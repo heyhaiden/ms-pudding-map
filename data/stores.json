@@ -1,0 +1,1902 @@
+{
+ "updated": "2026-10-27T14:59:22+00:00",
+ "stores": [
+  {
+   "id": "10",
+   "name": "Thurrock Outlet",
+   "type": "Outlet Store",
+   "lat": 51.485931,
+   "lng": 0.271349
+  },
+  {
+   "id": "49",
+   "name": "Heathrow Airport T5 Simply Food",
+   "type": "SSP Air (Simply)",
+   "lat": 51.471293,
+   "lng": -0.48769
+  },
+  {
+   "id": "66",
+   "name": "St Pancras Rail Circle Simply Food",
+   "type": "SSP Rail (Simply)",
+   "lat": 51.532752,
+   "lng": -0.126445
+  },
+  {
+   "id": "67",
+   "name": "St Pancras Rail Arcade Simply Food",
+   "type": "SSP Rail (Simply)",
+   "lat": 51.530671,
+   "lng": -0.125857
+  },
+  {
+   "id": "84",
+   "name": "Reading",
+   "type": "Full Line",
+   "lat": 51.45563,
+   "lng": -0.97061
+  },
+  {
+   "id": "96",
+   "name": "Borehamwood Simply Food",
+   "type": "Simply Food",
+   "lat": 51.657181,
+   "lng": -0.278985
+  },
+  {
+   "id": "97",
+   "name": "Cheshunt",
+   "type": "Full Line",
+   "lat": 51.718093,
+   "lng": -0.03729
+  },
+  {
+   "id": "104",
+   "name": "Dartford Simply Food",
+   "type": "Simply Food",
+   "lat": 51.44746,
+   "lng": 0.21649
+  },
+  {
+   "id": "120",
+   "name": "Oxford Rail Simply Food",
+   "type": "SSP Rail (Simply)",
+   "lat": 51.7535,
+   "lng": -1.27009
+  },
+  {
+   "id": "134",
+   "name": "Bankside Simply Food",
+   "type": "Simply Food",
+   "lat": 51.50553,
+   "lng": -0.09996
+  },
+  {
+   "id": "136",
+   "name": "Camberley The Meadows",
+   "type": "Full Line",
+   "lat": 51.336498,
+   "lng": -0.776079
+  },
+  {
+   "id": "175",
+   "name": "Epping Simply Food",
+   "type": "Simply Food",
+   "lat": 51.70001,
+   "lng": 0.11212
+  },
+  {
+   "id": "181",
+   "name": "Pinner Simply Food",
+   "type": "Simply Food",
+   "lat": 51.59454,
+   "lng": -0.38157
+  },
+  {
+   "id": "200",
+   "name": "Maldon Simply Food",
+   "type": "Simply Food",
+   "lat": 51.73133,
+   "lng": 0.67723
+  },
+  {
+   "id": "220",
+   "name": "Croydon",
+   "type": "Full Line",
+   "lat": 51.37736,
+   "lng": -0.10153
+  },
+  {
+   "id": "244",
+   "name": "Stratford City London",
+   "type": "Full Line",
+   "lat": 51.543044,
+   "lng": -0.005103
+  },
+  {
+   "id": "247",
+   "name": "New Change Simply Food",
+   "type": "Simply Food",
+   "lat": 51.513588,
+   "lng": -0.095297
+  },
+  {
+   "id": "284",
+   "name": "Beaconsfield M40 Moto Simply Food",
+   "type": "MOTO (Simply Food)",
+   "lat": 51.59125,
+   "lng": -0.62918
+  },
+  {
+   "id": "285",
+   "name": "St George Nhs Hospital",
+   "type": "SSP Hospitals",
+   "lat": 51.42673,
+   "lng": -0.17572
+  },
+  {
+   "id": "287",
+   "name": "Royal Berkshire Nhs Hospital",
+   "type": "SSP Hospitals",
+   "lat": 51.44904,
+   "lng": -0.95843
+  },
+  {
+   "id": "291",
+   "name": "Camden Town Simply Food",
+   "type": "Simply Food",
+   "lat": 51.53783,
+   "lng": -0.14238
+  },
+  {
+   "id": "293",
+   "name": "Baldock A1 Moto",
+   "type": "MOTO (Simply Food)",
+   "lat": 52.01453,
+   "lng": -0.20246
+  },
+  {
+   "id": "320",
+   "name": "Tunbridge Fountains Retail Park",
+   "type": "Simply Food",
+   "lat": 51.155215,
+   "lng": 0.285098
+  },
+  {
+   "id": "327",
+   "name": "Tunbridge Wells",
+   "type": "Full Line",
+   "lat": 51.134996,
+   "lng": 0.265731
+  },
+  {
+   "id": "381",
+   "name": "Canterbury Maybrook Simply Food",
+   "type": "Simply Food",
+   "lat": 51.293396,
+   "lng": 1.103563
+  },
+  {
+   "id": "382",
+   "name": "Brighton Carden Avenue Simply Food",
+   "type": "Simply Food",
+   "lat": 50.865672,
+   "lng": -0.127725
+  },
+  {
+   "id": "387",
+   "name": "Newbury Retail Park Simply Food",
+   "type": "Simply Food",
+   "lat": 51.38506,
+   "lng": -1.31802
+  },
+  {
+   "id": "438",
+   "name": "Broomfield Nhs Hospital",
+   "type": "SSP Hospitals",
+   "lat": 51.77454,
+   "lng": 0.46549
+  },
+  {
+   "id": "482",
+   "name": "Southend",
+   "type": "Full Line",
+   "lat": 51.53624,
+   "lng": 0.71417
+  },
+  {
+   "id": "521",
+   "name": "Clapham Junction",
+   "type": "Simply Food",
+   "lat": 51.46227,
+   "lng": -0.16706
+  },
+  {
+   "id": "563",
+   "name": "Kilburn Simply Food",
+   "type": "Simply Food",
+   "lat": 51.538165,
+   "lng": -0.193351
+  },
+  {
+   "id": "589",
+   "name": "Haywards Heath",
+   "type": "Full Line",
+   "lat": 50.99746,
+   "lng": -0.10226
+  },
+  {
+   "id": "709",
+   "name": "Canterbury",
+   "type": "Full Line",
+   "lat": 51.27761,
+   "lng": 1.0817
+  },
+  {
+   "id": "725",
+   "name": "Islington",
+   "type": "Full Line",
+   "lat": 51.53338,
+   "lng": -0.10702
+  },
+  {
+   "id": "761",
+   "name": "Didcot Foodhall",
+   "type": "Simply Food",
+   "lat": 51.608279,
+   "lng": -1.235556
+  },
+  {
+   "id": "762",
+   "name": "North Middlesex Hospital",
+   "type": "WHS Travel Stores",
+   "lat": 51.613132,
+   "lng": -0.074353
+  },
+  {
+   "id": "763",
+   "name": "East Surrey Nhs Hospital",
+   "type": "WHS Travel Stores",
+   "lat": 51.219204,
+   "lng": -0.162021
+  },
+  {
+   "id": "770",
+   "name": "Marble Arch",
+   "type": "Full Line",
+   "lat": 51.51469,
+   "lng": -0.1545
+  },
+  {
+   "id": "776",
+   "name": "Chalfont St Peter Foodhall",
+   "type": "Simply Food",
+   "lat": 51.607027,
+   "lng": -0.555425
+  },
+  {
+   "id": "785",
+   "name": "Canvey Island Foodhall",
+   "type": "Simply Food",
+   "lat": 51.521577,
+   "lng": 0.550369
+  },
+  {
+   "id": "787",
+   "name": "Leighton Buzzard Fh",
+   "type": "Simply Food",
+   "lat": 51.90321,
+   "lng": -0.66547
+  },
+  {
+   "id": "793",
+   "name": "Dalston Foodhall",
+   "type": "Simply Food",
+   "lat": 51.547986,
+   "lng": -0.075656
+  },
+  {
+   "id": "804",
+   "name": "Walton-On-Thames Foodhall",
+   "type": "Simply Food",
+   "lat": 51.386675,
+   "lng": -0.418621
+  },
+  {
+   "id": "805",
+   "name": "East Dulwich Station",
+   "type": "Simply Food",
+   "lat": 51.46152,
+   "lng": -0.07983
+  },
+  {
+   "id": "819",
+   "name": "Chiswick Simply Food",
+   "type": "Simply Food",
+   "lat": 51.4929,
+   "lng": -0.258
+  },
+  {
+   "id": "823",
+   "name": "M&S Harlow Hospital",
+   "type": "Compass UK",
+   "lat": 51.771461,
+   "lng": 0.086141
+  },
+  {
+   "id": "826",
+   "name": "St Helier Nhs Hospital",
+   "type": "WH Smith",
+   "lat": 51.380147,
+   "lng": -0.183173
+  },
+  {
+   "id": "832",
+   "name": "Maidstone Nhs Hospital",
+   "type": "Compass UK",
+   "lat": 51.274077,
+   "lng": 0.483987
+  },
+  {
+   "id": "833",
+   "name": "Waterside Simply Food",
+   "type": "Simply Food",
+   "lat": 51.518655,
+   "lng": -0.175467
+  },
+  {
+   "id": "868",
+   "name": "London Bridge Western Arcade Arches",
+   "type": "SSP Rail (Simply)",
+   "lat": 51.5049,
+   "lng": -0.085955
+  },
+  {
+   "id": "873",
+   "name": "Whipps Bart Cross Nhs Hospital",
+   "type": "WH Smith",
+   "lat": 51.578877,
+   "lng": 0.002629
+  },
+  {
+   "id": "903",
+   "name": "Bromley",
+   "type": "Full Line",
+   "lat": 51.4041,
+   "lng": 0.01575
+  },
+  {
+   "id": "917",
+   "name": "West Middlesex Nhs Hospital",
+   "type": "WH Smith",
+   "lat": 51.473714,
+   "lng": -0.325015
+  },
+  {
+   "id": "919",
+   "name": "Southbank Place",
+   "type": "Simply Food",
+   "lat": 51.50326,
+   "lng": -0.11552
+  },
+  {
+   "id": "945",
+   "name": "Reigate Simply Food",
+   "type": "Simply Food",
+   "lat": 51.23767,
+   "lng": -0.20878
+  },
+  {
+   "id": "957",
+   "name": "Guy'S Nhs Hospital",
+   "type": "WHS Travel Stores",
+   "lat": 51.503224,
+   "lng": -0.086772
+  },
+  {
+   "id": "971",
+   "name": "Old Street",
+   "type": "Simply Food",
+   "lat": 51.525689,
+   "lng": -0.08981
+  },
+  {
+   "id": "980",
+   "name": "Archway Foodhall",
+   "type": "Simply Food",
+   "lat": 51.565129,
+   "lng": -0.135584
+  },
+  {
+   "id": "1007",
+   "name": "Finsbury Park",
+   "type": "Simply Food",
+   "lat": 51.56516,
+   "lng": -0.1075
+  },
+  {
+   "id": "1008",
+   "name": "Bicester Foodhall",
+   "type": "Simply Food",
+   "lat": 51.892584,
+   "lng": -1.163996
+  },
+  {
+   "id": "1010",
+   "name": "Notting Hill Simply Food",
+   "type": "Simply Food",
+   "lat": 51.509023,
+   "lng": -0.197909
+  },
+  {
+   "id": "1022",
+   "name": "Colchester General Nhs Hospital",
+   "type": "WH Smith",
+   "lat": 51.910035,
+   "lng": 0.899712
+  },
+  {
+   "id": "1025",
+   "name": "Brixton",
+   "type": "Simply Food",
+   "lat": 51.4635,
+   "lng": -0.11552
+  },
+  {
+   "id": "1029",
+   "name": "Maidstone Eclipse Park",
+   "type": "Full Line",
+   "lat": 51.286861,
+   "lng": 0.548653
+  },
+  {
+   "id": "1054",
+   "name": "Muswell Hill Simply Food",
+   "type": "Simply Food",
+   "lat": 51.59009,
+   "lng": -0.1436
+  },
+  {
+   "id": "1070",
+   "name": "Maidenhead",
+   "type": "Full Line",
+   "lat": 51.523,
+   "lng": -0.72121
+  },
+  {
+   "id": "1081",
+   "name": "St Thomas Whs",
+   "type": "WH Smith",
+   "lat": 51.49961,
+   "lng": -0.11389
+  },
+  {
+   "id": "1082",
+   "name": "Fenchurch Rail",
+   "type": "SSP Rail (Simply)",
+   "lat": 51.51177,
+   "lng": -0.07908
+  },
+  {
+   "id": "1119",
+   "name": "Mill Hill Simply Food",
+   "type": "Simply Food",
+   "lat": 51.61406,
+   "lng": -0.24909
+  },
+  {
+   "id": "1126",
+   "name": "Woodley Reading",
+   "type": "Simply Food",
+   "lat": 51.45893,
+   "lng": -0.92001
+  },
+  {
+   "id": "1127",
+   "name": "Winchester M3 North Moto",
+   "type": "MOTO (Simply Food)",
+   "lat": 51.12058,
+   "lng": -1.25488
+  },
+  {
+   "id": "1131",
+   "name": "London Bridge Shard",
+   "type": "SSP Rail (Simply)",
+   "lat": 51.50467,
+   "lng": -0.08601
+  },
+  {
+   "id": "1145",
+   "name": "Milton Keynes Stadium",
+   "type": "Full Line",
+   "lat": 52.00934,
+   "lng": -0.73448
+  },
+  {
+   "id": "1146",
+   "name": "Basildon Mayflower Simply Food",
+   "type": "Simply Food",
+   "lat": 51.59078,
+   "lng": 0.47954
+  },
+  {
+   "id": "1183",
+   "name": "Sutton Rail Simply Food",
+   "type": "SSP Rail (Simply)",
+   "lat": 51.358883,
+   "lng": -0.191037
+  },
+  {
+   "id": "1185",
+   "name": "Medway Moto Simply Food",
+   "type": "MOTO (Simply Food)",
+   "lat": 51.339832,
+   "lng": 0.605928
+  },
+  {
+   "id": "1216",
+   "name": "Sutton",
+   "type": "Full Line",
+   "lat": 51.36428,
+   "lng": -0.19254
+  },
+  {
+   "id": "1232",
+   "name": "Brighton",
+   "type": "Full Line",
+   "lat": 50.8241,
+   "lng": -0.14558
+  },
+  {
+   "id": "1246",
+   "name": "Southampton St Covent Garden",
+   "type": "Simply Food",
+   "lat": 51.51099,
+   "lng": -0.12191
+  },
+  {
+   "id": "1257",
+   "name": "Northwick Park Nhs Hospital",
+   "type": "WH Smith",
+   "lat": 51.575108,
+   "lng": -0.322494
+  },
+  {
+   "id": "1262",
+   "name": "Dartford Nhs Hospital",
+   "type": "WH Smith",
+   "lat": 51.43507,
+   "lng": 0.258149
+  },
+  {
+   "id": "1263",
+   "name": "Royal Surrey Nhs Hospital",
+   "type": "Compass UK",
+   "lat": 51.241035,
+   "lng": -0.607474
+  },
+  {
+   "id": "1268",
+   "name": "Heathrow Airport T2 Simply Food",
+   "type": "SSP Air (Simply)",
+   "lat": 51.472393,
+   "lng": -0.450971
+  },
+  {
+   "id": "1274",
+   "name": "Rickmansworth Simply Food",
+   "type": "Simply Food",
+   "lat": 51.63883,
+   "lng": -0.47417
+  },
+  {
+   "id": "1290",
+   "name": "Hammersmith",
+   "type": "Full Line",
+   "lat": 51.49248,
+   "lng": -0.22643
+  },
+  {
+   "id": "1294",
+   "name": "Berkhamsted Simply Food",
+   "type": "Simply Food",
+   "lat": 51.76202,
+   "lng": -0.56938
+  },
+  {
+   "id": "1298",
+   "name": "Royal Free Nhs Hospital Hampstead",
+   "type": "WH Smith",
+   "lat": 51.553234,
+   "lng": -0.165336
+  },
+  {
+   "id": "1302",
+   "name": "Winchester M3 South Moto",
+   "type": "MOTO (Simply Food)",
+   "lat": 51.116482,
+   "lng": -1.254184
+  },
+  {
+   "id": "1303",
+   "name": "Braintree Simply Food",
+   "type": "Simply Food",
+   "lat": 51.868652,
+   "lng": 0.574142
+  },
+  {
+   "id": "1323",
+   "name": "Sevenoaks",
+   "type": "Full Line",
+   "lat": 51.272442,
+   "lng": 0.190709
+  },
+  {
+   "id": "1355",
+   "name": "Kingston",
+   "type": "Full Line",
+   "lat": 51.41026,
+   "lng": -0.30384
+  },
+  {
+   "id": "1377",
+   "name": "Stansted Airport",
+   "type": "SSP Air (Simply)",
+   "lat": 51.888161,
+   "lng": 0.258354
+  },
+  {
+   "id": "1381",
+   "name": "Mayday Nhs Hospital",
+   "type": "Compass UK",
+   "lat": 51.390153,
+   "lng": -0.110419
+  },
+  {
+   "id": "1410",
+   "name": "Windsor",
+   "type": "Full Line",
+   "lat": 51.4816,
+   "lng": -0.61031
+  },
+  {
+   "id": "1414",
+   "name": "Aylesford Simply Food",
+   "type": "Simply Food",
+   "lat": 51.29414,
+   "lng": 0.470063
+  },
+  {
+   "id": "1423",
+   "name": "St Albans",
+   "type": "Full Line",
+   "lat": 51.75317,
+   "lng": -0.33847
+  },
+  {
+   "id": "1458",
+   "name": "West Hampstead",
+   "type": "Simply Food",
+   "lat": 51.547098,
+   "lng": -0.191262
+  },
+  {
+   "id": "1461",
+   "name": "Charlton",
+   "type": "Full Line",
+   "lat": 51.489239,
+   "lng": 0.027994
+  },
+  {
+   "id": "1492",
+   "name": "Staines Two Rivers Fh",
+   "type": "Simply Food",
+   "lat": 51.43612,
+   "lng": -0.51188
+  },
+  {
+   "id": "1504",
+   "name": "Putney High Street",
+   "type": "Simply Food",
+   "lat": 51.46425,
+   "lng": -0.21487
+  },
+  {
+   "id": "1533",
+   "name": "Charing Cross Rail Simply Food",
+   "type": "SSP Rail (Simply)",
+   "lat": 51.50836,
+   "lng": -0.12478
+  },
+  {
+   "id": "1568",
+   "name": "Woking",
+   "type": "Full Line",
+   "lat": 51.32057,
+   "lng": -0.56081
+  },
+  {
+   "id": "1588",
+   "name": "Chelmsford",
+   "type": "Full Line",
+   "lat": 51.7322,
+   "lng": 0.47428
+  },
+  {
+   "id": "1596",
+   "name": "University College London Hospital",
+   "type": "WHS Travel Stores",
+   "lat": 51.52407,
+   "lng": -0.13604
+  },
+  {
+   "id": "1603",
+   "name": "Stevenage Retail Park",
+   "type": "Full Line",
+   "lat": 51.89144,
+   "lng": -0.198
+  },
+  {
+   "id": "1611",
+   "name": "Stane Park Colchester",
+   "type": "Full Line",
+   "lat": 51.88857,
+   "lng": 0.8259
+  },
+  {
+   "id": "1629",
+   "name": "Basildon Hospital",
+   "type": "WH Smith",
+   "lat": 51.5587,
+   "lng": 0.45059
+  },
+  {
+   "id": "1633",
+   "name": "Battersea Foodhall",
+   "type": "Simply Food",
+   "lat": 51.481193,
+   "lng": -0.140694
+  },
+  {
+   "id": "1667",
+   "name": "Earlsfield",
+   "type": "Simply Food",
+   "lat": 51.44254,
+   "lng": -0.18961
+  },
+  {
+   "id": "1670",
+   "name": "Purley Way",
+   "type": "Full Line",
+   "lat": 51.37228,
+   "lng": -0.11862
+  },
+  {
+   "id": "1671",
+   "name": "Lakeside Thurrock",
+   "type": "Full Line",
+   "lat": 51.487106,
+   "lng": 0.283549
+  },
+  {
+   "id": "1698",
+   "name": "Toddington M1 South Simply Food",
+   "type": "MOTO (Simply Food)",
+   "lat": 51.94744,
+   "lng": -0.50311
+  },
+  {
+   "id": "1705",
+   "name": "Clacton Brook Park",
+   "type": "Simply Food",
+   "lat": 51.81163,
+   "lng": 1.14154
+  },
+  {
+   "id": "1706",
+   "name": "Uckfield",
+   "type": "Simply Food",
+   "lat": 50.99303,
+   "lng": 0.07678
+  },
+  {
+   "id": "1713",
+   "name": "Surbiton Sr",
+   "type": "Simply Retail",
+   "lat": 51.392586,
+   "lng": -0.3052
+  },
+  {
+   "id": "1719",
+   "name": "Liverpool St. West Mall",
+   "type": "SSP Rail (Simply)",
+   "lat": 51.51748,
+   "lng": -0.08225
+  },
+  {
+   "id": "1725",
+   "name": "Shaftesbury Ave",
+   "type": "LondonRetailPartner",
+   "lat": 51.51254,
+   "lng": -0.13092
+  },
+  {
+   "id": "1726",
+   "name": "Queensway",
+   "type": "LondonRetailPartner",
+   "lat": 51.51367,
+   "lng": -0.18783
+  },
+  {
+   "id": "1738",
+   "name": "Ealing Whs Broadway Station",
+   "type": "WH Smith",
+   "lat": 51.515,
+   "lng": -0.3012
+  },
+  {
+   "id": "1748",
+   "name": "Ladymead Guildford",
+   "type": "Simply Food",
+   "lat": 51.24898,
+   "lng": -0.57891
+  },
+  {
+   "id": "1759",
+   "name": "New Malden High Street",
+   "type": "Simply Retail",
+   "lat": 51.40196,
+   "lng": -0.25643
+  },
+  {
+   "id": "1784",
+   "name": "Sidcup",
+   "type": "Simply Food",
+   "lat": 51.43463,
+   "lng": 0.10281
+  },
+  {
+   "id": "1795",
+   "name": "Romford",
+   "type": "Full Line",
+   "lat": 51.57748,
+   "lng": 0.18221
+  },
+  {
+   "id": "1834",
+   "name": "Basingstoke",
+   "type": "Full Line",
+   "lat": 51.26485,
+   "lng": -1.08777
+  },
+  {
+   "id": "1838",
+   "name": "Southfields Foodhall",
+   "type": "Simply Food",
+   "lat": 51.445107,
+   "lng": -0.206019
+  },
+  {
+   "id": "1847",
+   "name": "Reading M4 East Moto Simply Food",
+   "type": "MOTO (Simply Food)",
+   "lat": 51.42618,
+   "lng": -1.03496
+  },
+  {
+   "id": "1880",
+   "name": "John Radcliffe Nhs Hospital",
+   "type": "WH Smith",
+   "lat": 51.763882,
+   "lng": -1.219819
+  },
+  {
+   "id": "1890",
+   "name": "Haslemere Foodhall",
+   "type": "Simply Food",
+   "lat": 51.087685,
+   "lng": -0.730695
+  },
+  {
+   "id": "1891",
+   "name": "Rayleigh Foodhall",
+   "type": "Simply Food",
+   "lat": 51.584547,
+   "lng": 0.606008
+  },
+  {
+   "id": "1895",
+   "name": "Ashford Warren Retail Park Foodhall",
+   "type": "Simply Food",
+   "lat": 51.158086,
+   "lng": 0.871996
+  },
+  {
+   "id": "1951",
+   "name": "Heston M4 West Moto Simply Food",
+   "type": "MOTO (Simply Food)",
+   "lat": 51.486584,
+   "lng": -0.396118
+  },
+  {
+   "id": "1960",
+   "name": "Guildford",
+   "type": "Full Line",
+   "lat": 51.23548,
+   "lng": -0.57483
+  },
+  {
+   "id": "1964",
+   "name": "Colindale Foodhall",
+   "type": "Simply Food",
+   "lat": 51.594363,
+   "lng": -0.262055
+  },
+  {
+   "id": "1966",
+   "name": "Queen'S Park Foodhall",
+   "type": "Simply Food",
+   "lat": 51.53364,
+   "lng": -0.20401
+  },
+  {
+   "id": "1968",
+   "name": "Sittingbourne Foodhall",
+   "type": "Simply Food",
+   "lat": 51.345027,
+   "lng": 0.735608
+  },
+  {
+   "id": "1988",
+   "name": "Crawley Acorn Park Foodhall",
+   "type": "Simply Food",
+   "lat": 51.13469,
+   "lng": -0.187588
+  },
+  {
+   "id": "1990",
+   "name": "Woolwich Foodhall",
+   "type": "Simply Food",
+   "lat": 51.491561,
+   "lng": 0.070585
+  },
+  {
+   "id": "1991",
+   "name": "Barnes Foodhall",
+   "type": "Simply Food",
+   "lat": 51.473508,
+   "lng": -0.250158
+  },
+  {
+   "id": "1994",
+   "name": "Dulwich Foodhall",
+   "type": "Simply Food",
+   "lat": 51.457857,
+   "lng": -0.075291
+  },
+  {
+   "id": "1997",
+   "name": "Whitstable Foodhall",
+   "type": "Simply Food",
+   "lat": 51.341105,
+   "lng": 1.015276
+  },
+  {
+   "id": "1999",
+   "name": "Newbury",
+   "type": "Full Line",
+   "lat": 51.40295,
+   "lng": -1.32404
+  },
+  {
+   "id": "2001",
+   "name": "Tonbridge Foodhall",
+   "type": "Simply Food",
+   "lat": 51.196009,
+   "lng": 0.281529
+  },
+  {
+   "id": "2011",
+   "name": "Oxford",
+   "type": "Full Line",
+   "lat": 51.75103,
+   "lng": -1.25882
+  },
+  {
+   "id": "2017",
+   "name": "Biggleswade Retail Park",
+   "type": "Full Line",
+   "lat": 52.075039,
+   "lng": -0.244867
+  },
+  {
+   "id": "2058",
+   "name": "Aylesbury Broadfields Foodhall",
+   "type": "Simply Food",
+   "lat": 51.823853,
+   "lng": -0.836655
+  },
+  {
+   "id": "2093",
+   "name": "Kings College Nhs Hospital",
+   "type": "Compass UK",
+   "lat": 51.468366,
+   "lng": -0.0923
+  },
+  {
+   "id": "2099",
+   "name": "Bracknell",
+   "type": "Full Line",
+   "lat": 51.418143,
+   "lng": -0.751057
+  },
+  {
+   "id": "2107",
+   "name": "Greenford Foodhall",
+   "type": "Simply Food",
+   "lat": 51.541844,
+   "lng": -0.338834
+  },
+  {
+   "id": "2109",
+   "name": "Marshalswick Foodhall",
+   "type": "Simply Food",
+   "lat": 51.763268,
+   "lng": -0.306687
+  },
+  {
+   "id": "2112",
+   "name": "Streatham Hill Foodhall",
+   "type": "Simply Food",
+   "lat": 51.438792,
+   "lng": -0.126785
+  },
+  {
+   "id": "2124",
+   "name": "Chelmsford Westway Foodhall",
+   "type": "Simply Food",
+   "lat": 51.723887,
+   "lng": 0.452341
+  },
+  {
+   "id": "2151",
+   "name": "Bishopsgate Foodhall",
+   "type": "Simply Food",
+   "lat": 51.514907,
+   "lng": -0.083097
+  },
+  {
+   "id": "2153",
+   "name": "Wanstead Convenience",
+   "type": "Simply Food",
+   "lat": 51.576291,
+   "lng": 0.028128
+  },
+  {
+   "id": "2170",
+   "name": "Ashtead Foodhall",
+   "type": "Simply Food",
+   "lat": 51.310198,
+   "lng": -0.298377
+  },
+  {
+   "id": "2172",
+   "name": "Royston",
+   "type": "Simply Food",
+   "lat": 52.055078,
+   "lng": -0.040465
+  },
+  {
+   "id": "2174",
+   "name": "Strood Foodhall",
+   "type": "Simply Food",
+   "lat": 51.39426,
+   "lng": 0.49557
+  },
+  {
+   "id": "2202",
+   "name": "Worthing",
+   "type": "Full Line",
+   "lat": 50.809858,
+   "lng": -0.372585
+  },
+  {
+   "id": "2228",
+   "name": "Watford",
+   "type": "Full Line",
+   "lat": 51.65528,
+   "lng": -0.39482
+  },
+  {
+   "id": "2286",
+   "name": "Hackney",
+   "type": "Simply Food",
+   "lat": 51.54749,
+   "lng": -0.05529
+  },
+  {
+   "id": "2363",
+   "name": "Friern Barnet",
+   "type": "Simply Food",
+   "lat": 51.61218,
+   "lng": -0.14294
+  },
+  {
+   "id": "2396",
+   "name": "Eltham",
+   "type": "Full Line",
+   "lat": 51.45094,
+   "lng": 0.0554
+  },
+  {
+   "id": "2480",
+   "name": "Pantheon 173 Oxford Street",
+   "type": "Full Line",
+   "lat": 51.51507,
+   "lng": -0.13798
+  },
+  {
+   "id": "2516",
+   "name": "Aylesbury",
+   "type": "Full Line",
+   "lat": 51.81723,
+   "lng": -0.81187
+  },
+  {
+   "id": "2529",
+   "name": "Finsbury Pavement",
+   "type": "Full Line",
+   "lat": 51.519536,
+   "lng": -0.087103
+  },
+  {
+   "id": "2561",
+   "name": "Kings Rd",
+   "type": "Full Line",
+   "lat": 51.48896,
+   "lng": -0.16422
+  },
+  {
+   "id": "2574",
+   "name": "Beckenham Simply Food",
+   "type": "Simply Food",
+   "lat": 51.4096,
+   "lng": -0.02545
+  },
+  {
+   "id": "2613",
+   "name": "Ealing Broadway",
+   "type": "Full Line",
+   "lat": 51.51286,
+   "lng": -0.30366
+  },
+  {
+   "id": "2752",
+   "name": "Hempstead Valley",
+   "type": "Full Line",
+   "lat": 51.34161,
+   "lng": 0.57277
+  },
+  {
+   "id": "2927",
+   "name": "Edgware Road",
+   "type": "Full Line",
+   "lat": 51.519665,
+   "lng": -0.168847
+  },
+  {
+   "id": "3078",
+   "name": "Hemel Hempstead",
+   "type": "Full Line",
+   "lat": 51.74879,
+   "lng": -0.47218
+  },
+  {
+   "id": "3081",
+   "name": "Uxbridge",
+   "type": "Full Line",
+   "lat": 51.54662,
+   "lng": -0.48066
+  },
+  {
+   "id": "3104",
+   "name": "Shoreham",
+   "type": "Full Line",
+   "lat": 50.845665,
+   "lng": -0.247875
+  },
+  {
+   "id": "3120",
+   "name": "Brent Cross Shopping Centre",
+   "type": "Full Line",
+   "lat": 51.57618,
+   "lng": -0.2245
+  },
+  {
+   "id": "3146",
+   "name": "Kensington",
+   "type": "Full Line",
+   "lat": 51.501146,
+   "lng": -0.192369
+  },
+  {
+   "id": "3188",
+   "name": "Harrow",
+   "type": "Full Line",
+   "lat": 51.5811,
+   "lng": -0.33566
+  },
+  {
+   "id": "3191",
+   "name": "Bexleyheath",
+   "type": "Full Line",
+   "lat": 51.45619,
+   "lng": 0.14648
+  },
+  {
+   "id": "3214",
+   "name": "Enfield",
+   "type": "Full Line",
+   "lat": 51.65122,
+   "lng": -0.08346
+  },
+  {
+   "id": "3227",
+   "name": "Epsom",
+   "type": "Full Line",
+   "lat": 51.33243,
+   "lng": -0.26929
+  },
+  {
+   "id": "3256",
+   "name": "Brentwood",
+   "type": "Full Line",
+   "lat": 51.62077,
+   "lng": 0.30281
+  },
+  {
+   "id": "3298",
+   "name": "Horsham",
+   "type": "Full Line",
+   "lat": 51.06373,
+   "lng": -0.32912
+  },
+  {
+   "id": "3476",
+   "name": "Blackheath Simply Food",
+   "type": "Simply Food",
+   "lat": 51.47678,
+   "lng": 0.01939
+  },
+  {
+   "id": "3492",
+   "name": "Alton Simply Food",
+   "type": "Simply Food",
+   "lat": 51.14671,
+   "lng": -0.97745
+  },
+  {
+   "id": "3670",
+   "name": "Tolworth Simply Food",
+   "type": "Simply Food",
+   "lat": 51.38109,
+   "lng": -0.27905
+  },
+  {
+   "id": "3696",
+   "name": "Temple Fortune Simply Food",
+   "type": "Simply Food",
+   "lat": 51.5834,
+   "lng": -0.199271
+  },
+  {
+   "id": "3706",
+   "name": "Dorking",
+   "type": "Full Line",
+   "lat": 51.23309,
+   "lng": -0.33164
+  },
+  {
+   "id": "3722",
+   "name": "Canary Wharf Simply Food",
+   "type": "Simply Food",
+   "lat": 51.50258,
+   "lng": -0.01871
+  },
+  {
+   "id": "3735",
+   "name": "Wimbledon Simply Food",
+   "type": "Simply Food",
+   "lat": 51.4211,
+   "lng": -0.20492
+  },
+  {
+   "id": "3751",
+   "name": "Gatwick South Airport Simply Food",
+   "type": "SSP Air (Simply)",
+   "lat": 51.15599,
+   "lng": -0.16302
+  },
+  {
+   "id": "3764",
+   "name": "Thurrock M25 Moto Simply Food",
+   "type": "MOTO (Simply Food)",
+   "lat": 51.49229,
+   "lng": 0.2723
+  },
+  {
+   "id": "3803",
+   "name": "Brooklands",
+   "type": "Full Line",
+   "lat": 51.3446,
+   "lng": -0.47575
+  },
+  {
+   "id": "3858",
+   "name": "London Victoria Cardinal Place",
+   "type": "Full Line",
+   "lat": 51.49742,
+   "lng": -0.14158
+  },
+  {
+   "id": "4064",
+   "name": "Colliers Wood",
+   "type": "Full Line",
+   "lat": 51.41527,
+   "lng": -0.1816
+  },
+  {
+   "id": "4080",
+   "name": "Chieveley Moto Simply Food",
+   "type": "MOTO (Simply Food)",
+   "lat": 51.4511,
+   "lng": -1.30846
+  },
+  {
+   "id": "4161",
+   "name": "Pease Pottage M23 Moto Simply Food",
+   "type": "MOTO (Simply Food)",
+   "lat": 51.08331,
+   "lng": -0.19991
+  },
+  {
+   "id": "4242",
+   "name": "Gatwick Airport North Simply Food",
+   "type": "SSP Air (Simply)",
+   "lat": 51.15599,
+   "lng": -0.16302
+  },
+  {
+   "id": "4297",
+   "name": "White City",
+   "type": "Full Line",
+   "lat": 51.508527,
+   "lng": -0.220156
+  },
+  {
+   "id": "4310",
+   "name": "Princes Risborough Simply Food",
+   "type": "Simply Food",
+   "lat": 51.723106,
+   "lng": -0.829912
+  },
+  {
+   "id": "4433",
+   "name": "Southgate Simply Food",
+   "type": "Simply Food",
+   "lat": 51.63365,
+   "lng": -0.12516
+  },
+  {
+   "id": "4462",
+   "name": "Amersham Simply Food",
+   "type": "Simply Food",
+   "lat": 51.67757,
+   "lng": -0.60628
+  },
+  {
+   "id": "4514",
+   "name": "Summertown Simply Food",
+   "type": "Simply Food",
+   "lat": 51.77672,
+   "lng": -1.26468
+  },
+  {
+   "id": "4556",
+   "name": "Upminster Simply Food",
+   "type": "Simply Food",
+   "lat": 51.55853,
+   "lng": 0.24963
+  },
+  {
+   "id": "4637",
+   "name": "Greenwich Simply Food",
+   "type": "Simply Food",
+   "lat": 51.48177,
+   "lng": -0.01084
+  },
+  {
+   "id": "4645",
+   "name": "Hatfield Oldings Corner",
+   "type": "Simply Food",
+   "lat": 51.77707,
+   "lng": -0.22166
+  },
+  {
+   "id": "4734",
+   "name": "London Colney",
+   "type": "Full Line",
+   "lat": 51.715507,
+   "lng": -0.285838
+  },
+  {
+   "id": "4747",
+   "name": "Orpington Nugent Park",
+   "type": "Full Line",
+   "lat": 51.394,
+   "lng": 0.11322
+  },
+  {
+   "id": "4789",
+   "name": "Cannon Street Rail Simply Food",
+   "type": "SSP Rail (Simply)",
+   "lat": 51.51151,
+   "lng": -0.09041
+  },
+  {
+   "id": "4886",
+   "name": "Euston Rail Simply Food",
+   "type": "SSP Rail (Simply)",
+   "lat": 51.52833,
+   "lng": -0.13319
+  },
+  {
+   "id": "5076",
+   "name": "Lower Earley Simply Food",
+   "type": "Simply Food",
+   "lat": 51.42325,
+   "lng": -0.93441
+  },
+  {
+   "id": "5209",
+   "name": "Clapham Junction Rail Simply Food",
+   "type": "SSP Rail (Simply)",
+   "lat": 51.46382,
+   "lng": -0.16831
+  },
+  {
+   "id": "5279",
+   "name": "Wembley Outlet",
+   "type": "Outlet Store",
+   "lat": 51.55627,
+   "lng": -0.28484
+  },
+  {
+   "id": "5322",
+   "name": "Milton Keynes",
+   "type": "Full Line",
+   "lat": 52.041693,
+   "lng": -0.759105
+  },
+  {
+   "id": "5349",
+   "name": "Chineham Simply Food",
+   "type": "Simply Food",
+   "lat": 51.28434,
+   "lng": -1.05979
+  },
+  {
+   "id": "5358",
+   "name": "Waterloo Station South",
+   "type": "SSP Rail (Simply)",
+   "lat": 51.50315,
+   "lng": -0.11326
+  },
+  {
+   "id": "5370",
+   "name": "Cobham Moto",
+   "type": "MOTO (Simply Food)",
+   "lat": 51.30683,
+   "lng": -0.40948
+  },
+  {
+   "id": "5393",
+   "name": "Slough Bath Rd Simply Food",
+   "type": "Simply Food",
+   "lat": 51.52032,
+   "lng": -0.63767
+  },
+  {
+   "id": "5617",
+   "name": "Tottenham Court Road",
+   "type": "Simply Food",
+   "lat": 51.51831,
+   "lng": -0.1313
+  },
+  {
+   "id": "5672",
+   "name": "Bell Green Sydenham",
+   "type": "Simply Food",
+   "lat": 51.4317,
+   "lng": -0.0339
+  },
+  {
+   "id": "5676",
+   "name": "Tooting Broadway",
+   "type": "Simply Food",
+   "lat": 51.42776,
+   "lng": -0.167133
+  },
+  {
+   "id": "5704",
+   "name": "Heathrow Airport T3 Simply Food",
+   "type": "SSP Air (Simply)",
+   "lat": 51.47031,
+   "lng": -0.45846
+  },
+  {
+   "id": "5758",
+   "name": "Luton Bramingham",
+   "type": "Simply Food",
+   "lat": 51.92001,
+   "lng": -0.43256
+  },
+  {
+   "id": "6143",
+   "name": "Cranleigh Simply Food",
+   "type": "Simply Food",
+   "lat": 51.14109,
+   "lng": -0.49003
+  },
+  {
+   "id": "6282",
+   "name": "South Woodford Simply Food",
+   "type": "Simply Food",
+   "lat": 51.59383,
+   "lng": 0.02461
+  },
+  {
+   "id": "6363",
+   "name": "High Wycombe Eden",
+   "type": "Full Line",
+   "lat": 51.63075,
+   "lng": -0.75563
+  },
+  {
+   "id": "6444",
+   "name": "Kew",
+   "type": "Full Line",
+   "lat": 51.477303,
+   "lng": -0.278341
+  },
+  {
+   "id": "6457",
+   "name": "Whetstone Simply Food",
+   "type": "Simply Food",
+   "lat": 51.63473,
+   "lng": -0.17619
+  },
+  {
+   "id": "6460",
+   "name": "Bluewater",
+   "type": "Full Line",
+   "lat": 51.438283,
+   "lng": 0.274605
+  },
+  {
+   "id": "6541",
+   "name": "Twickenham Simply Food",
+   "type": "Simply Food",
+   "lat": 51.44555,
+   "lng": -0.33102
+  },
+  {
+   "id": "6606",
+   "name": "Ashford Outlet",
+   "type": "Outlet Store",
+   "lat": 51.13736,
+   "lng": 0.876749
+  },
+  {
+   "id": "6732",
+   "name": "Braintree Village Outlet",
+   "type": "Outlet Store",
+   "lat": 51.869991,
+   "lng": 0.570953
+  },
+  {
+   "id": "6758",
+   "name": "London Victoria Rail Simply Food",
+   "type": "SSP Rail (Simply)",
+   "lat": 51.49573,
+   "lng": -0.14472
+  },
+  {
+   "id": "6761",
+   "name": "London Marylebone Rail Simply Food",
+   "type": "SSP Rail (Simply)",
+   "lat": 51.52263,
+   "lng": -0.16293
+  },
+  {
+   "id": "6774",
+   "name": "London Liverpool St Rail Simply Foo",
+   "type": "SSP Rail (Simply)",
+   "lat": 51.519,
+   "lng": -0.08136
+  },
+  {
+   "id": "6790",
+   "name": "Brighton Rail Simply Food",
+   "type": "SSP Rail (Simply)",
+   "lat": 50.82891,
+   "lng": -0.14063
+  },
+  {
+   "id": "6800",
+   "name": "Clapham South Simply Food",
+   "type": "Simply Food",
+   "lat": 51.45173,
+   "lng": -0.14805
+  },
+  {
+   "id": "6813",
+   "name": "Hitchin Simply Food",
+   "type": "Simply Food",
+   "lat": 51.94929,
+   "lng": -0.27724
+  },
+  {
+   "id": "6826",
+   "name": "Teddington Simply Food",
+   "type": "Simply Food",
+   "lat": 51.42736,
+   "lng": -0.32956
+  },
+  {
+   "id": "6965",
+   "name": "Hertford Simply Food",
+   "type": "Simply Food",
+   "lat": 51.79673,
+   "lng": -0.07464
+  },
+  {
+   "id": "7113",
+   "name": "Milton Keynes Rail Simply Food",
+   "type": "SSP Rail (Simply)",
+   "lat": 52.03467,
+   "lng": -0.77386
+  },
+  {
+   "id": "7223",
+   "name": "Earls Court Simply Food",
+   "type": "Simply Food",
+   "lat": 51.49114,
+   "lng": -0.19203
+  },
+  {
+   "id": "7317",
+   "name": "Sunbury Cross Simply Food",
+   "type": "Simply Food",
+   "lat": 51.41868,
+   "lng": -0.42193
+  },
+  {
+   "id": "7430",
+   "name": "Toddington M1 North Simply Food",
+   "type": "MOTO (Simply Food)",
+   "lat": 51.94744,
+   "lng": -0.503733
+  },
+  {
+   "id": "7498",
+   "name": "West Wickham Simply Food",
+   "type": "Simply Food",
+   "lat": 51.37607,
+   "lng": -0.01742
+  },
+  {
+   "id": "7511",
+   "name": "Hatfield Outlet",
+   "type": "Outlet Store",
+   "lat": 51.760914,
+   "lng": -0.24141
+  },
+  {
+   "id": "7553",
+   "name": "Hampstead Simply Food",
+   "type": "Simply Food",
+   "lat": 51.55377,
+   "lng": -0.16497
+  },
+  {
+   "id": "7579",
+   "name": "London Victoria East Simply Food",
+   "type": "SSP Rail (Simply)",
+   "lat": 51.49527,
+   "lng": -0.14428
+  },
+  {
+   "id": "7582",
+   "name": "London Paddington Rail Simply Food",
+   "type": "SSP Rail (Simply)",
+   "lat": 51.51751,
+   "lng": -0.17744
+  },
+  {
+   "id": "7595",
+   "name": "London Waterloo Rail Simply Food",
+   "type": "SSP Rail (Simply)",
+   "lat": 51.50315,
+   "lng": -0.115998
+  },
+  {
+   "id": "7631",
+   "name": "Clapham Common",
+   "type": "Simply Food",
+   "lat": 51.463558,
+   "lng": -0.13314
+  },
+  {
+   "id": "7778",
+   "name": "Abingdon Fairacres",
+   "type": "Simply Food",
+   "lat": 51.66935,
+   "lng": -1.30501
+  },
+  {
+   "id": "7870",
+   "name": "Crouch End Simply Food",
+   "type": "Simply Food",
+   "lat": 51.577374,
+   "lng": -0.124673
+  },
+  {
+   "id": "7883",
+   "name": "Green Park Simply Food",
+   "type": "Simply Food",
+   "lat": 51.50699,
+   "lng": -0.1428
+  },
+  {
+   "id": "7919",
+   "name": "Marlow Simply Food",
+   "type": "Simply Food",
+   "lat": 51.57255,
+   "lng": -0.7764
+  },
+  {
+   "id": "7980",
+   "name": "London More Riverside Simply Food",
+   "type": "Simply Food",
+   "lat": 51.50519,
+   "lng": -0.08316
+  },
+  {
+   "id": "8219",
+   "name": "Reading West M4 Moto Simply Food",
+   "type": "MOTO (Simply Food)",
+   "lat": 51.42619,
+   "lng": -1.03498
+  },
+  {
+   "id": "8316",
+   "name": "Cherwell Valley M40 Moto Simply Foo",
+   "type": "MOTO (Simply Food)",
+   "lat": 51.94998,
+   "lng": -1.19976
+  },
+  {
+   "id": "8387",
+   "name": "Chatham Outlet",
+   "type": "Outlet Store",
+   "lat": 51.401199,
+   "lng": 0.534864
+  },
+  {
+   "id": "8556",
+   "name": "Fulham Broadway",
+   "type": "Simply Food",
+   "lat": 51.47993,
+   "lng": -0.19661
+  },
+  {
+   "id": "8596",
+   "name": "Leytonstone",
+   "type": "Simply Food",
+   "lat": 51.56905,
+   "lng": 0.01099
+  },
+  {
+   "id": "8637",
+   "name": "Farnham",
+   "type": "Simply Food",
+   "lat": 51.21815,
+   "lng": -0.78284
+  },
+  {
+   "id": "8695",
+   "name": "Godalming",
+   "type": "Simply Food",
+   "lat": 51.18723,
+   "lng": -0.60753
+  },
+  {
+   "id": "8840",
+   "name": "Beaconsfield Simply Food",
+   "type": "Simply Food",
+   "lat": 51.60946,
+   "lng": -0.64513
+  },
+  {
+   "id": "8853",
+   "name": "Harpenden Simply Food",
+   "type": "Simply Food",
+   "lat": 51.81607,
+   "lng": -0.3579
+  },
+  {
+   "id": "8905",
+   "name": "London Kings Cross Rail Simply Food",
+   "type": "SSP Rail (Simply)",
+   "lat": 51.53111,
+   "lng": -0.124606
+  },
+  {
+   "id": "8992",
+   "name": "Bond Street Simply Food",
+   "type": "SSP Rail (Simply)",
+   "lat": 51.51438,
+   "lng": -0.14788
+  },
+  {
+   "id": "9124",
+   "name": "Loughton Simply Food",
+   "type": "Simply Food",
+   "lat": 51.64503,
+   "lng": 0.05312
+  },
+  {
+   "id": "9174",
+   "name": "Richmond Rail Simply Food",
+   "type": "SSP Rail (Simply)",
+   "lat": 51.46412,
+   "lng": -0.30063
+  },
+  {
+   "id": "9247",
+   "name": "Tring Simply Food",
+   "type": "Simply Food",
+   "lat": 51.79381,
+   "lng": -0.66179
+  },
+  {
+   "id": "9331",
+   "name": "Wycombe Marsh Simply Food",
+   "type": "Simply Food",
+   "lat": 51.618863,
+   "lng": -0.720756
+  },
+  {
+   "id": "9548",
+   "name": "Chancery Lane Simply Food",
+   "type": "Simply Food",
+   "lat": 51.51824,
+   "lng": -0.11159
+  },
+  {
+   "id": "9593",
+   "name": "Guildford Rail Simply Food",
+   "type": "SSP Rail (Simply)",
+   "lat": 51.2369,
+   "lng": -0.58042
+  },
+  {
+   "id": "9996",
+   "name": "Oxford Cowley Road Simply Food",
+   "type": "Simply Food",
+   "lat": 51.72756,
+   "lng": -1.20062
+  }
+ ]
+}
