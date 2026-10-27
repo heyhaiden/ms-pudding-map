@@ -17,6 +17,27 @@
 <meta name="theme-color" content="#F6C344">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍮</text></svg>">
 <script>try { const t = localStorage.getItem("theme"); if (t) document.documentElement.dataset.theme = t; } catch {}</script>
+<script>
+// Analytics: PostHog (US). Only on the live site, or locally with ?analytics. Cookieless (memory only), so no
+// consent banner is needed; the cost is that a returning visitor counts as new. Events before load are queued.
+window.track = (() => {
+  const queue = [];
+  let ready = false;
+  if (location.hostname.endsWith("github.io") || new URLSearchParams(location.search).has("analytics")) {
+    const script = document.createElement("script");
+    script.async = true;
+    script.src = "https://us-assets.i.posthog.com/static/array.js";
+    script.onload = () => {
+      posthog.init("phc_pLYVNcYd6dP3aMZ5PwE8KkJkG9L7RNCS8tRhx8XUbqQc", { api_host: "https://us.i.posthog.com",
+        persistence: "memory", person_profiles: "identified_only", capture_pageview: true, capture_pageleave: true });
+      ready = true;
+      queue.splice(0).forEach(([event, props]) => posthog.capture(event, props));
+    };
+    document.head.append(script);
+  }
+  return (event, props) => (ready ? posthog.capture(event, props) : queue.push([event, props]));
+})();
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=DM+Sans:opsz,wght@9..40,400;9..40,600;9..40,700&display=swap" rel="stylesheet">
@@ -254,7 +275,11 @@ function addLayers(geojson) {
   if (addLayers.wired) return;
   addLayers.wired = true;
   for (const layer of ["stores", "not_sold"]) {
-    map.on("click", layer, (e) => openStore(e.features[0].properties, e.features[0].geometry.coordinates));
+    map.on("click", layer, (e) => {
+      const s = e.features[0].properties;
+      track("store_opened", { store: s.name, status: s.status });
+      openStore(s, e.features[0].geometry.coordinates);
+    });
     map.on("mouseenter", layer, () => map.getCanvas().style.cursor = "pointer");
     map.on("mouseleave", layer, () => map.getCanvas().style.cursor = "");
   }
@@ -326,6 +351,7 @@ function miles(a, b) {
 let you;
 $("nearest").addEventListener("click", () => {
   if (!data) return;
+  track("nearest_clicked");
   if (!navigator.geolocation) return toast("Your browser can't share your location.");
   toast("Finding you…");
   navigator.geolocation.getCurrentPosition((pos) => {
@@ -334,13 +360,20 @@ $("nearest").addEventListener("click", () => {
       .map((s) => ({ s, d: miles(here, [s.lng, s.lat]) })).sort((a, b) => a.d - b.d);
     you?.remove();
     you = new mapboxgl.Marker({ color: css("magenta") }).setLngLat(here).addTo(map);
-    if (!options.length) return toast("No pudding anywhere nearby right now. 😭");
+    if (!options.length) {
+      track("nearest_result", { found: false });
+      return toast("No pudding anywhere nearby right now. 😭");
+    }
     const { s, d } = options[0];
+    track("nearest_result", { found: true, store: s.name, status: s.status, miles: +d.toFixed(1) });
     const coords = [s.lng, s.lat];
     map.fitBounds([here, coords], { padding: { top: 260, bottom: 80, left: 60, right: 60 }, maxZoom: 15,
       duration: reducedMotion ? 0 : 1200 });
     openStore(s, coords, `${d < 0.1 ? "Right here" : d.toFixed(1) + " mi away"}.`);
-  }, () => toast("Couldn't get your location."), { enableHighAccuracy: true, timeout: 10000 });
+  }, (error) => {
+    track("nearest_result", { found: false, location_error: error.code });
+    toast("Couldn't get your location.");
+  }, { enableHighAccuracy: true, timeout: 10000 });
 });
 
 $("share").addEventListener("click", async () => {
@@ -349,8 +382,12 @@ $("share").addEventListener("click", async () => {
     : "Is the M&S banana, caramel & pecan pudding in? 🍮";
   const url = location.href.split("#")[0];
   try {
-    if (navigator.share) return await navigator.share({ title: "Is the Pudding In?", text, url });
+    if (navigator.share) {
+      track("share", { method: "native" });
+      return await navigator.share({ title: "Is the Pudding In?", text, url });
+    }
     await navigator.clipboard.writeText(`${text} ${url}`);
+    track("share", { method: "copy" });
     toast("Link copied. Spread the pudding word.");
   } catch (error) {
     if (error.name !== "AbortError") toast("Couldn't share. Copy the address bar instead.");
@@ -374,7 +411,12 @@ function fold(folded, animate = true) {
       { duration: 300, easing: "cubic-bezier(.2,.8,.2,1)" });
   }
 }
-$("fold").addEventListener("click", () => fold(!document.querySelector(".card").classList.contains("folded")));
+$("product").addEventListener("click", () => track("product_link_clicked"));
+$("fold").addEventListener("click", () => {
+  const folded = !document.querySelector(".card").classList.contains("folded");
+  track("card_folded", { folded });
+  fold(folded);
+});
 try { if (innerWidth <= 720 && localStorage.getItem("card-folded")) fold(true, false); } catch {}
 
 $("legend").addEventListener("click", (e) => {
@@ -382,6 +424,7 @@ $("legend").addEventListener("click", (e) => {
   if (!button) return;
   const key = button.dataset.status;
   shown.has(key) ? shown.delete(key) : shown.add(key);
+  track("filter_toggled", { status: key, shown: shown.has(key) });
   button.setAttribute("aria-pressed", shown.has(key));
   filter();
 });
@@ -527,6 +570,7 @@ $("mode").addEventListener("click", () => {
   const next = mode() === "dark" ? "light" : "dark";
   document.documentElement.dataset.theme = next;
   try { localStorage.setItem("theme", next); } catch {}
+  track("theme_toggled", { mode: next });
   showMode();
   if (!mapReady) return;
   map.setStyle(STYLE[next]);
