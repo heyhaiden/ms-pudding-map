@@ -11,6 +11,8 @@ mcbroken-style map: is the M&S Banana, Caramel and Pecan Pudding (61273052) in s
 - Keep load low: one poll per 30 min. Never present the site as M&S.
 - GitHub Actions (`.github/workflows/poll.yml`) polls and deploys `public/` to Pages. A failed poll doesn't deploy.
 - If Actions gets blocked: `uv run --with-editable ../jev-ultrafast python -m scripts.poll --local` uses your Chrome.
+- `scripts/history.py` keeps 30 days of readings, one letter per store per 30-min slot, in `public/history.json`.
+  On Actions the run fetches the deployed copy (SITE_URL) and adds to it; only a 404 starts afresh.
 - `scripts/og.py` renders `public/og.png` (link preview) after each poll; deploy rewrites its URL to absolute.
 
 Checks: `uv run ruff check . && uv run pytest`. Live run: `uv run python -m scripts.poll` (~35s).
