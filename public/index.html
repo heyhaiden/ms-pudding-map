@@ -466,7 +466,8 @@ function trend() {
   const lines = Object.values(history?.stores || {});
   const length = lines[0]?.length || 0;
   const first = Math.max(0, length - WEEK);
-  if (length - first < 6) return (el.hidden = true);
+  // Only once there's a full week: a few hours of readings is just a squiggle.
+  if (length < WEEK) return (el.hidden = true);
   const counts = [];
   for (let i = first; i < length; i++) {
     const n = lines.reduce((sum, line) => sum + has(line[i]), 0);
@@ -477,16 +478,12 @@ function trend() {
     `${(100 * i / Math.max(1, counts.length - 1)).toFixed(2)},${(34 - 30 * n / max).toFixed(1)}`).filter(Boolean);
   const byHour = Array.from({ length: 24 }, () => [0, 0]);
   counts.forEach((n, i) => { if (n !== null) { const h = london(slotDate(first + i)).hour; byHour[h][0] += n; byHour[h][1]++; } });
-  const days = (length - first) / 48;
-  let best = "";
-  if (days >= 3) {
-    const hour = byHour.map(([sum, k], h) => [k ? sum / k : -1, h]).sort((a, b) => b[0] - a[0])[0][1];
-    best = ` Best time to look: around ${hour % 12 || 12}${hour < 12 ? "am" : "pm"}.`;
-  }
+  const hour = byHour.map(([sum, k], h) => [k ? sum / k : -1, h]).sort((a, b) => b[0] - a[0])[0][1];
+  const best = ` Best time to look: around ${hour % 12 || 12}${hour < 12 ? "am" : "pm"}.`;
   el.innerHTML = `<svg viewBox="0 0 100 34" preserveAspectRatio="none" aria-hidden="true">
     <polyline points="${points.join(" ")}" fill="none" stroke="var(--magenta)" stroke-width="2.5"
       vector-effect="non-scaling-stroke" stroke-linejoin="round" stroke-linecap="round"/></svg>
-    <p>Stores with it, ${days >= 7 ? "last 7 days" : "since tracking began"}.${best}</p>`;
+    <p>Stores with it, last 7 days.${best}</p>`;
   el.hidden = false;
 }
 
