@@ -13,10 +13,12 @@ import json
 import os
 import sys
 import time
+import urllib.error
+import urllib.request
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-from scripts import og
+from scripts import history, og
 from scripts.stock import join, stores_from
 
 PRODUCT = "61273052"
@@ -25,6 +27,7 @@ ROOT = Path(__file__).resolve().parent.parent
 STORES = ROOT / "data" / "stores.json"
 OUT = ROOT / "public" / "stock.json"
 OG = ROOT / "public" / "og.png"
+HISTORY = ROOT / "public" / "history.json"
 CONFIG = ROOT / "public" / "config.js"
 ENV = ROOT / ".env"
 STORES_MAX_AGE = timedelta(days=7)
@@ -186,6 +189,25 @@ def write_config(token, path=CONFIG):
     path.write_text(f"const MAPBOX_TOKEN = {json.dumps(token)};\n")
 
 
+def previous_history():
+    """The history so far: the local file, else the deployed site's copy (SITE_URL), else None to start one.
+
+    Only a 404 starts afresh. Any other failure stops the run, so a network blip never wipes the history.
+    """
+    if HISTORY.exists():
+        return json.loads(HISTORY.read_text())
+    site = os.environ.get("SITE_URL", "").rstrip("/")
+    if not site:
+        return None
+    try:
+        with urllib.request.urlopen(f"{site}/history.json?t={int(time.time())}", timeout=20) as response:
+            return json.load(response)
+    except urllib.error.HTTPError as error:
+        if error.code == 404:
+            return None
+        raise
+
+
 def stale(path):
     if not path.exists():
         return True
@@ -212,7 +234,12 @@ def poll(driver):
     OUT.write_text(json.dumps({"updated": now, "product": {"id": PRODUCT, "name": name, "url": PAGE},
                                "counts": counts, "stores": out}, separators=(",", ":")) + "\n")
     print(f"{name}: " + ", ".join(f"{n} {k}" for k, n in counts.items()))
-    return json.loads(OUT.read_text())
+    stock = json.loads(OUT.read_text())
+    past = previous_history()
+    HISTORY.write_text(json.dumps(history.record(past, stock, datetime.now(timezone.utc)),
+                                  separators=(",", ":")) + "\n")
+    print(f"history: {'started' if past is None else 'added a reading'}")
+    return stock
 
 
 def main():
