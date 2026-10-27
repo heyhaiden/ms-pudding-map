@@ -112,8 +112,6 @@
   .trend svg { display: block; width: 100%; height: 34px; overflow: visible; }
   .trend p { margin: 4px 0 0; font-size: 12px; opacity: .85; }
 
-  .credits { margin: 4px 0 0; font-size: 11px; opacity: .7; }
-  .credits a { color: inherit; margin-right: 6px; }
   .more { overflow: hidden; }
   .fold { display: none; position: absolute; top: 6px; right: 6px; width: 44px; height: 44px; padding: 10px;
     border: 0; border-radius: 50%; background: transparent; color: var(--ink); cursor: pointer; z-index: 1; }
@@ -158,10 +156,6 @@
   <p class="meta"><span id="updated"></span> · Unofficial fan map, not affiliated with M&S ·
     <a id="product" href="#" target="_blank" rel="noopener">The pudding</a></p>
   </div>
-  <!-- Map credits stay visible even when the card is minimised (Mapbox requires them). -->
-  <p class="credits"><a href="https://www.mapbox.com/about/maps/" target="_blank" rel="noopener">© Mapbox</a>
-    <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap</a>
-    <a href="https://apps.mapbox.com/feedback/" target="_blank" rel="noopener">Improve this map</a></p>
 </main>
 <div class="toast" id="toast" role="status"></div>
 <script src="config.js"></script>
@@ -514,7 +508,8 @@ const map = new mapboxgl.Map({
   container: "map", style: dark ? "mapbox://styles/mapbox/dark-v11" : "mapbox://styles/mapbox/light-v11",
   bounds: CENTRAL, attributionControl: false,
 });
-// No on-map buttons: pinch, scroll and double-tap still zoom. Map credits live in the card footer instead.
+// No zoom buttons: pinch, scroll and double-tap still zoom. Map credits (required by Mapbox) sit behind the ⓘ icon.
+map.addControl(new mapboxgl.AttributionControl({ compact: true }), "bottom-right");
 // The card shows stock even if the map fails; dots are added once the map is ready.
 map.on("load", () => {
   theme();
