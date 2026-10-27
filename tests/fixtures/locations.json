@@ -1,0 +1,8 @@
+[{"id":"1666","name":"BIRMINGHAM BULLRING","capabilities":["CHRISTMASFOOD","GM","FOOD","FOODSCATALOGUE"],"type":{"code":"16","name":"Full Line"},"coordinates":{"latitude":52.47754,"longitude":-1.8943}},
+ {"id":"4420","name":"HARBORNE SIMPLY FOOD","capabilities":["CHRISTMASFOOD","GM","FOOD","FOODSCATALOGUE"],"type":{"code":"28","name":"Simply Food"},"coordinates":{"latitude":52.46011,"longitude":-1.94425}},
+ {"id":"291","name":"MARBLE ARCH","capabilities":["GM","FOOD"],"type":{"code":"16","name":"Full Line"},"coordinates":{"latitude":51.5142,"longitude":-0.1568}},
+ {"id":"1025","name":"KENSINGTON","capabilities":["FOOD"],"type":{"code":"16","name":"Full Line"},"coordinates":{"latitude":51.5008,"longitude":-0.1925}},
+ {"id":"1633","name":"CAMDEN SIMPLY FOOD","capabilities":["FOOD"],"type":{"code":"28","name":"Simply Food"},"coordinates":{"latitude":51.539,"longitude":-0.1426}},
+ {"id":"1666","name":"BIRMINGHAM BULLRING","capabilities":["FOOD"],"type":{"code":"16","name":"Full Line"},"coordinates":{"latitude":52.47754,"longitude":-1.8943}},
+ {"id":"2972","name":"BELFAST","capabilities":["CHRISTMASFOOD","GM","FOODSCATALOGUE"],"type":{"code":"16","name":"Full Line"},"coordinates":{"latitude":54.5973,"longitude":-5.9301}},
+ {"id":"5000","name":"CLOTHING OUTLET","capabilities":["GM"],"type":{"code":"40","name":"Outlet Store"},"coordinates":{"latitude":53.0,"longitude":-2.0}}]
