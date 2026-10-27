@@ -1,0 +1,356 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Is the Pudding In?</title>
+<meta name="description" content="Live map: which M&S stores in and around London have the Banana, Caramel & Pecan Pudding right now.">
+<meta property="og:title" content="Is the Pudding In?">
+<meta property="og:description" content="Live map of every M&S in and around London with the Banana, Caramel & Pecan Pudding. Updated every 30 min.">
+<meta property="og:type" content="website">
+<!-- Deploy rewrites og.png to the site's absolute URL; scrapers ignore relative image paths. -->
+<meta property="og:image" content="og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Map of M&S stores around London coloured by pudding stock">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#F6C344">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍮</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=DM+Sans:opsz,wght@9..40,400;9..40,600;9..40,700&display=swap" rel="stylesheet">
+<link href="https://api.mapbox.com/mapbox-gl-js/v3.7.0/mapbox-gl.css" rel="stylesheet">
+<script src="https://api.mapbox.com/mapbox-gl-js/v3.7.0/mapbox-gl.js"></script>
+<style>
+  /* Colours from the tub: mustard label, magenta lettering, chocolate pudding, cream pot, caramel drizzle. */
+  :root {
+    --mustard: #F6C344; --magenta: #B5328C; --chocolate: #3B2216; --cream: #F3E6D3; --caramel: #C9802F;
+    --in: #1F9D5A; --low: #E8891C; --out: #D23A4E; --unknown: #8C7B70; --not_sold: #9A8473;
+    --card: var(--mustard); --ink: var(--chocolate); --headline: var(--magenta); --chip: rgba(255,255,255,.55);
+    --land: #F3E6D3; --water: #EBC6DD; --page: #F3E6D3; --shadow: 0 4px 0 var(--chocolate); --stroke: #3B2216;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --card: #2B1910; --ink: #F3E6D3; --headline: #F6C344; --chip: rgba(255,255,255,.08);
+      --land: #241812; --water: #3A2233; --page: #241812; --not_sold: #8C7B70; --shadow: 0 4px 0 #000;
+      --stroke: #F3E6D3;
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--page); color: var(--ink);
+    font: 15px/1.45 "DM Sans", system-ui, -apple-system, sans-serif; -webkit-font-smoothing: antialiased; }
+  #map { position: fixed; inset: 0; animation: fade .6s ease-out both; }
+  @keyframes fade { from { opacity: 0; } }
+  button, a { -webkit-tap-highlight-color: transparent; }
+  :focus-visible { outline: 3px solid var(--magenta); outline-offset: 2px; }
+
+  .card { position: absolute; top: max(16px, env(safe-area-inset-top)); left: 16px; width: min(380px, calc(100% - 32px));
+    padding: 18px 20px 16px; background: var(--card); color: var(--ink); border: 3px solid var(--chocolate);
+    border-radius: 22px; box-shadow: var(--shadow); }
+  .eyebrow { margin: 0; font-weight: 700; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; opacity: .75; }
+  .live { display: inline-block; width: 9px; height: 9px; margin: 0 8px 1px 0; border-radius: 50%;
+    background: var(--out); box-shadow: 0 0 0 0 var(--out); animation: live 1.6s ease-out infinite; }
+  @keyframes live { 0% { box-shadow: 0 0 0 0 rgba(210,58,78,.7); } 100% { box-shadow: 0 0 0 9px rgba(210,58,78,0); } }
+  h1 { margin: 2px 0 0; font: 400 34px/0.95 "Bagel Fat One", "DM Sans", sans-serif; color: var(--headline);
+    letter-spacing: .01em; }
+  .answer { margin: 10px 0 2px; font: 400 52px/1 "Bagel Fat One", "DM Sans", sans-serif; color: var(--ink); }
+  .headline { margin: 0 0 14px; font-size: 15px; }
+  .headline b { font-weight: 700; }
+
+  .actions { display: flex; gap: 8px; margin: 0 0 14px; }
+  .btn { flex: 1; white-space: nowrap; display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 44px;
+    padding: 0 14px; border: 3px solid var(--chocolate); border-radius: 999px; font: 700 14px "DM Sans", sans-serif;
+    cursor: pointer; box-shadow: 0 3px 0 var(--chocolate); transition: transform .08s, box-shadow .08s; }
+  .btn:active { transform: translateY(3px); box-shadow: 0 0 0 var(--chocolate); }
+  .btn .icon { width: 18px; height: 18px; flex: none; }
+  .btn.primary { flex: 1.5; background: var(--magenta); color: #fff; }
+  .btn.secondary { background: #fff; color: var(--chocolate); }
+
+  .legend { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
+  .legend button { display: flex; align-items: center; gap: 7px; min-height: 32px; padding: 0 11px;
+    border: 2px solid transparent; border-radius: 999px; background: var(--chip); color: var(--ink);
+    font: 600 13px "DM Sans", sans-serif; cursor: pointer; }
+  .legend button[aria-pressed="false"] { opacity: .45; text-decoration: line-through; }
+  .legend .n { font-variant-numeric: tabular-nums; opacity: .7; }
+  .dot { width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--chocolate); flex: none; }
+  .dot.ring { background: transparent !important; border-color: var(--not_sold); }
+
+  .meta { margin: 12px 0 0; font-size: 12px; opacity: .8; }
+  .meta a { color: inherit; }
+  .stale { color: var(--out); font-weight: 700; }
+  .toast { position: fixed; left: 50%; bottom: max(24px, env(safe-area-inset-bottom)); transform: translate(-50%, 20px);
+    padding: 10px 16px; background: var(--chocolate); color: var(--cream); border-radius: 999px; font-weight: 600;
+    opacity: 0; transition: opacity .2s, transform .2s; pointer-events: none; z-index: 5; }
+  .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+  .mapboxgl-popup-content { font: inherit; color: var(--chocolate); background: #fff; border: 3px solid var(--chocolate);
+    border-radius: 16px; padding: 12px 16px 12px 14px; box-shadow: 0 3px 0 var(--chocolate), 0 12px 24px rgba(59,34,22,.25); }
+  .mapboxgl-popup-tip { display: none; }
+  .mapboxgl-popup-close-button { font-size: 18px; padding: 2px 8px; color: var(--chocolate); }
+  .pop h2 { margin: 0 22px 6px 0; font: 400 19px/1.1 "Bagel Fat One", sans-serif; }
+  .pill { display: inline-block; padding: 2px 10px; border-radius: 999px; color: #fff; font-weight: 700; font-size: 12px; }
+  .pill.not_sold, .pill.unknown { background: var(--cream) !important; color: var(--chocolate); }
+  .pop p { margin: 6px 0 0; font-size: 13px; }
+  .pop a { color: var(--magenta); font-weight: 700; }
+
+  @media (max-width: 520px) {
+    .card { padding: 14px 16px 12px; border-radius: 18px; }
+    h1 { font-size: 26px; }
+    .answer { font-size: 40px; margin-top: 6px; }
+    .headline { margin-bottom: 10px; font-size: 14px; }
+    .actions { margin-bottom: 10px; }
+    .btn { min-height: 40px; font-size: 13px; padding: 0 10px; }
+    .legend button { min-height: 28px; padding: 0 9px; font-size: 12px; }
+    .meta { margin-top: 8px; font-size: 11px; }
+  }
+  @media (prefers-reduced-motion: reduce) { .btn, .toast { transition: none; } .live { animation: none; } }
+</style>
+</head>
+<body>
+<div id="map" role="region" aria-label="Map of M&S stores around London and pudding stock"></div>
+<main class="card" aria-live="polite">
+  <p class="eyebrow"><span class="live" aria-hidden="true"></span>Live</p>
+  <h1>Is the Pudding In?</h1>
+  <p class="answer" id="answer">…</p>
+  <p class="headline" id="headline">Checking every M&S…</p>
+  <div class="actions">
+    <button class="btn primary" id="nearest" type="button"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M15.8 8.2 13.6 13.6 8.2 15.8 10.4 10.4Z" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg> Nearest pudding</button>
+    <button class="btn secondary" id="share" type="button">Share</button>
+  </div>
+  <ul class="legend" id="legend" aria-label="Show or hide stores by stock"></ul>
+  <p class="meta"><span id="updated"></span> · Unofficial fan map, not affiliated with M&S ·
+    <a id="product" href="#" target="_blank" rel="noopener">The pudding</a></p>
+</main>
+<div class="toast" id="toast" role="status"></div>
+<script src="config.js"></script>
+<script>
+const STATUSES = [
+  ["in", "In stock"], ["low", "Going fast"], ["out", "Sold out"], ["not_sold", "Not sold here"],
+  ["unknown", "No reading"],
+];
+const LABEL = Object.fromEntries(STATUSES);
+const QUIP = {
+  in: "Pudding confirmed. Go go go.",
+  low: "Only a few left. Run.",
+  out: "Pudding-less. Thoughts and prayers.",
+  not_sold: "This M&S doesn't stock it.",
+  unknown: "M&S isn't saying. Mystery pudding.",
+};
+const css = (name) => getComputedStyle(document.documentElement).getPropertyValue("--" + name).trim();
+const shown = new Set(STATUSES.map(([k]) => k));
+const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+let data, mapReady = false;
+
+const $ = (id) => document.getElementById(id);
+
+function ago(iso) {
+  const mins = Math.round((Date.now() - new Date(iso)) / 60000);
+  if (mins < 1) return "just now";
+  if (mins < 60) return mins + " min ago";
+  const hours = Math.round(mins / 60);
+  return hours + (hours === 1 ? " hour ago" : " hours ago");
+}
+
+function verdict(have, pct) {
+  if (have === 0) return "NOPE.";
+  if (pct < 15) return "BARELY.";
+  if (pct < 50) return "SORT OF.";
+  return "YES!";
+}
+
+function stats() {
+  const c = data.counts, sold = c.in + c.low + c.out + c.unknown, have = c.in + c.low;
+  return { c, sold, have, pct: sold ? Math.round(100 * have / sold) : 0 };
+}
+
+function render() {
+  const { c, sold, have, pct } = stats();
+  $("product").href = data.product.url;
+  $("answer").textContent = verdict(have, pct);
+  $("headline").innerHTML = `<b>${have}</b> of ${sold} M&S stores that sell it have it right now.`;
+  const updated = $("updated");
+  updated.textContent = "Updated " + ago(data.updated);
+  updated.className = Date.now() - new Date(data.updated) > 2 * 3600e3 ? "stale" : "";
+  $("legend").innerHTML = STATUSES.filter(([k]) => k !== "unknown" || c.unknown).map(([key, label]) =>
+    `<li><button type="button" data-status="${key}" aria-pressed="${shown.has(key)}">
+       <span class="dot${key === "not_sold" ? " ring" : ""}" style="background:var(--${key})"></span>
+       ${label} <span class="n">${c[key]}</span></button></li>`).join("");
+  if (!mapReady) return;
+  const geojson = { type: "FeatureCollection", features: data.stores.map((s) => ({
+    type: "Feature", geometry: { type: "Point", coordinates: [s.lng, s.lat] }, properties: s })) };
+  const source = map.getSource("stores");
+  if (source) source.setData(geojson); else addLayers(geojson);
+  filter();
+}
+
+function addLayers(geojson) {
+  map.addSource("stores", { type: "geojson", data: geojson });
+  const colour = ["match", ["get", "status"], ...STATUSES.flatMap(([k]) => [k, css(k)]), "#888"];
+  // A soft glow behind in-stock stores, pulsing unless the viewer prefers reduced motion.
+  map.addLayer({ id: "glow", type: "circle", source: "stores", filter: ["==", ["get", "status"], "in"], paint: {
+    "circle-color": css("in"), "circle-opacity": 0.25, "circle-blur": 0.4,
+    "circle-radius": ["interpolate", ["linear"], ["zoom"], 8, 12, 13, 22] } });
+  map.addLayer({ id: "not_sold", type: "circle", source: "stores", filter: ["==", ["get", "status"], "not_sold"], paint: {
+    "circle-color": "rgba(0,0,0,0)", "circle-stroke-color": css("not_sold"), "circle-stroke-width": 2,
+    "circle-radius": ["interpolate", ["linear"], ["zoom"], 8, 3.5, 13, 7] } });
+  map.addLayer({ id: "stores", type: "circle", source: "stores", filter: ["!=", ["get", "status"], "not_sold"], paint: {
+    "circle-color": colour, "circle-stroke-color": css("stroke"), "circle-stroke-width": 2,
+    "circle-radius": ["interpolate", ["linear"], ["zoom"], 8,
+      ["match", ["get", "status"], "in", 8, "low", 7, 5.5], 13, ["match", ["get", "status"], "in", 14, "low", 12, 9]],
+    "circle-sort-key": ["match", ["get", "status"], "in", 4, "low", 3, "out", 2, 1] } });
+  for (const layer of ["stores", "not_sold"]) {
+    map.on("click", layer, (e) => openStore(e.features[0].properties, e.features[0].geometry.coordinates));
+    map.on("mouseenter", layer, () => map.getCanvas().style.cursor = "pointer");
+    map.on("mouseleave", layer, () => map.getCanvas().style.cursor = "");
+  }
+  if (!reducedMotion) pulse();
+}
+
+function pulse() {
+  const t = (performance.now() % 1800) / 1800;
+  map.setPaintProperty("glow", "circle-opacity", 0.35 * (1 - t));
+  map.setPaintProperty("glow", "circle-radius", ["interpolate", ["linear"], ["zoom"], 8, 8 + 12 * t, 13, 14 + 20 * t]);
+  requestAnimationFrame(pulse);
+}
+
+let popup;
+function openStore(s, coordinates, extra = "") {
+  const box = document.createElement("div");
+  box.className = "pop";
+  const name = document.createElement("h2");
+  name.textContent = s.name;
+  const pill = document.createElement("span");
+  pill.className = "pill " + s.status;
+  pill.style.background = css(s.status);
+  pill.textContent = LABEL[s.status];
+  const quip = document.createElement("p");
+  quip.textContent = (extra ? extra + " " : "") + QUIP[s.status];
+  const directions = document.createElement("p");
+  const link = document.createElement("a");
+  link.href = `https://www.google.com/maps/dir/?api=1&destination=${coordinates[1]},${coordinates[0]}`;
+  link.target = "_blank";
+  link.rel = "noopener";
+  link.textContent = "Directions →";
+  directions.append(link);
+  box.append(name, pill, quip, directions);
+  popup?.remove();
+  popup = new mapboxgl.Popup({ offset: 24, maxWidth: "260px" }).setLngLat(coordinates).setDOMContent(box).addTo(map);
+}
+
+function filter() {
+  if (!mapReady) return;
+  const visible = ["in", ["get", "status"], ["literal", [...shown]]];
+  map.setFilter("stores", ["all", ["!=", ["get", "status"], "not_sold"], visible]);
+  map.setFilter("glow", ["all", ["==", ["get", "status"], "in"], visible]);
+  map.setFilter("not_sold", ["all", ["==", ["get", "status"], "not_sold"], visible]);
+}
+
+function toast(text) {
+  const el = $("toast");
+  el.textContent = text;
+  el.classList.add("show");
+  clearTimeout(toast.timer);
+  toast.timer = setTimeout(() => el.classList.remove("show"), 2600);
+}
+
+function miles(a, b) {
+  const rad = Math.PI / 180, dLat = (b[1] - a[1]) * rad, dLng = (b[0] - a[0]) * rad;
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(a[1] * rad) * Math.cos(b[1] * rad) * Math.sin(dLng / 2) ** 2;
+  return 3958.8 * 2 * Math.asin(Math.sqrt(h));
+}
+
+let you;
+$("nearest").addEventListener("click", () => {
+  if (!data) return;
+  if (!navigator.geolocation) return toast("Your browser can't share your location.");
+  toast("Finding you…");
+  navigator.geolocation.getCurrentPosition((pos) => {
+    const here = [pos.coords.longitude, pos.coords.latitude];
+    const options = data.stores.filter((s) => s.status === "in" || s.status === "low")
+      .map((s) => ({ s, d: miles(here, [s.lng, s.lat]) })).sort((a, b) => a.d - b.d);
+    you?.remove();
+    you = new mapboxgl.Marker({ color: css("magenta") }).setLngLat(here).addTo(map);
+    if (!options.length) return toast("No pudding anywhere nearby right now. 😭");
+    const { s, d } = options[0];
+    const coords = [s.lng, s.lat];
+    map.fitBounds([here, coords], { padding: { top: 260, bottom: 80, left: 60, right: 60 }, maxZoom: 15,
+      duration: reducedMotion ? 0 : 1200 });
+    openStore(s, coords, `${d < 0.1 ? "Right here" : d.toFixed(1) + " mi away"}.`);
+  }, () => toast("Couldn't get your location."), { enableHighAccuracy: true, timeout: 10000 });
+});
+
+$("share").addEventListener("click", async () => {
+  const text = data
+    ? `Only ${stats().have} of ${stats().sold} M&S stores around London have the banana, caramel & pecan pudding right now 🍮`
+    : "Is the M&S banana, caramel & pecan pudding in? 🍮";
+  const url = location.href.split("#")[0];
+  try {
+    if (navigator.share) return await navigator.share({ title: "Is the Pudding In?", text, url });
+    await navigator.clipboard.writeText(`${text} ${url}`);
+    toast("Link copied. Spread the pudding word.");
+  } catch (error) {
+    if (error.name !== "AbortError") toast("Couldn't share. Copy the address bar instead.");
+  }
+});
+
+$("legend").addEventListener("click", (e) => {
+  const button = e.target.closest("button");
+  if (!button) return;
+  const key = button.dataset.status;
+  shown.has(key) ? shown.delete(key) : shown.add(key);
+  button.setAttribute("aria-pressed", shown.has(key));
+  filter();
+});
+
+async function load() {
+  try {
+    data = await (await fetch("stock.json?t=" + Date.now())).json();
+    render();
+  } catch (error) {
+    $("headline").textContent = "Couldn't load stock. Trying again shortly.";
+  }
+}
+
+// Recolour the Mapbox base style to the tub: cream land, pink-tinted water, quiet labels.
+function theme() {
+  for (const layer of map.getStyle().layers) {
+    if (layer.type === "background") map.setPaintProperty(layer.id, "background-color", css("land"));
+    else if (layer.id.startsWith("land") && layer.type === "fill") map.setPaintProperty(layer.id, "fill-color", css("land"));
+    else if (layer.id.includes("water") && layer.type === "fill") map.setPaintProperty(layer.id, "fill-color", css("water"));
+    else if (layer.type === "symbol" && layer.id.startsWith("poi")) map.setLayoutProperty(layer.id, "visibility", "none");
+  }
+}
+
+mapboxgl.accessToken = MAPBOX_TOKEN;
+const dark = matchMedia("(prefers-color-scheme: dark)").matches;
+// Where the push-in lands: Hounslow to Welling, East Finchley to Streatham, Westminster in the middle.
+const CENTRAL = [[-0.4, 51.425], [0.12, 51.595]];
+// Keep London clear of the card: beside it on wide screens, below it on phones.
+const card = document.querySelector(".card");
+const padding = () => innerWidth > 720
+  ? { top: 20, bottom: 20, left: card.offsetWidth + 40, right: 20 }
+  : { top: card.offsetHeight + 24, bottom: 20, left: 10, right: 10 };
+const map = new mapboxgl.Map({
+  container: "map", style: dark ? "mapbox://styles/mapbox/dark-v11" : "mapbox://styles/mapbox/light-v11",
+  bounds: CENTRAL, attributionControl: false,
+});
+map.addControl(new mapboxgl.AttributionControl({ compact: true }), "bottom-left");
+map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), "bottom-right");
+// The card shows stock even if the map fails; dots are added once the map is ready.
+map.on("load", () => {
+  theme();
+  mapReady = true;
+  if (data) render();
+  // Wide screens centre on the whole window with the card floating over the west; phones keep London below the card.
+  const target = map.cameraForBounds(CENTRAL, { padding: innerWidth > 720 ? 0 : padding() });
+  if (reducedMotion) return map.jumpTo(target);
+  // A gentle push-in: start slightly zoomed out, ease straight in without the fly-to arc.
+  map.jumpTo({ ...target, zoom: target.zoom - 0.8 });
+  map.easeTo({ ...target, duration: 1800, easing: (t) => 1 - Math.pow(1 - t, 3) });
+});
+load();
+setInterval(load, 5 * 60 * 1000);
+setInterval(() => data && render(), 60 * 1000);
+</script>
+</body>
+</html>
