@@ -30,7 +30,6 @@ jobs:
       - uses: astral-sh/setup-uv@v6
       - run: uv sync --frozen
       - run: uv run ruff check . && uv run pytest -q
-      - run: uv run playwright install --with-deps chromium
       - id: pages
         uses: actions/configure-pages@v5
       # SITE_URL: the poll adds to the history the live site already has.
@@ -38,6 +37,8 @@ jobs:
         env:
           MAPBOX_TOKEN: ${{ secrets.MAPBOX_TOKEN }}
           SITE_URL: ${{ steps.pages.outputs.base_url }}
+          # The runner image ships Google Chrome; installing Playwright's browser via apt can take 10+ minutes.
+          BROWSER_CHANNEL: chrome
       # The store list refreshes weekly; keep it so the next run doesn't re-fetch it.
       - name: Save store list
         run: |

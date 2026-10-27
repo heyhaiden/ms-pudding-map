@@ -4,6 +4,7 @@ Rendered after each poll so a shared link always shows the latest numbers. No Ma
 """
 
 import math
+import os
 from html import escape
 
 WIDTH, HEIGHT = 1200, 630
@@ -100,7 +101,7 @@ def render(stock, path):
     from playwright.sync_api import sync_playwright
 
     with sync_playwright() as pw:
-        browser = pw.chromium.launch()
+        browser = pw.chromium.launch(channel=os.environ.get("BROWSER_CHANNEL") or None)
         try:
             page = browser.new_page(viewport={"width": WIDTH, "height": HEIGHT})
             page.set_content(html(stock), wait_until="networkidle")

@@ -102,7 +102,8 @@ class Playwright:
         from playwright.sync_api import sync_playwright
 
         self.pw = sync_playwright().start()
-        self.browser = self.pw.chromium.launch()
+        # BROWSER_CHANNEL=chrome uses an installed Google Chrome (GitHub's runners have one) instead of Playwright's.
+        self.browser = self.pw.chromium.launch(channel=os.environ.get("BROWSER_CHANNEL") or None)
         self.page = self.browser.new_page(locale="en-GB", user_agent=(
             "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) "
             "Chrome/130.0.0.0 Safari/537.36"))
