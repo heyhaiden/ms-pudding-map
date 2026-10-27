@@ -332,6 +332,8 @@ $("legend").addEventListener("click", (e) => {
 
 // ----- History: one letter per store per 30-minute slot (scripts/history.py) -----
 let history;
+// The 7-day grid in store popups. Off for now; set to true to bring it back.
+const SHOW_WEEK_GRID = false;
 const SLOT_MS = 30 * 60 * 1000, WEEK = 7 * 48;
 const RANK = { I: 4, L: 3, O: 2, U: 1, N: 1, "-": 0 };
 const londonParts = new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/London", weekday: "short", year: "numeric",
@@ -375,12 +377,12 @@ function week(s) {
   const facts = known < 48 ? "" : `Had it ${Math.round(100 * yes / known)}% of the time this week.` +
     (last >= 0 ? ` Last seen ${when(slotDate(last))}.` : " Not seen this week.");
   // The grid is tucked away until asked for.
-  box.innerHTML = `${facts ? '<p class="facts"></p>' : ""}<details><summary>Last 7 days</summary>
+  box.innerHTML = (facts ? '<p class="facts"></p>' : "") + (SHOW_WEEK_GRID ? `<details><summary>Last 7 days</summary>
     <div class="slide"><div class="grid" role="img" aria-label="Stock by hour for the last 7 days">${grid}</div></div>
-    </details>`;
+    </details>` : "");
   if (facts) box.querySelector(".facts").textContent = facts;
   const details = box.querySelector("details");
-  details.querySelector("summary").addEventListener("click", (e) => { e.preventDefault(); slide(details); });
+  details?.querySelector("summary").addEventListener("click", (e) => { e.preventDefault(); slide(details); });
   return box;
 }
 
