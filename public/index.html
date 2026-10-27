@@ -100,10 +100,11 @@
   .week summary::-webkit-details-marker { display: none; }
   .week summary::before { content: "▸"; font-size: 12px; transition: transform .15s; }
   .week details[open] summary::before { transform: rotate(90deg); }
-  .week details[open] .grid { margin: 2px 0 4px; }
-  .grid { display: grid; grid-template-columns: 26px repeat(24, 7px); gap: 1.5px; align-items: center; }
-  .grid .day { font-size: 10px; font-weight: 600; opacity: .7; }
-  .grid .c { height: 9px; border-radius: 2px; background: #EDE3D6; }
+  .week details[open] .grid { margin: 4px 0 6px; }
+  .grid { display: grid; grid-template-columns: 28px repeat(24, 7px); gap: 3px 2px; align-items: center; }
+  .grid .day { font-size: 11px; font-weight: 600; opacity: .7; }
+  .grid .c { height: 16px; border-radius: 3px; background: #EDE3D6; }
+  .week .slide { overflow: hidden; }
   .grid .c.I { background: var(--in); } .grid .c.L { background: var(--low); } .grid .c.O { background: var(--out); }
   .grid .hours { grid-column: 2 / -1; display: flex; justify-content: space-between; font-size: 9px; opacity: .6; }
   .week .facts { margin: 0 0 2px; font-size: 12px; }
@@ -370,16 +371,35 @@ function week(s) {
     const code = cells.get(d.key + "|" + h) || "";
     return `<span class="c ${code}"></span>`;
   }).join("")).join("") + `<span class="hours"><span>0</span><span>6</span><span>12</span><span>18</span><span>24</span></span>`;
-  const since = when(new Date(history.start));
-  const facts = known < 48
-    ? `Tracking since ${since}. This fills in over the week.`
-    : `Had it ${Math.round(100 * yes / known)}% of the time this week.` +
-      (last >= 0 ? ` Last seen ${when(slotDate(last))}.` : " Not seen this week.");
-  // The grid is tucked away until asked for; the one-line summary is always shown.
-  box.innerHTML = `<p class="facts"></p><details><summary>Last 7 days</summary>
-    <div class="grid" role="img" aria-label="Stock by hour for the last 7 days">${grid}</div></details>`;
-  box.querySelector(".facts").textContent = facts;
+  // A percentage needs a day of readings; until then the grid speaks for itself.
+  const facts = known < 48 ? "" : `Had it ${Math.round(100 * yes / known)}% of the time this week.` +
+    (last >= 0 ? ` Last seen ${when(slotDate(last))}.` : " Not seen this week.");
+  // The grid is tucked away until asked for.
+  box.innerHTML = `${facts ? '<p class="facts"></p>' : ""}<details><summary>Last 7 days</summary>
+    <div class="slide"><div class="grid" role="img" aria-label="Stock by hour for the last 7 days">${grid}</div></div>
+    </details>`;
+  if (facts) box.querySelector(".facts").textContent = facts;
+  const details = box.querySelector("details");
+  details.querySelector("summary").addEventListener("click", (e) => { e.preventDefault(); slide(details); });
   return box;
+}
+
+// Slide the grid open or shut, then nudge the map if the taller popup ran off screen.
+function slide(details) {
+  const panel = details.querySelector(".slide");
+  const opening = !details.open;
+  if (opening) details.open = true;
+  const full = panel.scrollHeight + "px";
+  const animation = panel.animate(
+    { height: opening ? ["0px", full] : [full, "0px"], opacity: opening ? [0, 1] : [1, 0] },
+    { duration: reducedMotion ? 0 : 320, easing: "cubic-bezier(.2, .8, .2, 1)" });
+  animation.onfinish = () => {
+    if (!opening) details.open = false;
+    const rect = popup?.getElement().getBoundingClientRect();
+    if (!rect) return;
+    const nudge = rect.top < 8 ? rect.top - 8 : rect.bottom > innerHeight - 8 ? rect.bottom - innerHeight + 8 : 0;
+    if (nudge) map.panBy([0, nudge], { duration: reducedMotion ? 0 : 300 });
+  };
 }
 
 // Card: how many stores had it at each reading this week, and the best hour to look once there's enough data.
