@@ -19,6 +19,8 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from scripts import history, og
+from scripts.posthog_client import get_posthog_client
+from scripts.posthog_logs import get_posthog_logger
 from scripts.stock import join, stores_from
 
 PRODUCT = "61273052"
@@ -216,7 +218,7 @@ def stale(path):
     return datetime.now(timezone.utc) - updated > STORES_MAX_AGE
 
 
-def poll(driver):
+def poll(driver, posthog_client, posthog_logger):
     open_page(driver)
     now = datetime.now(timezone.utc).isoformat(timespec="seconds")
     if stale(STORES):
@@ -225,6 +227,25 @@ def poll(driver):
         if found["failed"]:
             print(f"warning: store search failed for {', '.join(found['failed'])}")
         STORES.write_text(json.dumps({"updated": now, "stores": stores}, indent=1) + "\n")
+        if posthog_logger:
+            posthog_logger.info(
+                "store catalogue refreshed",
+                extra={
+                    "event": "store_catalogue_refreshed",
+                    "store_count": len(stores),
+                    "seed_count": len(SEEDS),
+                    "failed_seed_count": len(found["failed"]),
+                },
+            )
+        if posthog_client:
+            posthog_client.capture(
+                "store_list_refreshed",
+                properties={
+                    "store_count": len(stores),
+                    "seed_count": len(SEEDS),
+                    "failed_seed_count": len(found["failed"]),
+                },
+            )
         print(f"store list: {len(stores)} food stores from {len(SEEDS)} towns")
     stores = json.loads(STORES.read_text())["stores"]
     found = checked(driver.run(STOCK_JS, [PRODUCT, [s["id"] for s in stores]]), "stock")
@@ -239,6 +260,29 @@ def poll(driver):
     past = previous_history()
     HISTORY.write_text(json.dumps(history.record(past, stock, datetime.now(timezone.utc)),
                                   separators=(",", ":")) + "\n")
+    if posthog_logger:
+        posthog_logger.info(
+            "stock snapshot published",
+            extra={
+                "event": "stock_snapshot_published",
+                "store_count": len(out),
+                "in_stock_count": counts.get("in", 0),
+                "low_stock_count": counts.get("low", 0),
+                "out_of_stock_count": counts.get("out", 0),
+                "history_started": past is None,
+            },
+        )
+    if posthog_client:
+        posthog_client.capture(
+            "stock_snapshot_published",
+            properties={
+                "store_count": len(out),
+                "in_stock_count": counts.get("in", 0),
+                "low_stock_count": counts.get("low", 0),
+                "out_of_stock_count": counts.get("out", 0),
+                "history_started": past is None,
+            },
+        )
     print(f"history: {'started' if past is None else 'added a reading'}")
     return stock
 
@@ -248,11 +292,13 @@ def main():
     args.add_argument("--local", action="store_true", help="use your Chrome through Jev's Browser")
     local = args.parse_args().local
     load_env()
+    posthog_client = get_posthog_client()
+    posthog_logger = get_posthog_logger()
     write_config(os.environ.get("MAPBOX_TOKEN", ""))
     for attempt in (1, 2):
         driver = Jev() if local else Playwright()
         try:
-            stock = poll(driver)
+            stock = poll(driver, posthog_client, posthog_logger)
             break
         except Exception as error:
             print(f"attempt {attempt}: {type(error).__name__}: {error}", file=sys.stderr)

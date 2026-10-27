@@ -36,6 +36,8 @@ jobs:
       - run: uv run python -m scripts.poll
         env:
           MAPBOX_TOKEN: ${{ secrets.MAPBOX_TOKEN }}
+          POSTHOG_PROJECT_TOKEN: ${{ vars.POSTHOG_PROJECT_TOKEN }}
+          POSTHOG_HOST: ${{ vars.POSTHOG_HOST }}
           SITE_URL: ${{ steps.pages.outputs.base_url }}
           # The runner image ships Google Chrome; installing Playwright's browser via apt can take 10+ minutes.
           BROWSER_CHANNEL: chrome

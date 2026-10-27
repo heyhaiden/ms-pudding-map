@@ -3,7 +3,13 @@ name = "ms-pudding-map"
 version = "0.1.0"
 description = "Map of UK M&S stores showing whether one food product is in stock."
 requires-python = ">=3.12"
-dependencies = ["playwright>=1.48,<2"]
+dependencies = [
+    "opentelemetry-api>=1.45.1",
+    "opentelemetry-exporter-otlp>=1.45.1",
+    "opentelemetry-sdk>=1.45.1",
+    "playwright>=1.48,<2",
+    "posthog>=7.76.0",
+]
 
 [dependency-groups]
 dev = ["pytest>=8.4,<9", "ruff>=0.14,<1"]
