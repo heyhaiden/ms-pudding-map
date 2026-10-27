@@ -94,14 +94,19 @@
   .pop a { color: var(--magenta); font-weight: 700; }
   /* History: 7 days (rows) by 24 hours (columns), like a status page. */
   .week { margin: 10px 0 0; }
-  .week h3 { margin: 0 0 5px; font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
-    opacity: .7; }
+  .week summary { display: inline-flex; align-items: center; gap: 5px; min-height: 28px; font-size: 11px;
+    font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--magenta); cursor: pointer;
+    list-style: none; }
+  .week summary::-webkit-details-marker { display: none; }
+  .week summary::before { content: "▸"; font-size: 12px; transition: transform .15s; }
+  .week details[open] summary::before { transform: rotate(90deg); }
+  .week details[open] .grid { margin: 2px 0 4px; }
   .grid { display: grid; grid-template-columns: 26px repeat(24, 7px); gap: 1.5px; align-items: center; }
   .grid .day { font-size: 10px; font-weight: 600; opacity: .7; }
   .grid .c { height: 9px; border-radius: 2px; background: #EDE3D6; }
   .grid .c.I { background: var(--in); } .grid .c.L { background: var(--low); } .grid .c.O { background: var(--out); }
   .grid .hours { grid-column: 2 / -1; display: flex; justify-content: space-between; font-size: 9px; opacity: .6; }
-  .week .facts { margin: 6px 0 0; font-size: 12px; }
+  .week .facts { margin: 0 0 2px; font-size: 12px; }
   .trend { margin: 12px 0 0; }
   .trend svg { display: block; width: 100%; height: 34px; overflow: visible; }
   .trend p { margin: 4px 0 0; font-size: 12px; opacity: .85; }
@@ -116,7 +121,7 @@
     .legend button { min-height: 28px; padding: 0 9px; font-size: 12px; }
     .meta { margin-top: 8px; font-size: 11px; }
   }
-  @media (prefers-reduced-motion: reduce) { .btn, .toast { transition: none; } .live { animation: none; } }
+  @media (prefers-reduced-motion: reduce) { .btn, .toast, .week summary::before { transition: none; } .live { animation: none; } }
 </style>
 </head>
 <body>
@@ -370,8 +375,9 @@ function week(s) {
     ? `Tracking since ${since}. This fills in over the week.`
     : `Had it ${Math.round(100 * yes / known)}% of the time this week.` +
       (last >= 0 ? ` Last seen ${when(slotDate(last))}.` : " Not seen this week.");
-  box.innerHTML = `<h3>Last 7 days</h3><div class="grid" role="img" aria-label="Stock by hour for the last 7 days">${grid}</div>
-    <p class="facts"></p>`;
+  // The grid is tucked away until asked for; the one-line summary is always shown.
+  box.innerHTML = `<p class="facts"></p><details><summary>Last 7 days</summary>
+    <div class="grid" role="img" aria-label="Stock by hour for the last 7 days">${grid}</div></details>`;
   box.querySelector(".facts").textContent = facts;
   return box;
 }
