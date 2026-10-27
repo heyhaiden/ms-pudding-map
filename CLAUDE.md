@@ -10,6 +10,9 @@ mcbroken-style map: is the M&S Banana, Caramel and Pecan Pudding (61273052) in s
   Northern Ireland stores only have the `FOODSCATALOGUE` capability, not `FOOD`.
 - Keep load low: one poll per 30 min. Never present the site as M&S.
 - GitHub Actions (`.github/workflows/poll.yml`) polls and deploys `public/` to Pages. A failed poll doesn't deploy.
+- What starts it: cron-job.org POSTs `workflow_dispatch` every 30 min (fine-grained token, Actions read/write,
+  this repo only; it lives in cron-job.org, renew yearly). GitHub's own `schedule` is only a backup: it never fired
+  on this repo. Stale map? Check cron-job.org's history first, then `gh run list`.
 - If Actions gets blocked: `uv run --with-editable ../jev-ultrafast python -m scripts.poll --local` uses your Chrome.
 - `scripts/history.py` keeps 30 days of readings, one letter per store per 30-min slot, in `public/history.json`.
   On Actions the run fetches the deployed copy (SITE_URL) and adds to it; only a 404 starts afresh.
