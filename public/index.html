@@ -16,6 +16,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#F6C344">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍮</text></svg>">
+<script>try { const t = localStorage.getItem("theme"); if (t) document.documentElement.dataset.theme = t; } catch {}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=DM+Sans:opsz,wght@9..40,400;9..40,600;9..40,700&display=swap" rel="stylesheet">
@@ -36,6 +37,12 @@
       --stroke: #F3E6D3;
     }
   }
+  /* Same dark palette when the viewer picks it with the toggle. */
+  :root[data-theme="dark"] {
+    --card: #2B1910; --ink: #F3E6D3; --headline: #F6C344; --chip: rgba(255,255,255,.08);
+    --land: #241812; --water: #3A2233; --page: #241812; --not_sold: #8C7B70; --shadow: 0 4px 0 #000;
+    --stroke: #F3E6D3;
+  }
   * { box-sizing: border-box; }
   html, body { margin: 0; height: 100%; background: var(--page); color: var(--ink);
     font: 15px/1.45 "DM Sans", system-ui, -apple-system, sans-serif; -webkit-font-smoothing: antialiased; }
@@ -53,6 +60,7 @@
   @keyframes live { 0% { box-shadow: 0 0 0 0 rgba(210,58,78,.7); } 100% { box-shadow: 0 0 0 9px rgba(210,58,78,0); } }
   h1 { margin: 2px 0 0; font: 400 34px/0.95 "Bagel Fat One", "DM Sans", sans-serif; color: var(--headline);
     letter-spacing: .01em; }
+  h1 a { color: inherit; text-decoration: underline; text-decoration-thickness: 3px; text-underline-offset: 4px; }
   .answer { margin: 10px 0 2px; font: 400 52px/1 "Bagel Fat One", "DM Sans", sans-serif; color: var(--ink); }
   .headline { margin: 0 0 14px; font-size: 15px; }
   .headline b { font-weight: 700; }
@@ -113,6 +121,10 @@
   .trend p { margin: 4px 0 0; font-size: 12px; opacity: .85; }
 
   .more { overflow: hidden; }
+  .mode { position: fixed; top: max(16px, env(safe-area-inset-top)); right: 16px; z-index: 2; width: 48px; height: 48px;
+    padding: 11px; border: 3px solid var(--chocolate); border-radius: 50%; background: var(--card); color: var(--ink);
+    box-shadow: 0 3px 0 var(--chocolate); cursor: pointer; }
+  .mode svg { width: 20px; height: 20px; display: block; }
   .fold { display: none; position: absolute; top: 6px; right: 6px; width: 44px; height: 44px; padding: 10px;
     border: 0; border-radius: 50%; background: transparent; color: var(--ink); cursor: pointer; z-index: 1; }
   .fold svg { width: 24px; height: 24px; display: block; transition: transform .25s; }
@@ -120,6 +132,9 @@
   .card.folded .more { display: none; }
   @media (max-width: 720px) {
     .fold { display: block; }
+    /* Phones: the card spans the top, so the toggle sits inside it, left of the minimise button. */
+    .mode { position: absolute; top: 6px; right: 50px; width: 44px; height: 44px; padding: 12px; border: 0;
+      background: transparent; box-shadow: none; }
     .card.folded h1 { font-size: 22px; }
     .card.folded .answer { font-size: 30px; margin: 4px 0 0; }
   }
@@ -139,11 +154,13 @@
 <body>
 <div id="map" role="region" aria-label="Map of M&S stores around London and pudding stock"></div>
 <main class="card" aria-live="polite">
+  <button class="mode" id="mode" type="button"></button>
   <button class="fold" id="fold" type="button" aria-expanded="true" aria-controls="more" aria-label="Minimise">
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 15l6-6 6 6" fill="none" stroke="currentColor"
       stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
   <p class="eyebrow"><span class="live" aria-hidden="true"></span>Live</p>
-  <h1>Is the Pudding In?</h1>
+  <h1>Is <a id="product" href="https://www.marksandspencer.com/food/banana-caramel-and-pecan-pudding/p/fdp61273052"
+    target="_blank" rel="noopener">the Pudding</a> In?</h1>
   <p class="answer" id="answer">…</p>
   <div class="more" id="more">
   <p class="headline" id="headline">Checking every M&S…</p>
@@ -153,8 +170,7 @@
   </div>
   <ul class="legend" id="legend" aria-label="Show or hide stores by stock"></ul>
   <div class="trend" id="trend" hidden></div>
-  <p class="meta"><span id="updated"></span> · Unofficial fan map, not affiliated with M&S ·
-    <a id="product" href="#" target="_blank" rel="noopener">The pudding</a></p>
+  <p class="meta"><span id="updated"></span> · Unofficial fan map, not affiliated with M&S</p>
   </div>
 </main>
 <div class="toast" id="toast" role="status"></div>
@@ -232,8 +248,11 @@ function addLayers(geojson) {
   map.addLayer({ id: "stores", type: "circle", source: "stores", filter: ["!=", ["get", "status"], "not_sold"], paint: {
     "circle-color": colour, "circle-stroke-color": css("stroke"), "circle-stroke-width": 2,
     "circle-radius": ["interpolate", ["linear"], ["zoom"], 8,
-      ["match", ["get", "status"], "in", 8, "low", 7, 5.5], 13, ["match", ["get", "status"], "in", 14, "low", 12, 9]],
-    "circle-sort-key": ["match", ["get", "status"], "in", 4, "low", 3, "out", 2, 1] } });
+      ["match", ["get", "status"], "in", 8, "low", 7, 5.5], 13, ["match", ["get", "status"], "in", 14, "low", 12, 9]] },
+    layout: { "circle-sort-key": ["match", ["get", "status"], "in", 4, "low", 3, "out", 2, 1] } });
+  // Layer events and the pulse outlive a style swap (light/dark), so wire them once.
+  if (addLayers.wired) return;
+  addLayers.wired = true;
   for (const layer of ["stores", "not_sold"]) {
     map.on("click", layer, (e) => openStore(e.features[0].properties, e.features[0].geometry.coordinates));
     map.on("mouseenter", layer, () => map.getCanvas().style.cursor = "pointer");
@@ -243,10 +262,11 @@ function addLayers(geojson) {
 }
 
 function pulse() {
+  requestAnimationFrame(pulse);
+  if (!map.getLayer("glow")) return;
   const t = (performance.now() % 1800) / 1800;
   map.setPaintProperty("glow", "circle-opacity", 0.35 * (1 - t));
   map.setPaintProperty("glow", "circle-radius", ["interpolate", ["linear"], ["zoom"], 8, 8 + 12 * t, 13, 14 + 20 * t]);
-  requestAnimationFrame(pulse);
 }
 
 let popup;
@@ -282,7 +302,7 @@ function openStore(s, coordinates, extra = "") {
 }
 
 function filter() {
-  if (!mapReady) return;
+  if (!mapReady || !map.getLayer("stores")) return;
   const visible = ["in", ["get", "status"], ["literal", [...shown]]];
   map.setFilter("stores", ["all", ["!=", ["get", "status"], "not_sold"], visible]);
   map.setFilter("glow", ["all", ["==", ["get", "status"], "in"], visible]);
@@ -496,7 +516,26 @@ function theme() {
 }
 
 mapboxgl.accessToken = MAPBOX_TOKEN;
-const dark = matchMedia("(prefers-color-scheme: dark)").matches;
+// Light/dark: the viewer's pick (saved), else their system setting. The map swaps between Mapbox's two base styles.
+const STYLE = { light: "mapbox://styles/mapbox/light-v11", dark: "mapbox://styles/mapbox/dark-v11" };
+const ICON = { light: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z" fill="currentColor"/></svg>`, dark: `<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.5" fill="currentColor"/><g stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></g></svg>` };
+const mode = () => document.documentElement.dataset.theme || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+function showMode() {
+  const m = mode();
+  $("mode").innerHTML = ICON[m];
+  $("mode").setAttribute("aria-label", m === "dark" ? "Switch to light mode" : "Switch to dark mode");
+}
+showMode();
+$("mode").addEventListener("click", () => {
+  const next = mode() === "dark" ? "light" : "dark";
+  document.documentElement.dataset.theme = next;
+  try { localStorage.setItem("theme", next); } catch {}
+  showMode();
+  if (!mapReady) return;
+  map.setStyle(STYLE[next]);
+  // Base styles drop our layers; recolour and re-add them once the new style is in.
+  map.once("style.load", () => { theme(); if (data) render(); });
+});
 // Where the push-in lands: Hounslow to Welling, East Finchley to Streatham, Westminster in the middle.
 const CENTRAL = [[-0.4, 51.425], [0.12, 51.595]];
 // Keep London clear of the card: beside it on wide screens, below it on phones.
@@ -505,7 +544,7 @@ const padding = () => innerWidth > 720
   ? { top: 20, bottom: 20, left: card.offsetWidth + 40, right: 20 }
   : { top: card.offsetHeight + 24, bottom: 20, left: 10, right: 10 };
 const map = new mapboxgl.Map({
-  container: "map", style: dark ? "mapbox://styles/mapbox/dark-v11" : "mapbox://styles/mapbox/light-v11",
+  container: "map", style: STYLE[mode()],
   bounds: CENTRAL, attributionControl: false,
 });
 // No zoom buttons: pinch, scroll and double-tap still zoom. Map credits (required by Mapbox) sit behind the ⓘ icon.
