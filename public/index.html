@@ -112,6 +112,19 @@
   .trend svg { display: block; width: 100%; height: 34px; overflow: visible; }
   .trend p { margin: 4px 0 0; font-size: 12px; opacity: .85; }
 
+  .credits { margin: 4px 0 0; font-size: 11px; opacity: .7; }
+  .credits a { color: inherit; margin-right: 6px; }
+  .more { overflow: hidden; }
+  .fold { display: none; position: absolute; top: 6px; right: 6px; width: 44px; height: 44px; padding: 10px;
+    border: 0; border-radius: 50%; background: transparent; color: var(--ink); cursor: pointer; z-index: 1; }
+  .fold svg { width: 24px; height: 24px; display: block; transition: transform .25s; }
+  .card.folded .fold svg { transform: rotate(180deg); }
+  .card.folded .more { display: none; }
+  @media (max-width: 720px) {
+    .fold { display: block; }
+    .card.folded h1 { font-size: 22px; }
+    .card.folded .answer { font-size: 30px; margin: 4px 0 0; }
+  }
   @media (max-width: 520px) {
     .card { padding: 14px 16px 12px; border-radius: 18px; }
     h1 { font-size: 26px; }
@@ -122,15 +135,19 @@
     .legend button { min-height: 28px; padding: 0 9px; font-size: 12px; }
     .meta { margin-top: 8px; font-size: 11px; }
   }
-  @media (prefers-reduced-motion: reduce) { .btn, .toast, .week summary::before { transition: none; } .live { animation: none; } }
+  @media (prefers-reduced-motion: reduce) { .btn, .toast, .week summary::before, .fold svg { transition: none; } .live { animation: none; } }
 </style>
 </head>
 <body>
 <div id="map" role="region" aria-label="Map of M&S stores around London and pudding stock"></div>
 <main class="card" aria-live="polite">
+  <button class="fold" id="fold" type="button" aria-expanded="true" aria-controls="more" aria-label="Minimise">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 15l6-6 6 6" fill="none" stroke="currentColor"
+      stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
   <p class="eyebrow"><span class="live" aria-hidden="true"></span>Live</p>
   <h1>Is the Pudding In?</h1>
   <p class="answer" id="answer">…</p>
+  <div class="more" id="more">
   <p class="headline" id="headline">Checking every M&S…</p>
   <div class="actions">
     <button class="btn primary" id="nearest" type="button"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M15.8 8.2 13.6 13.6 8.2 15.8 10.4 10.4Z" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg> Nearest pudding</button>
@@ -140,6 +157,11 @@
   <div class="trend" id="trend" hidden></div>
   <p class="meta"><span id="updated"></span> · Unofficial fan map, not affiliated with M&S ·
     <a id="product" href="#" target="_blank" rel="noopener">The pudding</a></p>
+  </div>
+  <!-- Map credits stay visible even when the card is minimised (Mapbox requires them). -->
+  <p class="credits"><a href="https://www.mapbox.com/about/maps/" target="_blank" rel="noopener">© Mapbox</a>
+    <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap</a>
+    <a href="https://apps.mapbox.com/feedback/" target="_blank" rel="noopener">Improve this map</a></p>
 </main>
 <div class="toast" id="toast" role="status"></div>
 <script src="config.js"></script>
@@ -321,6 +343,26 @@ $("share").addEventListener("click", async () => {
   }
 });
 
+// Phones: fold the card down to the verdict so more map shows. Remembered per viewer.
+function fold(folded, animate = true) {
+  const cardEl = document.querySelector(".card"), more = $("more"), button = $("fold");
+  button.setAttribute("aria-expanded", String(!folded));
+  button.setAttribute("aria-label", folded ? "Expand" : "Minimise");
+  try { localStorage.setItem("card-folded", folded ? "1" : ""); } catch {}
+  if (!animate || reducedMotion) return cardEl.classList.toggle("folded", folded);
+  const full = more.scrollHeight + "px";
+  if (folded) {
+    more.animate({ height: [full, "0px"], opacity: [1, 0] }, { duration: 260, easing: "cubic-bezier(.2,.8,.2,1)" })
+      .onfinish = () => cardEl.classList.add("folded");
+  } else {
+    cardEl.classList.remove("folded");
+    more.animate({ height: ["0px", more.scrollHeight + "px"], opacity: [0, 1] },
+      { duration: 300, easing: "cubic-bezier(.2,.8,.2,1)" });
+  }
+}
+$("fold").addEventListener("click", () => fold(!document.querySelector(".card").classList.contains("folded")));
+try { if (innerWidth <= 720 && localStorage.getItem("card-folded")) fold(true, false); } catch {}
+
 $("legend").addEventListener("click", (e) => {
   const button = e.target.closest("button");
   if (!button) return;
@@ -472,8 +514,7 @@ const map = new mapboxgl.Map({
   container: "map", style: dark ? "mapbox://styles/mapbox/dark-v11" : "mapbox://styles/mapbox/light-v11",
   bounds: CENTRAL, attributionControl: false,
 });
-map.addControl(new mapboxgl.AttributionControl({ compact: true }), "bottom-left");
-map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), "bottom-right");
+// No on-map buttons: pinch, scroll and double-tap still zoom. Map credits live in the card footer instead.
 // The card shows stock even if the map fails; dots are added once the map is ready.
 map.on("load", () => {
   theme();
