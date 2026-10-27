@@ -3,8 +3,9 @@
 name: Poll stock
 
 on:
+  # GitHub's scheduler is best-effort and drops runs at busy times; :00 and :30 are the busiest slots.
   schedule:
-    - cron: "*/30 * * * *"
+    - cron: "13,43 * * * *"
   workflow_dispatch:
   push:
     branches: [main]
