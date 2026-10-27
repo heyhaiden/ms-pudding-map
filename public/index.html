@@ -92,6 +92,19 @@
   .pill.not_sold, .pill.unknown { background: var(--cream) !important; color: var(--chocolate); }
   .pop p { margin: 6px 0 0; font-size: 13px; }
   .pop a { color: var(--magenta); font-weight: 700; }
+  /* History: 7 days (rows) by 24 hours (columns), like a status page. */
+  .week { margin: 10px 0 0; }
+  .week h3 { margin: 0 0 5px; font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+    opacity: .7; }
+  .grid { display: grid; grid-template-columns: 26px repeat(24, 7px); gap: 1.5px; align-items: center; }
+  .grid .day { font-size: 10px; font-weight: 600; opacity: .7; }
+  .grid .c { height: 9px; border-radius: 2px; background: #EDE3D6; }
+  .grid .c.I { background: var(--in); } .grid .c.L { background: var(--low); } .grid .c.O { background: var(--out); }
+  .grid .hours { grid-column: 2 / -1; display: flex; justify-content: space-between; font-size: 9px; opacity: .6; }
+  .week .facts { margin: 6px 0 0; font-size: 12px; }
+  .trend { margin: 12px 0 0; }
+  .trend svg { display: block; width: 100%; height: 34px; overflow: visible; }
+  .trend p { margin: 4px 0 0; font-size: 12px; opacity: .85; }
 
   @media (max-width: 520px) {
     .card { padding: 14px 16px 12px; border-radius: 18px; }
@@ -118,6 +131,7 @@
     <button class="btn secondary" id="share" type="button">Share</button>
   </div>
   <ul class="legend" id="legend" aria-label="Show or hide stores by stock"></ul>
+  <div class="trend" id="trend" hidden></div>
   <p class="meta"><span id="updated"></span> · Unofficial fan map, not affiliated with M&S ·
     <a id="product" href="#" target="_blank" rel="noopener">The pudding</a></p>
 </main>
@@ -232,9 +246,17 @@ function openStore(s, coordinates, extra = "") {
   link.rel = "noopener";
   link.textContent = "Directions →";
   directions.append(link);
-  box.append(name, pill, quip, directions);
+  box.append(name, pill, quip, week(s), directions);
   popup?.remove();
-  popup = new mapboxgl.Popup({ offset: 24, maxWidth: "260px" }).setLngLat(coordinates).setDOMContent(box).addTo(map);
+  // Phones: the card covers the top, so slide the store just below it and open the popup underneath the dot.
+  const phone = innerWidth <= 720;
+  if (phone) {
+    const top = card.getBoundingClientRect().bottom;
+    map.easeTo({ center: coordinates, padding: { top, bottom: Math.max(0, innerHeight - top - 80), left: 0, right: 0 },
+      duration: reducedMotion ? 0 : 400 });
+  }
+  popup = new mapboxgl.Popup({ offset: 24, maxWidth: "280px", anchor: phone ? "top" : undefined })
+    .setLngLat(coordinates).setDOMContent(box).addTo(map);
 }
 
 function filter() {
@@ -302,10 +324,98 @@ $("legend").addEventListener("click", (e) => {
   filter();
 });
 
+// ----- History: one letter per store per 30-minute slot (scripts/history.py) -----
+let history;
+const SLOT_MS = 30 * 60 * 1000, WEEK = 7 * 48;
+const RANK = { I: 4, L: 3, O: 2, U: 1, N: 1, "-": 0 };
+const londonParts = new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/London", weekday: "short", year: "numeric",
+  month: "2-digit", day: "2-digit", hour: "numeric", hourCycle: "h23" });
+function london(date) {
+  const p = Object.fromEntries(londonParts.formatToParts(date).map((x) => [x.type, x.value]));
+  return { key: `${p.year}-${p.month}-${p.day}`, day: p.weekday, hour: +p.hour };
+}
+const slotDate = (i) => new Date(+new Date(history.start) + i * SLOT_MS);
+const has = (code) => code === "I" || code === "L";
+
+function when(date) {
+  const t = london(date), today = london(new Date()).key;
+  const h = t.hour % 12 || 12, ampm = t.hour < 12 ? "am" : "pm";
+  return (t.key === today ? "today" : t.day) + " " + h + ampm;
+}
+
+// The last 7 days for one store: a 7x24 grid of the best reading each hour, plus a few facts.
+function week(s) {
+  const line = history?.stores?.[s.id];
+  const box = document.createElement("div");
+  box.className = "week";
+  if (!line || s.status === "not_sold") return box;
+  const first = Math.max(0, line.length - WEEK);
+  const cells = new Map();
+  let known = 0, yes = 0, last = -1;
+  for (let i = first; i < line.length; i++) {
+    const code = line[i], t = london(slotDate(i)), key = t.key + "|" + t.hour;
+    if (RANK[code] > (RANK[cells.get(key)] ?? -1)) cells.set(key, code);
+    if (code !== "-" && code !== "N") known++;
+    if (has(code)) { yes++; last = i; }
+  }
+  for (let i = first - 1; i >= 0 && last < 0; i--) if (has(line[i])) last = i;
+  const days = [];
+  for (let d = 6; d >= 0; d--) days.push(london(new Date(Date.now() - d * 864e5)));
+  const grid = days.map((d) => `<span class="day">${d.day}</span>` + Array.from({ length: 24 }, (_, h) => {
+    const code = cells.get(d.key + "|" + h) || "";
+    return `<span class="c ${code}"></span>`;
+  }).join("")).join("") + `<span class="hours"><span>0</span><span>6</span><span>12</span><span>18</span><span>24</span></span>`;
+  const since = when(new Date(history.start));
+  const facts = known < 48
+    ? `Tracking since ${since}. This fills in over the week.`
+    : `Had it ${Math.round(100 * yes / known)}% of the time this week.` +
+      (last >= 0 ? ` Last seen ${when(slotDate(last))}.` : " Not seen this week.");
+  box.innerHTML = `<h3>Last 7 days</h3><div class="grid" role="img" aria-label="Stock by hour for the last 7 days">${grid}</div>
+    <p class="facts"></p>`;
+  box.querySelector(".facts").textContent = facts;
+  return box;
+}
+
+// Card: how many stores had it at each reading this week, and the best hour to look once there's enough data.
+function trend() {
+  const el = $("trend");
+  const lines = Object.values(history?.stores || {});
+  const length = lines[0]?.length || 0;
+  const first = Math.max(0, length - WEEK);
+  if (length - first < 6) return (el.hidden = true);
+  const counts = [];
+  for (let i = first; i < length; i++) {
+    const n = lines.reduce((sum, line) => sum + has(line[i]), 0);
+    counts.push(lines.some((line) => line[i] !== "-") ? n : null);
+  }
+  const max = Math.max(1, ...counts.filter((n) => n !== null));
+  const points = counts.map((n, i) => n === null ? null :
+    `${(100 * i / Math.max(1, counts.length - 1)).toFixed(2)},${(34 - 30 * n / max).toFixed(1)}`).filter(Boolean);
+  const byHour = Array.from({ length: 24 }, () => [0, 0]);
+  counts.forEach((n, i) => { if (n !== null) { const h = london(slotDate(first + i)).hour; byHour[h][0] += n; byHour[h][1]++; } });
+  const days = (length - first) / 48;
+  let best = "";
+  if (days >= 3) {
+    const hour = byHour.map(([sum, k], h) => [k ? sum / k : -1, h]).sort((a, b) => b[0] - a[0])[0][1];
+    best = ` Best time to look: around ${hour % 12 || 12}${hour < 12 ? "am" : "pm"}.`;
+  }
+  el.innerHTML = `<svg viewBox="0 0 100 34" preserveAspectRatio="none" aria-hidden="true">
+    <polyline points="${points.join(" ")}" fill="none" stroke="var(--magenta)" stroke-width="2.5"
+      vector-effect="non-scaling-stroke" stroke-linejoin="round" stroke-linecap="round"/></svg>
+    <p>Stores with it, ${days >= 7 ? "last 7 days" : "since tracking began"}.${best}</p>`;
+  el.hidden = false;
+}
+
 async function load() {
   try {
-    data = await (await fetch("stock.json?t=" + Date.now())).json();
+    const [stock, past] = await Promise.all([
+      fetch("stock.json?t=" + Date.now()).then((r) => r.json()),
+      fetch("history.json?t=" + Date.now()).then((r) => (r.ok ? r.json() : null)).catch(() => null),
+    ]);
+    data = stock;
+    history = past;
     render();
+    trend();
   } catch (error) {
     $("headline").textContent = "Couldn't load stock. Trying again shortly.";
   }
