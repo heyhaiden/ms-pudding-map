@@ -1,0 +1,52 @@
+# Every 30 min: read M&S stock and deploy the map to GitHub Pages.
+# If the poll fails the job stops before deploying, so the site keeps the last good stock.json.
+name: Poll stock
+
+on:
+  schedule:
+    - cron: "*/30 * * * *"
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: poll
+  cancel-in-progress: false
+
+jobs:
+  poll:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - run: uv sync --frozen
+      - run: uv run ruff check . && uv run pytest -q
+      - run: uv run playwright install --with-deps chromium
+      - run: uv run python -m scripts.poll
+        env:
+          MAPBOX_TOKEN: ${{ secrets.MAPBOX_TOKEN }}
+      # The store list refreshes weekly; keep it so the next run doesn't re-fetch it.
+      - name: Save store list
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/stores.json
+          git diff --cached --quiet || (git commit -m "Refresh M&S store list" && git push)
+      - id: pages
+        uses: actions/configure-pages@v5
+      # Link previews need an absolute image URL.
+      - run: sed -i 's|content="og.png"|content="${{ steps.pages.outputs.base_url }}/og.png"|' public/index.html
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: public
+      - id: deploy
+        uses: actions/deploy-pages@v4
