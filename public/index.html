@@ -246,6 +246,9 @@ window.track = (() => {
   .chooser-head { display: grid; gap: 10px; max-width: 594px; margin: 0 auto; padding: 0 21px; text-align: center; }
   .chooser-head p, .chooser-head h2 { margin: 0; }
   .chooser-eyebrow { font-size: 11px; font-weight: 700; color: #B62689; }
+  .chooser-eyebrow .tracker { display: inline-block; width: 7px; height: 7px; margin-right: 7px; border-radius: 50%;
+    background: currentColor; vertical-align: 1px; animation: tracker 1.8s ease-out infinite; }
+  @keyframes tracker { 0% { box-shadow: 0 0 0 0 rgba(182, 38, 137, .45); } 100% { box-shadow: 0 0 0 7px rgba(182, 38, 137, 0); } }
   .chooser-head h2 { font-size: 35px; font-weight: 700; line-height: 1.2; }
   .chooser-sub { font-size: 16px; }
   .chooser-head h2, .chooser-sub { text-wrap: balance; }
@@ -309,7 +312,7 @@ window.track = (() => {
   }
   @media (prefers-reduced-motion: reduce) {
     .btn, .toast, .week summary::before, .fold svg, .card, h1, .btn.primary { transition: none; }
-    .live, .menu, .chooser-card, .chooser-panel { animation: none; }
+    .live, .menu, .chooser-card, .chooser-panel, .tracker { animation: none; }
     .chooser-card, .card, .team { transition: none; }
   }
 </style>
@@ -354,7 +357,7 @@ window.track = (() => {
 <section class="chooser" id="chooser" role="dialog" aria-modal="true" aria-labelledby="chooser-title" hidden>
   <div class="chooser-panel">
     <div class="chooser-head">
-      <p class="chooser-eyebrow"><span aria-hidden="true">●</span> LIVE PUDDING TRACKER</p>
+      <p class="chooser-eyebrow"><span class="tracker" aria-hidden="true"></span>LIVE PUDDING TRACKER</p>
       <h2 id="chooser-title">Choose your pudding 🍮</h2>
       <p class="chooser-sub">Pick a flavour and see which stores near you have it.</p>
     </div>
