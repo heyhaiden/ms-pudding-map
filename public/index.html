@@ -130,7 +130,8 @@ window.track = (() => {
   .legend button { display: flex; align-items: center; gap: 7px; min-height: 32px; padding: 0 11px;
     border: 2px solid transparent; border-radius: 999px; background: var(--chip); color: var(--ink);
     font: 600 13px "DM Sans", sans-serif; cursor: pointer; }
-  .legend button[aria-pressed="false"] { opacity: .45; text-decoration: line-through; }
+  .legend button[aria-pressed="true"] { border-color: currentColor; }
+  .legend button.off { opacity: .45; }
   .legend .n { font-variant-numeric: tabular-nums; opacity: .7; }
   .dot { width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--chocolate); flex: none; }
   .dot.ring { background: transparent !important; border-color: var(--not_sold); }
@@ -287,7 +288,10 @@ const QUIP = {
 };
 const css = (name) => getComputedStyle(document.documentElement).getPropertyValue("--" + name).trim();
 // "unknown" (M&S gave no reading) is never shown: not on the map, in the legend, or in the totals.
-const shown = new Set(STATUSES.map(([k]) => k).filter((k) => k !== "unknown"));
+const VISIBLE = STATUSES.map(([k]) => k).filter((k) => k !== "unknown");
+// Legend chips filter "only these": nothing picked shows every status; picking chips adds to what's shown.
+const picked = new Set();
+const shown = () => (picked.size ? [...picked] : VISIBLE);
 const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
 let data, mapReady = false;
 
@@ -337,7 +341,8 @@ function render() {
   updated.textContent = "Updated " + ago(data.updated);
   updated.className = Date.now() - new Date(data.updated) > 2 * 3600e3 ? "stale" : "";
   $("legend").innerHTML = STATUSES.filter(([k]) => k !== "unknown").map(([key, label]) =>
-    `<li><button type="button" data-status="${key}" aria-pressed="${shown.has(key)}">
+    `<li><button type="button" data-status="${key}" aria-pressed="${!picked.size || picked.has(key)}"
+       class="${picked.size && !picked.has(key) ? "off" : ""}">
        <span class="dot${key === "not_sold" ? " ring" : ""}" style="background:var(--${key})"></span>
        ${label} <span class="n">${c[key]}</span></button></li>`).join("");
   if (!mapReady) return;
@@ -420,7 +425,7 @@ function openStore(s, coordinates, extra = "") {
 
 function filter() {
   if (!mapReady || !map.getLayer("stores")) return;
-  const visible = ["in", ["get", "status"], ["literal", [...shown]]];
+  const visible = ["in", ["get", "status"], ["literal", shown()]];
   map.setFilter("stores", ["all", ["!=", ["get", "status"], "not_sold"], visible]);
   map.setFilter("glow", ["all", ["==", ["get", "status"], "in"], visible]);
   map.setFilter("not_sold", ["all", ["==", ["get", "status"], "not_sold"], visible]);
@@ -516,9 +521,13 @@ $("legend").addEventListener("click", (e) => {
   const button = e.target.closest("button");
   if (!button) return;
   const key = button.dataset.status;
-  shown.has(key) ? shown.delete(key) : shown.add(key);
-  track("filter_toggled", { status: key, shown: shown.has(key) });
-  button.setAttribute("aria-pressed", shown.has(key));
+  picked.has(key) ? picked.delete(key) : picked.add(key);
+  track("filter_toggled", { status: key, picked: picked.has(key), showing: shown().join(",") });
+  for (const b of $("legend").querySelectorAll("button")) {
+    // Nothing picked means everything is on.
+    b.setAttribute("aria-pressed", !picked.size || picked.has(b.dataset.status));
+    b.classList.toggle("off", picked.size > 0 && !picked.has(b.dataset.status));
+  }
   filter();
 });
 
