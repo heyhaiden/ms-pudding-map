@@ -65,8 +65,8 @@ window.track = (() => {
   button, a { -webkit-tap-highlight-color: transparent; }
   :focus-visible { outline: 3px solid var(--magenta); outline-offset: 2px; }
   /* Flavour skins: --card, --headline, --ink, --accent, --on-accent and --water are set from data/products.json. */
-  /* The chooser morphs into the card's exact spot, then the card swaps in underneath with a quick fade. */
-  .card { transition: background-color .35s, color .35s, opacity .16s ease-out; }
+  /* The chooser morphs into the card's exact spot; the card then swaps in at once and only its text fades in. */
+  .card { transition: background-color .35s, color .35s; }
   h1, .btn.primary { transition: color .35s, background-color .35s; }
   .title { position: relative; }
   .pick { padding: 0; border: 0; background: none; color: inherit; font: inherit; cursor: pointer; text-align: left;
@@ -864,20 +864,19 @@ function showChooser() {
   track("chooser_shown");
 }
 // Hand-off: the panel morphs into the stock card, ending on its exact position, size, corners, border, shadow and
-// colour, as its contents fade and the blur clears. Then the real card swaps in, the map pushes in to London, and
-// phones tuck the card away.
+// colour, as its contents fade and the blur clears. Then the real card swaps in and phones tuck it away.
 let closing = false;
 function closeChooser() {
   if (closing || $("chooser").hidden) return;
   closing = true;
   const chooser = $("chooser"), panel = chooser.querySelector(".chooser-panel");
-  const done = () => {
+  const done = (settled) => {
     chooser.hidden = true;
     for (const a of [...panel.getAnimations({ subtree: true }), ...chooser.getAnimations()]) a.cancel();
     panel.removeAttribute("style");
     closing = false;
-    pushIn();
-    tuck();
+    if (settled) settled.then(tuck);
+    else tuck();
   };
   if (reducedMotion) {
     document.body.classList.remove("choosing");
@@ -899,9 +898,14 @@ function closeChooser() {
     { ...box(to), borderRadius: look.borderRadius, borderWidth: look.borderTopWidth, borderColor: look.borderTopColor,
       backgroundColor: look.backgroundColor, boxShadow: look.boxShadow },
   ], timing).onfinish = () => {
-    // Lined up: show the real card and let the stand-in fade off it.
+    // Lined up: the real card takes over in the same frame (same shape and colour, so no flash), and only its
+    // text fades in, line by line.
     document.body.classList.remove("choosing");
-    panel.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 160, fill: "forwards" }).onfinish = done;
+    const lines = [...card.children].filter((el) => getComputedStyle(el).display !== "none" && !el.matches(".team"));
+    const fades = lines.map((el, i) => el.animate(
+      [{ opacity: 0, transform: "translateY(6px)" }, { opacity: 1, transform: "none" }],
+      { duration: 320, delay: 40 * i, easing: "cubic-bezier(.2, .8, .2, 1)", fill: "backwards" }).finished);
+    done(Promise.all(fades));
   };
 }
 // A tap anywhere on a card picks it: a quick squeeze, then the hand-off to its map.
@@ -947,7 +951,7 @@ function theme() {
 }
 
 mapboxgl.accessToken = MAPBOX_TOKEN;
-// Where the push-in lands: Hounslow to Welling, East Finchley to Streatham, Westminster in the middle.
+// The opening view: Hounslow to Welling, East Finchley to Streatham, Westminster in the middle.
 const CENTRAL = [[-0.4, 51.425], [0.12, 51.595]];
 // Keep London clear of the card: beside it on wide screens, below it on phones.
 const card = document.querySelector(".card");
@@ -966,19 +970,8 @@ map.on("load", () => {
   mapReady = true;
   if (data) render();
   // Wide screens centre on the whole window with the card floating over the west; phones keep London below the card.
-  pushTarget = map.cameraForBounds(CENTRAL, { padding: innerWidth > 720 ? 0 : padding() });
-  if (reducedMotion) return map.jumpTo(pushTarget);
-  // Start slightly zoomed out; the push-in waits while the chooser is up.
-  map.jumpTo({ ...pushTarget, zoom: pushTarget.zoom - 0.8 });
-  if (!document.body.classList.contains("choosing")) pushIn();
+  map.jumpTo(map.cameraForBounds(CENTRAL, { padding: innerWidth > 720 ? 0 : padding() }));
 });
-// A gentle push-in to London, once: straight in without the fly-to arc.
-let pushTarget;
-function pushIn() {
-  if (!pushTarget || reducedMotion) return;
-  map.easeTo({ ...pushTarget, duration: 1800, easing: (t) => 1 - Math.pow(1 - t, 3) });
-  pushTarget = null;
-}
 load();
 setInterval(load, 5 * 60 * 1000);
 setInterval(() => data && render(), 60 * 1000);
