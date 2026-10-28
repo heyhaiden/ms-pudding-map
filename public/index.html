@@ -584,8 +584,9 @@ function openStore(s, coordinates, extra = "", frame) {
   box.append(name, pill, quip, ...(history.childElementCount ? [history] : []), directions);
   popup?.remove();
   // Phones: the card covers the top, so slide the store just below it and open the popup underneath the dot.
+  // frame === false: the caller already aimed the camera (nearest pudding frames two dots).
   const phone = innerWidth <= 720;
-  if (phone) snapView(frame || [coordinates]);
+  if (frame !== false && phone) snapView(frame || [coordinates]);
   select(s.id);
   // Anchor stays put for the life of the card. Leaving it unset makes Mapbox swap the
   // card above and below the dot whenever a zoom changes which side has room.
@@ -597,8 +598,34 @@ function openStore(s, coordinates, extra = "", frame) {
   const opened = popup;
   opened.on("close", () => { if (popup === opened) select(null); });
   // A GIF makes the card taller; once it (and the phone pan) has settled, keep the card on screen.
+  // Not after a two-dot frame: that pan would shove you or the store back off screen.
+  if (frame === false) return;
   gif?.addEventListener("load", keepPopupInView);
   setTimeout(keepPopupInView, phone && !reducedMotion ? 450 : 0);
+}
+
+// You and the nearest store in one view. Phones keep both dots, and the store card, below the
+// stock card. Desktop keeps them to the right of it, so the card in the upper left isn't on top.
+function frameNearest(points) {
+  const phone = innerWidth <= 720;
+  const edge = card.getBoundingClientRect();
+  // Tuck hides the detail immediately in spirit; the fold animation hasn't caught up yet.
+  const tucking = phone && card.classList.contains("compact") && !card.classList.contains("folded");
+  const top = (tucking ? edge.bottom - $("more").offsetHeight : edge.bottom) + 16;
+  // Half the store card, so it isn't cut off when its dot sits on the edge of the frame.
+  const side = 150;
+  const padding = phone
+    ? { top, bottom: 360, left: side, right: side }
+    : { top: 32, bottom: 48, left: edge.right + side, right: side };
+  const spare = 72;
+  padding.top = Math.max(16, Math.min(padding.top, innerHeight - spare - 80));
+  if (padding.top + padding.bottom > innerHeight - spare)
+    padding.bottom = Math.max(120, innerHeight - spare - padding.top);
+  if (padding.left + padding.right > innerWidth - spare)
+    padding.left = Math.max(24, innerWidth - spare - padding.right);
+  const duration = reducedMotion ? 0 : 900;
+  if (points.length > 1) map.fitBounds(points, { padding, maxZoom: 15, duration });
+  else map.easeTo({ center: points[0], padding, duration });
 }
 
 function keepPopupInView() {
@@ -643,21 +670,23 @@ $("nearest").addEventListener("click", () => {
       .map((s) => ({ s, d: miles(here, [s.lng, s.lat]) })).sort((a, b) => a.d - b.d);
     you?.remove();
     you = new mapboxgl.Marker({ color: css("magenta") }).setLngLat(here).addTo(map);
+    const showYou = (store) => {
+      let shown = false;
+      const show = () => { if (shown) return; shown = true; if (store) openStore(store.s, store.coords, store.away, false); };
+      map.once("moveend", show);
+      frameNearest(store ? [here, store.coords] : [here]);
+      if (!map.isMoving()) show();
+    };
     if (!options.length) {
       track("nearest_result", { found: false });
-      if (innerWidth <= 720) snapView([here]);
+      showYou(null);
       return toast("No pudding anywhere nearby right now. 😭");
     }
     const { s, d } = options[0];
     track("nearest_result", { found: true, store: s.name, status: s.status, miles: +d.toFixed(1) });
     const coords = [s.lng, s.lat];
     const away = `${d < 0.1 ? "Right here" : d.toFixed(1) + " mi away"}.`;
-    if (innerWidth <= 720) openStore(s, coords, away, [here, coords]);
-    else {
-      map.fitBounds([here, coords], { padding: { top: 260, bottom: 80, left: 60, right: 60 }, maxZoom: 15,
-        duration: reducedMotion ? 0 : 1200 });
-      openStore(s, coords, away);
-    }
+    showYou({ s, coords, away });
   }, (error) => {
     track("nearest_result", { found: false, location_error: error.code });
     toast("Couldn't get your location.");
