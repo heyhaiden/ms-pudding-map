@@ -192,24 +192,24 @@ window.track = (() => {
   .crew h2 { margin: 2px 0 14px; font: 400 32px/1 "Bagel Fat One", "DM Sans", sans-serif; color: var(--headline); }
   .crew .close { position: absolute; top: 8px; right: 10px; width: 40px; height: 40px; border: 0; background: none;
     color: var(--ink); font-size: 26px; line-height: 1; cursor: pointer; z-index: 1; }
-  .makers { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
-  .makers li { display: grid; grid-template-columns: 56px 1fr; gap: 4px 12px; align-items: center; padding: 12px;
-    border-radius: 16px; background: var(--chip); }
-  .makers .face { grid-row: span 3; width: 56px; height: 56px; display: grid; place-items: center; border-radius: 50%;
-    background: var(--accent); color: var(--on-accent); border: 3px solid var(--chocolate); font-size: 26px; }
+  /* The makers, side by side at the top: a round headshot, name, then their links. */
+  .makers { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 4px 0 18px; padding: 0; list-style: none;
+    text-align: center; }
+  .makers li { display: grid; justify-items: center; gap: 6px; }
+  .makers .face { position: relative; width: 104px; height: 104px; display: grid; place-items: center; overflow: hidden;
+    border-radius: 50%; background: var(--accent); color: var(--on-accent); border: 3px solid var(--chocolate);
+    box-shadow: 0 3px 0 var(--chocolate); font: 400 44px/1 "Bagel Fat One", "DM Sans", sans-serif; }
+  .makers .face img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
   .makers .who { font: 400 20px/1.1 "Bagel Fat One", "DM Sans", sans-serif; }
-  .makers .bio { margin: 0; font-size: 13px; opacity: .85; }
-  .makers .links { display: flex; gap: 6px; }
-  .makers .links a { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%;
-    background: var(--accent); color: var(--on-accent); }
-  .makers .links svg { width: 16px; height: 16px; }
+  .makers .links { display: flex; gap: 8px; }
+  .makers .links a { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%;
+    background: var(--chip); color: var(--ink); }
+  .makers .links svg { width: 17px; height: 17px; }
   .crew .small { margin: 12px 0 0; font-size: 11px; opacity: .7; }
   .story p { margin: 0 0 8px; font-size: 15px; line-height: 1.45; }
   .story b { color: var(--headline); }
   .story .nowrap { white-space: nowrap; }
-  #baked { margin-top: 16px; }
-  #baked .eyebrow { margin-bottom: 8px; }
-  #baked[hidden] { display: none; }
+  .crew .makers ~ .eyebrow { margin-top: 0; }
   .fold { display: none; position: absolute; top: 6px; right: 6px; width: 44px; height: 44px; padding: 10px;
     border: 0; border-radius: 50%; background: transparent; color: var(--ink); cursor: pointer; z-index: 1; }
   .fold svg { width: 24px; height: 24px; display: block; transition: transform .25s; }
@@ -271,6 +271,7 @@ window.track = (() => {
 </main>
 <dialog class="crew" id="crew" aria-labelledby="crew-title">
   <button class="close" id="crew-close" type="button" aria-label="Close">×</button>
+  <ul class="makers" id="makers" aria-label="Made by"></ul>
   <p class="eyebrow">The story</p>
   <h2 id="crew-title">Why does this exist?</h2>
   <div class="story">
@@ -278,10 +279,6 @@ window.track = (() => {
     <p>So we built a map that checks every store near London every 30 minutes, and we finally found one.</p>
     <p>Then it clicked: why stop at pudding? Every viral M&S treat sells out the same way.</p>
     <p>Now we track them all, so you can find yours too. <b>For the people, by the <span class="nowrap">people.</span></b><span class="nowrap"> 🤝</span></p>
-  </div>
-  <div id="baked" hidden>
-    <p class="eyebrow">Baked by</p>
-    <ul class="makers" id="makers"></ul>
   </div>
   <p class="small">An unofficial fan project. Not affiliated with M&S.</p>
 </dialog>
@@ -743,9 +740,13 @@ document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("menu
 
 // ----- Meet the team -----
 // Edit names, bios and links here. Networks with icons: x, instagram, tiktok, linkedin, github, web.
+// photo: a flat illustrated headshot in public/team/ (until it exists, the circle shows their initial).
+// An empty link shows its icon but goes nowhere until the URL is filled in.
 const TEAM = [
-  { name: "Haiden", face: "🍮", bio: "One-line bio goes here.", links: { github: "https://github.com/heyhaiden" } },
-  { name: "Khumbira", face: "🥄", bio: "One-line bio goes here.", links: {} },
+  { name: "Haiden", photo: "team/haiden.png",
+    links: { linkedin: "", github: "https://github.com/heyhaiden" } },
+  { name: "Khumbira", photo: "team/khumbira.png",
+    links: { linkedin: "", web: "" } },
 ];
 const SOCIAL = {
   x: '<path d="M18.9 2H22l-7.6 8.7L23 22h-7l-5.5-7.2L4.2 22H1l8.1-9.3L1 2h7.2l5 6.6zM17.7 20h1.7L7.4 3.9H5.5z" fill="currentColor"/>',
@@ -759,15 +760,22 @@ function showTeam() {
   $("makers").innerHTML = "";
   for (const m of TEAM) {
     const li = document.createElement("li");
-    li.innerHTML = `<span class="face" aria-hidden="true"></span><span class="who"></span><p class="bio"></p><span class="links"></span>`;
-    li.querySelector(".face").textContent = m.face;
+    li.innerHTML = `<span class="face" aria-hidden="true"></span><span class="who"></span><span class="links"></span>`;
+    const face = li.querySelector(".face");
+    face.textContent = m.name[0];
+    const img = new Image();
+    img.alt = "";
+    img.onerror = () => img.remove();
+    img.src = m.photo;
+    face.append(img);
     li.querySelector(".who").textContent = m.name;
-    li.querySelector(".bio").textContent = m.bio;
     for (const [network, url] of Object.entries(m.links)) {
       const a = document.createElement("a");
-      a.href = url;
-      a.target = "_blank";
-      a.rel = "noopener";
+      if (url) {
+        a.href = url;
+        a.target = "_blank";
+        a.rel = "noopener";
+      }
       a.setAttribute("aria-label", `${m.name} on ${network}`);
       a.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true">${SOCIAL[network] || SOCIAL.web}</svg>`;
       a.addEventListener("click", () => track("team_link_clicked", { maker: m.name, network }));
@@ -779,9 +787,6 @@ function showTeam() {
   track("about_opened");
 }
 $("team").addEventListener("click", showTeam);
-// "Baked by" stays hidden on the live site until the bios and links are filled in; dev always shows it.
-const TEAM_READY = false;
-$("baked").hidden = !(TEAM_READY || DEV);
 $("crew-close").addEventListener("click", () => $("crew").close());
 // A click on the dimmed backdrop lands on the dialog element itself.
 $("crew").addEventListener("click", (e) => { if (e.target === $("crew")) $("crew").close(); });
