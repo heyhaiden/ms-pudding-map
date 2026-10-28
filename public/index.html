@@ -999,9 +999,9 @@ function showChooser() {
     $("chooser-cards").append(li);
   }
   $("chooser").hidden = false;
+  // Always open on the first card. The remembered flavour is not a scroll position.
+  $("chooser-cards").scrollLeft = 0;
   dots();
-  // Start the row on the remembered flavour.
-  $("chooser-cards").querySelector('[aria-selected="true"]')?.scrollIntoView({ inline: "start", block: "nearest" });
   track("chooser_shown");
 }
 // Hand-off: the panel morphs into the stock card, ending on its exact position, size, corners, border, shadow and
