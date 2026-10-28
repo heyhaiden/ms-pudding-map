@@ -101,7 +101,6 @@ window.track = (() => {
   /* A tiny tub: the pack's label colour with its lettering colour down both sides. */
   .tub { width: 30px; height: 26px; flex: none; border-radius: 5px 5px 9px 9px; background: var(--c);
     box-shadow: inset 5px 0 0 var(--l), inset -5px 0 0 var(--l), 0 0 0 2px var(--chocolate); }
-  .headline a { color: inherit; font-weight: 700; white-space: nowrap; }
 
   .card { position: absolute; top: max(16px, env(safe-area-inset-top)); left: 16px; width: min(380px, calc(100% - 32px));
     padding: 18px 20px 16px; background: var(--card); color: var(--ink); border: 3px solid var(--chocolate);
@@ -333,9 +332,7 @@ function render() {
   $("pick-name").innerHTML = (words.length ? words.join(" ") + " " : "") +
     `<span class="nowrap">${last}${document.querySelector(".pick .chev").outerHTML.replace(" hidden", "")}</span>`;
   $("answer").textContent = verdict(have, pct);
-  $("headline").innerHTML = `<b>${have}</b> of ${sold} M&S stores that sell it have it right now. ` +
-    `<a id="product" href="${p.url}" target="_blank" rel="noopener">See it on M&S ↗</a>`;
-  $("product").addEventListener("click", () => track("product_link_clicked"));
+  $("headline").innerHTML = `<b>${have}</b> of ${sold} M&S stores that sell it have it right now.`;
   skin(p);
   const updated = $("updated");
   updated.textContent = "Updated " + ago(data.updated);
