@@ -220,7 +220,7 @@ window.track = (() => {
   .chooser-card { flex: none; width: 264px; display: flex; flex-direction: column; gap: 10px; padding: 14px;
     background: #fff; border: 1px solid #E5D8C7; border-radius: 18px; scroll-snap-align: start; cursor: pointer;
     text-align: left; }
-  .chooser-card[aria-selected="true"] { padding: 13px; border: 2px solid #B62689; }
+  /* Outlined on hover only; the remembered pick isn't marked. */
   @media (hover: hover) { .chooser-card:hover { padding: 13px; border: 2px solid #B62689; } }
   /* While choosing, the map's card and ? button stay out of sight (keeping their size for the map's framing). */
   body.choosing .card, body.choosing .team { visibility: hidden; opacity: 0; }
