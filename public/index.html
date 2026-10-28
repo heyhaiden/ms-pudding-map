@@ -293,6 +293,10 @@ window.track = (() => {
     .team { position: fixed; top: auto; right: auto; left: 12px; bottom: calc(40px + env(safe-area-inset-bottom));
       width: 44px; height: 44px; padding: 6px; }
     .title { padding-right: 40px; }
+    .legend { flex-wrap: nowrap; margin: 0 -20px; padding: 0 20px 2px; overflow-x: auto; scrollbar-width: none;
+      -webkit-overflow-scrolling: touch; }
+    .legend::-webkit-scrollbar { display: none; }
+    .legend li { flex: none; }
     .card.folded h1 { font-size: 22px; }
     .card.folded .answer { font-size: 30px; margin: 4px 0 0; }
   }
@@ -307,6 +311,7 @@ window.track = (() => {
     .headline { margin-bottom: 10px; font-size: 14px; }
     .actions { margin-bottom: 10px; }
     .btn { min-height: 40px; font-size: 13px; padding: 0 10px; }
+    .legend { margin: 0 -16px; padding: 0 16px 2px; }
     .legend button { min-height: 28px; padding: 0 9px; font-size: 12px; }
     .meta { margin-top: 8px; font-size: 11px; }
   }
