@@ -66,7 +66,8 @@ window.track = (() => {
   :focus-visible { outline: 3px solid var(--magenta); outline-offset: 2px; }
   /* Flavour skins: --card, --headline, --ink, --accent, --on-accent and --water are set from data/products.json. */
   /* The card arrives a beat after the chooser starts to leave: fade, lift and settle. */
-  .card { transition: background-color .35s, color .35s, opacity .4s .18s, transform .45s .18s cubic-bezier(.2,.8,.2,1); }
+  .card { transition: background-color .35s, color .35s, opacity .5s .22s ease-in-out,
+    transform .55s .22s cubic-bezier(.65, 0, .35, 1); }
   h1, .btn.primary { transition: color .35s, background-color .35s; }
   .title { position: relative; }
   .pick { padding: 0; border: 0; background: none; color: inherit; font: inherit; cursor: pointer; text-align: left;
@@ -206,7 +207,7 @@ window.track = (() => {
   .chooser { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; padding: 16px;
     background: rgba(30, 15, 8, .35); backdrop-filter: blur(4px); }
   .chooser[hidden] { display: none; }
-  .chooser-panel { width: min(936px, 100%); max-height: calc(100dvh - 32px); overflow: hidden auto; padding: 50px 0 41px;
+  .chooser-panel { width: min(936px, 100%); max-height: calc(100dvh - 32px); overflow: hidden auto; padding: 50px 0 21px;
     background: #FFF8EA; border: 1px solid #E5D8C7; border-radius: 30px; color: #3B2016;
     font-family: Inter, "DM Sans", system-ui, sans-serif; animation: pop .25s ease-out; }
   .chooser-head { display: grid; gap: 10px; max-width: 594px; margin: 0 auto; padding: 0 21px; text-align: center; }
@@ -215,7 +216,7 @@ window.track = (() => {
   .chooser-head h2 { font-size: 35px; font-weight: 700; line-height: 1.2; }
   .chooser-sub { font-size: 16px; }
   .chooser-head h2, .chooser-sub { text-wrap: balance; }
-  .chooser-cards { display: flex; gap: 15px; margin: 34px 0 0; padding: 0 50px 8px; list-style: none; overflow-x: auto;
+  .chooser-cards { display: flex; gap: 15px; margin: 24px 0 0; padding: 10px 50px 28px; list-style: none; overflow-x: auto;
     scroll-snap-type: x mandatory; scroll-padding: 0 50px; scrollbar-width: none; }
   .chooser-cards::-webkit-scrollbar { display: none; }
   .chooser-card { flex: none; width: 264px; display: flex; flex-direction: column; gap: 10px; padding: 14px;
@@ -226,18 +227,17 @@ window.track = (() => {
   @keyframes rise { from { opacity: 0; transform: translateY(16px); } }
   @media (hover: hover) {
     .chooser-card:hover { transform: translateY(-4px); box-shadow: 0 12px 24px rgba(59, 34, 22, .12); }
-    .chooser-card:hover .shot img { transform: scale(1.05); }
     .chooser-card:hover .find { filter: brightness(1.1); }
   }
   .chooser-card:active { transform: scale(.98); }
   .chooser-card .shot { display: block; overflow: hidden; border-radius: 12px; }
-  .chooser-card .shot img { display: block; transition: transform .35s ease; }
+  .chooser-card .shot img { display: block; }
   /* Outlined on hover only; the remembered pick isn't marked. */
   @media (hover: hover) { .chooser-card:hover { padding: 13px; border: 2px solid #B62689; } }
   /* While choosing, the map's card and ? button stay out of sight (keeping their size for the map's framing). */
   body.choosing .card, body.choosing .team { visibility: hidden; opacity: 0; }
   body.choosing .card { transform: translateY(-8px) scale(.97); }
-  .team { transition: opacity .3s .3s; }
+  .team { transition: opacity .4s .4s; }
   .chooser-card img { width: 100%; height: 142px; object-fit: cover; }
   .chooser-card p { margin: 0; }
   .chooser-card .new { font-size: 10px; font-weight: 700; color: #B62689; }
@@ -257,7 +257,7 @@ window.track = (() => {
   @media (max-width: 520px) {
     .chooser-head h2 { font-size: 28px; }
     .chooser-sub { font-size: 13px; }
-    .chooser-cards { padding: 0 38px 8px; scroll-padding: 0 38px; }
+    .chooser-cards { padding: 10px 38px 28px; scroll-padding: 0 38px; }
     .crew h2 { font-size: 24px; margin-left: 30px; margin-right: 30px; }
     .card { padding: 14px 16px 12px; border-radius: 18px; }
     h1 { font-size: 26px; }
@@ -271,7 +271,7 @@ window.track = (() => {
   @media (prefers-reduced-motion: reduce) {
     .btn, .toast, .week summary::before, .fold svg, .card, h1, .btn.primary { transition: none; }
     .live, .menu, .chooser-card, .chooser-panel { animation: none; }
-    .chooser-card, .chooser-card .shot img, .card, .team { transition: none; }
+    .chooser-card, .card, .team { transition: none; }
   }
 </style>
 </head>
@@ -880,7 +880,7 @@ function closeChooser() {
   if (reducedMotion) return done();
   const from = panel.getBoundingClientRect(), to = card.getBoundingClientRect();
   const dx = to.left + to.width / 2 - (from.left + from.width / 2), dy = to.top + to.height / 2 - (from.top + from.height / 2);
-  const ease = { duration: 520, easing: "cubic-bezier(.5, 0, .15, 1)", fill: "forwards" };
+  const ease = { duration: 620, easing: "cubic-bezier(.65, 0, .35, 1)", fill: "forwards" };
   panel.animate([{ transform: "none", opacity: 1 },
     { transform: `translate(${dx}px, ${dy}px) scale(${to.width / from.width}, ${to.height / from.height})`, opacity: 0 }], ease);
   chooser.animate([{ backgroundColor: "rgba(30,15,8,.35)", backdropFilter: "blur(4px)" },
