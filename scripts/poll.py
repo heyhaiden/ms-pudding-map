@@ -60,17 +60,19 @@ PRELUDE = """
 STOCK_JS = """async ([product, ids]) => {""" + PRELUDE + """
   const range = await fetch('https://api.range.marksandspencer.app/v1/range/product/' + product, {headers: auth});
   if (!range.ok) return {error: 'range ' + range.status};
-  // Only ask about our stores that sell it, not the whole country.
+  // Ask about all our stores, not the whole country. The range list misses the odd store that has stock.
   const ours = new Set(ids);
   const ranged = (await range.json()).stores.map(s => s.storeId).filter(id => ours.has(id));
   const d = await graphql(`query GetStockLevel($input: Stock_GetFoodStockLevelIndicatorInput!) { stock {
     getFoodStockLevelIndicator(input: $input) { __typename
       ... on Stock_GetFoodStockLevelIndicatorSuccess { indicator { stockLevelIndicator locationId } }
       ... on Stock_GetFoodStockLevelIndicatorFailure { errors { __typename ... on Stock_GenericError { message } } }
-    } } }`, {input: {locationIds: ranged, productId: product}});
+    } } }`, {input: {locationIds: ids, productId: product}});
   const result = d?.data?.stock?.getFoodStockLevelIndicator;
   if (!result?.indicator) return {error: 'stock: ' + JSON.stringify(result?.errors || d.errors).slice(0, 300)};
-  return {ranged, indicators: result.indicator, title: document.title};
+  // A store with a stock reading sells it, whatever the range list says.
+  const sells = [...new Set([...ranged, ...result.indicator.map(i => i.locationId)])];
+  return {ranged: sells, indicators: result.indicator, title: document.title};
 }"""
 STORES_JS = """async (seeds) => {""" + PRELUDE + """
   const locations = [], failed = [];
