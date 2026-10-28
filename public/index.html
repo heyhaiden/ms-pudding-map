@@ -149,6 +149,11 @@ window.track = (() => {
   .mapboxgl-popup-content { width: 260px; font: inherit; color: var(--chocolate); background: #fff;
     border: 3px solid var(--chocolate); border-radius: 16px; padding: 12px 14px;
     box-shadow: 0 3px 0 var(--chocolate), 0 12px 24px rgba(59,34,22,.25); }
+  /* Pinch and pan pass through the card to the map. The link and close button still take taps. */
+  .mapboxgl-popup-content, .mapboxgl-popup-content * { pointer-events: none; }
+  .mapboxgl-popup-content a, .mapboxgl-popup-content a *,
+  .mapboxgl-popup-content summary, .mapboxgl-popup-content summary *,
+  .mapboxgl-popup-close-button { pointer-events: auto; }
   .mapboxgl-popup-tip { display: none; }
   /* A white disc keeps the close button readable over a GIF. */
   .mapboxgl-popup-close-button { top: 8px; right: 8px; width: 28px; height: 28px; padding: 0; border-radius: 50%;
