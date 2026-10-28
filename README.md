@@ -13,6 +13,8 @@ mcbroken-style map: is the M&S Banana, Caramel and Pecan Pudding (61273052) in s
 - What starts it: cron-job.org POSTs `workflow_dispatch` every 30 min (fine-grained token, Actions read/write,
   this repo only; it lives in cron-job.org, renew yearly). GitHub's own `schedule` is only a backup: it never fired
   on this repo. Stale map? Check cron-job.org's history first, then `gh run list`.
+- Mapbox tokens: DEV in `.env` (local, allows 127.0.0.1:8731); PROD only in the GitHub secret `MAPBOX_TOKEN`
+  (URL-restricted to heyhaiden.github.io). Update prod with `gh secret set MAPBOX_TOKEN`, never `-f .env`.
 - If Actions gets blocked: `uv run --with-editable ../jev-ultrafast python -m scripts.poll --local` uses your Chrome.
 - `scripts/history.py` keeps 30 days of readings, one letter per store per 30-min slot, in `public/history.json`.
   On Actions the run fetches the deployed copy (SITE_URL) and adds to it; only a 404 starts afresh.
