@@ -107,6 +107,9 @@ window.track = (() => {
   .meta { margin: 12px 0 0; font-size: 12px; opacity: .8; }
   .meta a { color: inherit; }
   .stale { color: var(--out); font-weight: 700; }
+  .dev { position: fixed; left: 50%; top: 8px; transform: translateX(-50%); z-index: 6; display: flex; gap: 6px;
+    align-items: center; padding: 4px 10px; border-radius: 999px; background: #111; color: #0f0;
+    font: 600 11px ui-monospace, monospace; cursor: pointer; opacity: .85; }
   .toast { position: fixed; left: 50%; bottom: max(24px, env(safe-area-inset-bottom)); transform: translate(-50%, 20px);
     padding: 10px 16px; background: var(--chocolate); color: var(--cream); border-radius: 999px; font-weight: 600;
     opacity: 0; transition: opacity .2s, transform .2s; pointer-events: none; z-index: 5; }
@@ -431,8 +434,21 @@ $("legend").addEventListener("click", (e) => {
 
 // ----- History: one letter per store per 30-minute slot (scripts/history.py) -----
 let history;
-// The 7-day grid in store popups. Off for now; set to true to bring it back.
-const SHOW_WEEK_GRID = true;
+// The 7-day grid in store popups: hidden on the live site. Dev (localhost, or any URL with ?dev) gets a switch for it.
+const DEV = ["127.0.0.1", "localhost"].includes(location.hostname) || new URLSearchParams(location.search).has("dev");
+let SHOW_WEEK_GRID = false;
+try { SHOW_WEEK_GRID = DEV && localStorage.getItem("dev-week-grid") === "1"; } catch {}
+if (DEV) {
+  const panel = document.createElement("label");
+  panel.className = "dev";
+  panel.innerHTML = `<input type="checkbox" ${SHOW_WEEK_GRID ? "checked" : ""}> DEV · 7-day grid`;
+  panel.querySelector("input").addEventListener("change", (e) => {
+    SHOW_WEEK_GRID = e.target.checked;
+    try { localStorage.setItem("dev-week-grid", SHOW_WEEK_GRID ? "1" : ""); } catch {}
+    popup?.remove();
+  });
+  document.body.append(panel);
+}
 const SLOT_MS = 30 * 60 * 1000, WEEK = 7 * 48;
 const RANK = { I: 4, L: 3, O: 2, U: 1, N: 1, "-": 0 };
 const londonParts = new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/London", weekday: "short", year: "numeric",
