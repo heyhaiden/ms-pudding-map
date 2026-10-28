@@ -193,7 +193,7 @@ window.track = (() => {
   .crew .close { position: absolute; top: 8px; right: 10px; width: 40px; height: 40px; border: 0; background: none;
     color: var(--ink); font-size: 26px; line-height: 1; cursor: pointer; z-index: 1; }
   /* The makers, side by side at the top: a round headshot, name, then their links. */
-  .makers { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 4px 0 18px; padding: 0; list-style: none;
+  .makers { display: flex; justify-content: center; gap: 28px; margin: 4px 0 18px; padding: 0; list-style: none;
     text-align: center; }
   .makers li { display: grid; justify-items: center; gap: 6px; }
   .makers .face { position: relative; width: 104px; height: 104px; display: grid; place-items: center; overflow: hidden;
@@ -209,7 +209,6 @@ window.track = (() => {
   .story p { margin: 0 0 8px; font-size: 15px; line-height: 1.45; }
   .story b { color: var(--headline); }
   .story .nowrap { white-space: nowrap; }
-  .crew .makers ~ .eyebrow { margin-top: 0; }
   .fold { display: none; position: absolute; top: 6px; right: 6px; width: 44px; height: 44px; padding: 10px;
     border: 0; border-radius: 50%; background: transparent; color: var(--ink); cursor: pointer; z-index: 1; }
   .fold svg { width: 24px; height: 24px; display: block; transition: transform .25s; }
@@ -271,9 +270,9 @@ window.track = (() => {
 </main>
 <dialog class="crew" id="crew" aria-labelledby="crew-title">
   <button class="close" id="crew-close" type="button" aria-label="Close">×</button>
-  <ul class="makers" id="makers" aria-label="Made by"></ul>
   <p class="eyebrow">The story</p>
   <h2 id="crew-title">Why does this exist?</h2>
+  <ul class="makers" id="makers" aria-label="Made by"></ul>
   <div class="story">
     <p>We wanted the banana pudding. Every M&S we tried had sold out. 😩</p>
     <p>So we built a map that checks every store near London every 30 minutes, and we finally found one.</p>
