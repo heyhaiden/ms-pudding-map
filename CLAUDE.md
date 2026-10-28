@@ -1,10 +1,14 @@
 # M&S Pudding Map
 
-mcbroken-style map: is the M&S Banana, Caramel and Pecan Pudding (61273052) in stock at each UK store?
+mcbroken-style map: are the new M&S puddings and cookie doughs in stock at each store around London?
 
 - `scripts/poll.py` opens the product page in a browser and runs M&S's own store-modal calls as in-page fetches:
   range (stores that sell it) + one GraphQL `GetStockLevel` for all of them. No clicks, no model calls.
-- Codes (from M&S `_app.js`): H/M = in stock, L = low, O = out. Not in range = not sold.
+- Products: `data/products.json` (id, slug, names, pack colours for the skin). Add one there and it's polled and
+  appears in the title's flavour menu. Any store with a stock reading counts as selling it.
+- Codes (from M&S `_app.js`): H/M = in stock, L = low, O = out. Not in range = not sold. No reading ('unknown') is
+  kept in the data but never shown to visitors.
+- Dev: localhost (or ?dev) shows a DEV pill that toggles the hidden 7-day grid in store popups.
 - Scope: London + ~50 miles (`BOX` in `poll.py`); the page opens on central London. Store list from 24 seed towns,
   no ownedBys filter (station franchises sell M&S food), cached in `data/stores.json`, refreshed weekly.
   Northern Ireland stores only have the `FOODSCATALOGUE` capability, not `FOOD`.
