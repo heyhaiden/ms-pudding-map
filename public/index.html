@@ -65,9 +65,8 @@ window.track = (() => {
   button, a { -webkit-tap-highlight-color: transparent; }
   :focus-visible { outline: 3px solid var(--magenta); outline-offset: 2px; }
   /* Flavour skins: --card, --headline, --ink, --accent, --on-accent and --water are set from data/products.json. */
-  /* The card arrives a beat after the chooser starts to leave: fade, lift and settle. */
-  .card { transition: background-color .35s, color .35s, opacity .5s .22s ease-in-out,
-    transform .55s .22s cubic-bezier(.65, 0, .35, 1); }
+  /* The chooser morphs into the card's exact spot, then the card swaps in underneath with a quick fade. */
+  .card { transition: background-color .35s, color .35s, opacity .16s ease-out; }
   h1, .btn.primary { transition: color .35s, background-color .35s; }
   .title { position: relative; }
   .pick { padding: 0; border: 0; background: none; color: inherit; font: inherit; cursor: pointer; text-align: left;
@@ -166,10 +165,13 @@ window.track = (() => {
   .trend p { margin: 4px 0 0; font-size: 12px; opacity: .85; }
 
   .more { overflow: hidden; }
-  .team svg { width: 20px; height: 20px; display: block; }
+  .team svg { width: 26px; height: 26px; display: block; transition: transform .25s cubic-bezier(.34, 1.56, .64, 1); }
+  /* The ? tilts and pops on hover, and squishes on press. */
+  @media (hover: hover) { .team:hover svg { transform: rotate(-14deg) scale(1.12); } }
+  .team:active svg { transform: scale(.88); }
   .team[hidden] { display: none; }
   .team { position: fixed; top: max(16px, env(safe-area-inset-top)); right: 16px; z-index: 2; width: 48px; height: 48px;
-    padding: 11px; border: 3px solid var(--chocolate); border-radius: 50%; background: var(--card); color: var(--ink);
+    padding: 8px; border: 3px solid var(--chocolate); border-radius: 50%; background: var(--card); color: var(--ink);
     box-shadow: 0 3px 0 var(--chocolate); cursor: pointer; transition: background-color .35s, color .35s; }
   /* Meet the team: a small dialog in the current flavour's colours. */
   .crew { width: min(400px, calc(100% - 32px)); padding: 24px 22px 18px; border: 3px solid var(--chocolate);
@@ -236,8 +238,7 @@ window.track = (() => {
   @media (hover: hover) { .chooser-card:hover { padding: 13px; border: 2px solid #B62689; } }
   /* While choosing, the map's card and ? button stay out of sight (keeping their size for the map's framing). */
   body.choosing .card, body.choosing .team { visibility: hidden; opacity: 0; }
-  body.choosing .card { transform: translateY(-8px) scale(.97); }
-  .team { transition: opacity .4s .4s; }
+  .team { transition: opacity .3s .1s; }
   .chooser-card img { width: 100%; height: 142px; object-fit: cover; }
   .chooser-card p { margin: 0; }
   .chooser-card .new { font-size: 10px; font-weight: 700; color: #B62689; }
@@ -248,7 +249,7 @@ window.track = (() => {
   @media (max-width: 720px) {
     .fold { display: block; }
     /* Phones: the card spans the top, so the ? sits inside it, left of the minimise button. */
-    .team { position: absolute; top: 6px; right: 50px; width: 44px; height: 44px; padding: 12px; border: 0;
+    .team { position: absolute; top: 6px; right: 50px; width: 44px; height: 44px; padding: 9px; border: 0;
       background: transparent; box-shadow: none; }
     .title { padding-right: 84px; }
     .card.folded h1 { font-size: 22px; }
@@ -862,8 +863,9 @@ function showChooser() {
   $("chooser-cards").querySelector('[aria-selected="true"]')?.scrollIntoView({ inline: "start", block: "nearest" });
   track("chooser_shown");
 }
-// Hand-off: the panel shrinks into the stock card's spot as the blur clears and the card settles in.
-// Then the map pushes in to London, and phones tuck the card away.
+// Hand-off: the panel morphs into the stock card, ending on its exact position, size, corners, border, shadow and
+// colour, as its contents fade and the blur clears. Then the real card swaps in, the map pushes in to London, and
+// phones tuck the card away.
 let closing = false;
 function closeChooser() {
   if (closing || $("chooser").hidden) return;
@@ -871,20 +873,36 @@ function closeChooser() {
   const chooser = $("chooser"), panel = chooser.querySelector(".chooser-panel");
   const done = () => {
     chooser.hidden = true;
-    for (const a of [...panel.getAnimations(), ...chooser.getAnimations()]) a.cancel();
+    for (const a of [...panel.getAnimations({ subtree: true }), ...chooser.getAnimations()]) a.cancel();
+    panel.removeAttribute("style");
     closing = false;
     pushIn();
     tuck();
   };
-  document.body.classList.remove("choosing");
-  if (reducedMotion) return done();
-  const from = panel.getBoundingClientRect(), to = card.getBoundingClientRect();
-  const dx = to.left + to.width / 2 - (from.left + from.width / 2), dy = to.top + to.height / 2 - (from.top + from.height / 2);
-  const ease = { duration: 620, easing: "cubic-bezier(.65, 0, .35, 1)", fill: "forwards" };
-  panel.animate([{ transform: "none", opacity: 1 },
-    { transform: `translate(${dx}px, ${dy}px) scale(${to.width / from.width}, ${to.height / from.height})`, opacity: 0 }], ease);
+  if (reducedMotion) {
+    document.body.classList.remove("choosing");
+    return done();
+  }
+  const from = panel.getBoundingClientRect(), to = card.getBoundingClientRect(), look = getComputedStyle(card);
+  const box = (r) => ({ left: r.left + "px", top: r.top + "px", width: r.width + "px", height: r.height + "px" });
+  // Pin the panel where it is, so it can be resized freely.
+  Object.assign(panel.style, { position: "fixed", margin: "0", maxHeight: "none", ...box(from) });
+  const timing = { duration: 620, easing: "cubic-bezier(.65, 0, .35, 1)", fill: "forwards" };
+  for (const part of panel.children) {
+    part.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 220, easing: "ease-out", fill: "forwards" });
+  }
   chooser.animate([{ backgroundColor: "rgba(30,15,8,.35)", backdropFilter: "blur(4px)" },
-    { backgroundColor: "rgba(30,15,8,0)", backdropFilter: "blur(0px)" }], ease).onfinish = done;
+    { backgroundColor: "rgba(30,15,8,0)", backdropFilter: "blur(0px)" }], timing);
+  panel.animate([
+    { ...box(from), borderRadius: "30px", borderWidth: "1px", borderColor: "#E5D8C7", backgroundColor: "#FFF8EA",
+      boxShadow: "0 0 0 rgba(0,0,0,0)" },
+    { ...box(to), borderRadius: look.borderRadius, borderWidth: look.borderTopWidth, borderColor: look.borderTopColor,
+      backgroundColor: look.backgroundColor, boxShadow: look.boxShadow },
+  ], timing).onfinish = () => {
+    // Lined up: show the real card and let the stand-in fade off it.
+    document.body.classList.remove("choosing");
+    panel.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 160, fill: "forwards" }).onfinish = done;
+  };
 }
 // A tap anywhere on a card picks it: a quick squeeze, then the hand-off to its map.
 $("chooser-cards").addEventListener("click", (e) => {
