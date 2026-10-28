@@ -91,7 +91,9 @@ window.track = (() => {
   .menu button { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 48px; padding: 6px 10px;
     border: 0; border-radius: 12px; background: none; color: var(--chocolate); font: 600 15px "DM Sans", sans-serif;
     text-align: left; cursor: pointer; }
-  .menu button:hover, .menu button:focus-visible { background: #F6EEE3; }
+  /* Hover only where there's a real pointer: on iPhones a hover style can swallow the first tap. */
+  @media (hover: hover) { .menu button:hover { background: #F6EEE3; } }
+  .menu button:focus-visible { background: #F6EEE3; }
   .menu button[aria-selected="true"] { background: #F3E6D3; }
   .menu .name { flex: 1; }
   .menu .have { font-size: 12px; font-weight: 600; opacity: .65; white-space: nowrap; }
@@ -107,7 +109,7 @@ window.track = (() => {
   .live { display: inline-block; width: 9px; height: 9px; margin: 0 8px 1px 0; border-radius: 50%;
     background: var(--out); box-shadow: 0 0 0 0 var(--out); animation: live 1.6s ease-out infinite; }
   @keyframes live { 0% { box-shadow: 0 0 0 0 rgba(210,58,78,.7); } 100% { box-shadow: 0 0 0 9px rgba(210,58,78,0); } }
-  h1 { margin: 2px 0 0; font: 400 34px/0.95 "Bagel Fat One", "DM Sans", sans-serif; color: var(--headline);
+  h1 { margin: 2px 0 0; font: 400 34px/1.08 "Bagel Fat One", "DM Sans", sans-serif; color: var(--headline);
     letter-spacing: .01em; }
   h1 a { color: inherit; text-decoration: underline; text-decoration-thickness: 3px; text-underline-offset: 4px; }
   .answer { margin: 10px 0 2px; font: 400 52px/1 "Bagel Fat One", "DM Sans", sans-serif; color: var(--ink); }
@@ -187,7 +189,7 @@ window.track = (() => {
   .crew::backdrop { background: rgba(30, 15, 8, .45); backdrop-filter: blur(3px); }
   .crew h2 { margin: 2px 0 14px; font: 400 32px/1 "Bagel Fat One", "DM Sans", sans-serif; color: var(--headline); }
   .crew .close { position: absolute; top: 8px; right: 10px; width: 40px; height: 40px; border: 0; background: none;
-    color: var(--ink); font-size: 26px; line-height: 1; cursor: pointer; }
+    color: var(--ink); font-size: 26px; line-height: 1; cursor: pointer; z-index: 1; }
   .makers { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
   .makers li { display: grid; grid-template-columns: 56px 1fr; gap: 4px 12px; align-items: center; padding: 12px;
     border-radius: 16px; background: var(--chip); }
@@ -210,9 +212,10 @@ window.track = (() => {
     /* Phones: the card spans the top, so the toggle sits inside it, left of the minimise button. */
     .mode { position: absolute; top: 6px; right: 50px; width: 44px; height: 44px; padding: 12px; border: 0;
       background: transparent; box-shadow: none; }
-    .team { position: absolute; top: 6px; right: 94px; width: 44px; height: 44px; padding: 12px; border: 0;
+    .mode { display: none; }
+    .team { position: absolute; top: 6px; right: 50px; width: 44px; height: 44px; padding: 12px; border: 0;
       background: transparent; box-shadow: none; }
-    .title { padding-right: 128px; }
+    .title { padding-right: 84px; }
     .card.folded h1 { font-size: 22px; }
     .card.folded .answer { font-size: 30px; margin: 4px 0 0; }
   }
@@ -439,6 +442,7 @@ let you;
 $("nearest").addEventListener("click", () => {
   if (!data) return;
   track("nearest_clicked");
+  tuck();
   if (!navigator.geolocation) return toast("Your browser can't share your location.");
   toast("Finding you…");
   navigator.geolocation.getCurrentPosition((pos) => {
@@ -481,12 +485,11 @@ $("share").addEventListener("click", async () => {
   }
 });
 
-// Phones: fold the card down to the verdict so more map shows. Remembered per viewer.
+// Phones: fold the card down to the verdict so more map shows.
 function fold(folded, animate = true) {
   const cardEl = document.querySelector(".card"), more = $("more"), button = $("fold");
   button.setAttribute("aria-expanded", String(!folded));
   button.setAttribute("aria-label", folded ? "Expand" : "Minimise");
-  try { localStorage.setItem("card-folded", folded ? "1" : ""); } catch {}
   if (!animate || reducedMotion) return cardEl.classList.toggle("folded", folded);
   const full = more.scrollHeight + "px";
   if (folded) {
@@ -503,7 +506,9 @@ $("fold").addEventListener("click", () => {
   track("card_folded", { folded });
   fold(folded);
 });
-try { if (innerWidth <= 720 && localStorage.getItem("card-folded")) fold(true, false); } catch {}
+// Phones open with the full card every time, then tuck it away once someone picks a flavour or asks for the
+// nearest pudding, so the map has room.
+const tuck = () => { if (innerWidth <= 720 && !document.querySelector(".card").classList.contains("folded")) fold(true); };
 
 $("legend").addEventListener("click", (e) => {
   const button = e.target.closest("button");
@@ -665,10 +670,11 @@ function choose(next, from) {
   popup?.remove();
   render();
   trend();
+  tuck();
   track("product_selected", { from });
 }
 
-function openMenu() {
+function openMenu(fromKeyboard) {
   const current = product();
   $("menu").innerHTML = data.products.map((p) => `<li><button type="button" role="option" data-slug="${p.slug}"
       aria-selected="${p.slug === current.slug}"><span class="tub" style="--c:${p.skin.card};--l:${p.skin.lettering}"></span>
@@ -676,7 +682,8 @@ function openMenu() {
     .join("");
   $("menu").hidden = false;
   $("pick").setAttribute("aria-expanded", "true");
-  $("menu").querySelector('[aria-selected="true"]').focus();
+  // Only move focus for keyboard users; on phones a programmatic focus can cost the next tap.
+  if (fromKeyboard) $("menu").querySelector('[aria-selected="true"]').focus();
   track("product_menu_opened");
 }
 function closeMenu() {
@@ -687,8 +694,16 @@ function closeMenu() {
 $("pick").addEventListener("click", (e) => {
   e.stopPropagation();
   if (!data) return;
-  $("menu").hidden ? openMenu() : closeMenu();
+  $("menu").hidden ? openMenu(e.detail === 0) : closeMenu();
 });
+// Touch picks on finger lift and cancels the click the phone would send next: the menu has closed by then, so that
+// click would land on whatever was underneath (e.g. Nearest pudding). Mouse and keyboard use the click.
+$("menu").addEventListener("touchend", (e) => {
+  const option = e.target.closest("button[data-slug]");
+  if (!option) return;
+  e.preventDefault();
+  choose(option.dataset.slug, "menu");
+}, { passive: false });
 $("menu").addEventListener("click", (e) => {
   const option = e.target.closest("button[data-slug]");
   if (option) choose(option.dataset.slug, "menu");
@@ -707,7 +722,7 @@ document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("menu
 // Edit names, bios and links here. Networks with icons: x, instagram, tiktok, linkedin, github, web.
 const TEAM = [
   { name: "Haiden", face: "🍮", bio: "One-line bio goes here.", links: { github: "https://github.com/heyhaiden" } },
-  { name: "Co-maker", face: "🥄", bio: "One-line bio goes here.", links: {} },
+  { name: "Khumbira", face: "🥄", bio: "One-line bio goes here.", links: {} },
 ];
 const SOCIAL = {
   x: '<path d="M18.9 2H22l-7.6 8.7L23 22h-7l-5.5-7.2L4.2 22H1l8.1-9.3L1 2h7.2l5 6.6zM17.7 20h1.7L7.4 3.9H5.5z" fill="currentColor"/>',
