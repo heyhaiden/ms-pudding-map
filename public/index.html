@@ -101,9 +101,11 @@ window.track = (() => {
   h1 { margin: 2px 0 0; font: 400 34px/1.08 "Bagel Fat One", "DM Sans", sans-serif; color: var(--headline);
     letter-spacing: .01em; }
   h1 a { color: inherit; text-decoration: underline; text-decoration-thickness: 3px; text-underline-offset: 4px; }
-  .answer { margin: 10px 0 2px; font: 400 52px/1 "Bagel Fat One", "DM Sans", sans-serif; color: var(--ink); }
-  .headline { margin: 0 0 14px; font-size: 15px; }
-  .headline b { font-weight: 700; }
+  /* The chunky verdict sits a hair left of plain text, so it's nudged in to share the stock line's edge. */
+  .answer { margin: 10px 0 8px; padding-left: 1px; font: 400 52px/1 "Bagel Fat One", "DM Sans", sans-serif;
+    color: var(--ink); }
+  .headline { margin: 0 0 14px; font-size: 15px; line-height: 1.45; }
+  .headline b { font-weight: 700; font-variant-numeric: lining-nums tabular-nums; }
 
   .actions { display: flex; gap: 8px; margin: 0 0 14px; }
   .btn { flex: 1; white-space: nowrap; display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 44px;
@@ -262,7 +264,7 @@ window.track = (() => {
     .crew h2 { font-size: 24px; margin-left: 30px; margin-right: 30px; }
     .card { padding: 14px 16px 12px; border-radius: 18px; }
     h1 { font-size: 26px; }
-    .answer { font-size: 40px; margin-top: 6px; }
+    .answer { font-size: 40px; margin: 6px 0 6px; }
     .headline { margin-bottom: 10px; font-size: 14px; }
     .actions { margin-bottom: 10px; }
     .btn { min-height: 40px; font-size: 13px; padding: 0 10px; }
