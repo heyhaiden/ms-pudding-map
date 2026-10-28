@@ -221,6 +221,10 @@ window.track = (() => {
     background: #fff; border: 1px solid #E5D8C7; border-radius: 18px; scroll-snap-align: start; cursor: pointer;
     text-align: left; }
   .chooser-card[aria-selected="true"] { padding: 13px; border: 2px solid #B62689; }
+  @media (hover: hover) { .chooser-card:hover { padding: 13px; border: 2px solid #B62689; } }
+  /* While choosing, the map's card and ? button stay out of sight (keeping their size for the map's framing). */
+  body.choosing .card, body.choosing .team { visibility: hidden; opacity: 0; }
+  .card, .team { transition: opacity .3s; }
   .chooser-card img { width: 100%; height: 142px; object-fit: cover; border-radius: 12px; }
   .chooser-card p { margin: 0; }
   .chooser-card .new { font-size: 10px; font-weight: 700; color: #B62689; }
@@ -813,6 +817,7 @@ $("crew").addEventListener("click", (e) => { if (e.target === $("crew")) $("crew
 // ----- First screen: choose a flavour, then the map -----
 // Shown on every visit except shared links (?p=…), which go straight to that flavour's map.
 const startOnChooser = !new URLSearchParams(location.search).has("p");
+if (startOnChooser) document.body.classList.add("choosing");
 function chooserStatus(p) {
   const c = p.counts, sold = c.in + c.low + c.out, pct = sold ? (c.in + c.low) / sold : 0;
   if (!c.in && !c.low) return "Sold out everywhere";
@@ -843,12 +848,13 @@ function showChooser() {
 }
 function closeChooser() {
   $("chooser").hidden = true;
+  document.body.classList.remove("choosing");
 }
+// A tap anywhere on a card picks it and opens its map.
 $("chooser-cards").addEventListener("click", (e) => {
   const cardEl = e.target.closest(".chooser-card");
   if (!cardEl) return;
   for (const c of $("chooser-cards").children) c.setAttribute("aria-selected", c === cardEl);
-  if (!e.target.closest(".find")) return;
   closeChooser();
   track("chooser_picked", { product: data.products.find((p) => p.slug === cardEl.dataset.slug).short });
   if (cardEl.dataset.slug === product().slug) tuck();
