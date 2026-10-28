@@ -18,8 +18,9 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍮</text></svg>">
 <script>try { const t = localStorage.getItem("theme"); if (t) document.documentElement.dataset.theme = t; } catch {}</script>
 <script>
-// Analytics: PostHog (US). Only on the live site, or locally with ?analytics. Cookieless (memory only), so no
-// consent banner is needed; the cost is that a returning visitor counts as new. Events before load are queued.
+// Analytics: PostHog (US). Only on the live site, or locally with ?analytics. Cookieless mode: nothing is stored on the
+// device, so no consent banner; PostHog counts unique visitors with a daily server-side hash instead (it must also be
+// switched on in the PostHog project). Events before load are queued.
 window.track = (() => {
   const queue = [];
   let ready = false;
@@ -29,7 +30,7 @@ window.track = (() => {
     script.src = "https://us-assets.i.posthog.com/static/array.js";
     script.onload = () => {
       posthog.init("phc_pLYVNcYd6dP3aMZ5PwE8KkJkG9L7RNCS8tRhx8XUbqQc", { api_host: "https://us.i.posthog.com",
-        persistence: "memory", person_profiles: "identified_only", capture_pageview: true, capture_pageleave: true });
+        cookieless_mode: "always", person_profiles: "identified_only", capture_pageview: true, capture_pageleave: true });
       ready = true;
       queue.splice(0).forEach(([event, props]) => posthog.capture(event, props));
     };
@@ -179,6 +180,7 @@ window.track = (() => {
     padding: 11px; border: 3px solid var(--chocolate); border-radius: 50%; background: var(--card); color: var(--ink);
     box-shadow: 0 3px 0 var(--chocolate); cursor: pointer; }
   .mode svg, .team svg { width: 20px; height: 20px; display: block; }
+  .team[hidden] { display: none; }
   .team { position: fixed; top: max(16px, env(safe-area-inset-top)); right: 72px; z-index: 2; width: 48px; height: 48px;
     padding: 11px; border: 3px solid var(--chocolate); border-radius: 50%; background: var(--card); color: var(--ink);
     box-shadow: 0 3px 0 var(--chocolate); cursor: pointer; transition: background-color .35s, color .35s; }
@@ -756,6 +758,9 @@ function showTeam() {
   track("team_opened");
 }
 $("team").addEventListener("click", showTeam);
+// Hidden on the live site until the bios and links are filled in; dev always shows it.
+const TEAM_READY = false;
+$("team").hidden = !(TEAM_READY || DEV);
 $("crew-close").addEventListener("click", () => $("crew").close());
 // A click on the dimmed backdrop lands on the dialog element itself.
 $("crew").addEventListener("click", (e) => { if (e.target === $("crew")) $("crew").close(); });
