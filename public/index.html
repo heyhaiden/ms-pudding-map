@@ -87,9 +87,9 @@ window.track = (() => {
   .menu button[aria-selected="true"] { background: #F3E6D3; }
   .menu .name { flex: 1; }
   .menu .have { font-size: 12px; font-weight: 600; opacity: .65; white-space: nowrap; }
-  /* A tiny tub: the pack's label colour with its lettering colour down both sides. */
-  .tub { width: 30px; height: 26px; flex: none; border-radius: 5px 5px 9px 9px; background: var(--c);
-    box-shadow: inset 5px 0 0 var(--l), inset -5px 0 0 var(--l), 0 0 0 2px var(--chocolate); }
+  /* The pack photo, cropped to its label. */
+  .thumb { width: 52px; height: 40px; flex: none; object-fit: cover; border-radius: 8px; background: #fff;
+    box-shadow: 0 0 0 1px #E5D8C7; }
 
   .card { position: absolute; top: max(16px, env(safe-area-inset-top)); left: 16px; width: min(380px, calc(100% - 32px));
     padding: 18px 20px 16px; background: var(--card); color: var(--ink); border: 3px solid var(--chocolate);
@@ -734,8 +734,8 @@ function choose(next, from) {
 function openMenu(fromKeyboard) {
   const current = product();
   $("menu").innerHTML = data.products.map((p) => `<li><button type="button" role="option" data-slug="${p.slug}"
-      aria-selected="${p.slug === current.slug}"><span class="tub" style="--c:${p.skin.card};--l:${p.skin.lettering}"></span>
-      <span class="name">${p.short}</span><span class="have">${p.counts.in + p.counts.low} have it</span></button></li>`)
+      aria-selected="${p.slug === current.slug}"><img class="thumb" src="packs/${p.slug}.png" alt="" width="52" height="40">
+      <span class="name">${p.short}</span><span class="have">${p.counts.in + p.counts.low} stores</span></button></li>`)
     .join("");
   $("menu").hidden = false;
   $("pick").setAttribute("aria-expanded", "true");
