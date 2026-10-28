@@ -432,7 +432,7 @@ $("legend").addEventListener("click", (e) => {
 // ----- History: one letter per store per 30-minute slot (scripts/history.py) -----
 let history;
 // The 7-day grid in store popups. Off for now; set to true to bring it back.
-const SHOW_WEEK_GRID = false;
+const SHOW_WEEK_GRID = true;
 const SLOT_MS = 30 * 60 * 1000, WEEK = 7 * 48;
 const RANK = { I: 4, L: 3, O: 2, U: 1, N: 1, "-": 0 };
 const londonParts = new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/London", weekday: "short", year: "numeric",
