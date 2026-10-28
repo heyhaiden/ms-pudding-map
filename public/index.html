@@ -451,12 +451,12 @@ function pulse() {
   map.setPaintProperty("glow", "circle-radius", ["interpolate", ["linear"], ["zoom"], 8, 8 + 12 * t, 13, 14 + 20 * t]);
 }
 
-// GIFs for the store card, one picked at random by stock status. Add URLs (or files in public/) to each list; a
-// status with an empty list just has no GIF.
+// GIFs for the store card, one picked at random by stock status. Light animated WebPs in public/gifs/ (464x280, the
+// card's slot at 2x); a status with an empty list just has no GIF.
 const GIFS = {
-  in: ["https://i.pinimg.com/originals/9f/4b/12/9f4b121467aaf2625155ff85bdf97569.gif"],
-  low: ["https://i.pinimg.com/originals/fe/c2/05/fec205c522e0455911599fc30e8970ad.gif"],
-  out: ["https://media1.tenor.com/m/OXAMthjEqm4AAAAd/dog-scroll.gif"],
+  in: ["gifs/in-jeopardy-kid.webp"],
+  low: ["gifs/low-spongebob.webp"],
+  out: ["gifs/out-dog-scroll.webp"],
   not_sold: [],
 };
 const randomGif = (status) => {
