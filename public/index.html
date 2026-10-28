@@ -65,7 +65,8 @@ window.track = (() => {
   button, a { -webkit-tap-highlight-color: transparent; }
   :focus-visible { outline: 3px solid var(--magenta); outline-offset: 2px; }
   /* Flavour skins: --card, --headline, --ink, --accent, --on-accent and --water are set from data/products.json. */
-  .card { transition: background-color .35s, color .35s; }
+  /* The card arrives a beat after the chooser starts to leave: fade, lift and settle. */
+  .card { transition: background-color .35s, color .35s, opacity .4s .18s, transform .45s .18s cubic-bezier(.2,.8,.2,1); }
   h1, .btn.primary { transition: color .35s, background-color .35s; }
   .title { position: relative; }
   .pick { padding: 0; border: 0; background: none; color: inherit; font: inherit; cursor: pointer; text-align: left;
@@ -219,19 +220,31 @@ window.track = (() => {
   .chooser-cards::-webkit-scrollbar { display: none; }
   .chooser-card { flex: none; width: 264px; display: flex; flex-direction: column; gap: 10px; padding: 14px;
     background: #fff; border: 1px solid #E5D8C7; border-radius: 18px; scroll-snap-align: start; cursor: pointer;
-    text-align: left; }
+    text-align: left; animation: rise .45s cubic-bezier(.2,.8,.2,1) backwards;
+    transition: transform .2s ease, box-shadow .2s ease; }
+  /* Cards rise in one after another (delay set per card), lift on hover and squish on press. */
+  @keyframes rise { from { opacity: 0; transform: translateY(16px); } }
+  @media (hover: hover) {
+    .chooser-card:hover { transform: translateY(-4px); box-shadow: 0 12px 24px rgba(59, 34, 22, .12); }
+    .chooser-card:hover .shot img { transform: scale(1.05); }
+    .chooser-card:hover .find { filter: brightness(1.1); }
+  }
+  .chooser-card:active { transform: scale(.98); }
+  .chooser-card .shot { display: block; overflow: hidden; border-radius: 12px; }
+  .chooser-card .shot img { display: block; transition: transform .35s ease; }
   /* Outlined on hover only; the remembered pick isn't marked. */
   @media (hover: hover) { .chooser-card:hover { padding: 13px; border: 2px solid #B62689; } }
   /* While choosing, the map's card and ? button stay out of sight (keeping their size for the map's framing). */
   body.choosing .card, body.choosing .team { visibility: hidden; opacity: 0; }
-  .card, .team { transition: opacity .3s; }
-  .chooser-card img { width: 100%; height: 142px; object-fit: cover; border-radius: 12px; }
+  body.choosing .card { transform: translateY(-8px) scale(.97); }
+  .team { transition: opacity .3s .3s; }
+  .chooser-card img { width: 100%; height: 142px; object-fit: cover; }
   .chooser-card p { margin: 0; }
   .chooser-card .new { font-size: 10px; font-weight: 700; color: #B62689; }
   .chooser-card .name { font-size: 15px; font-weight: 700; }
   .chooser-card .status { font-size: 12px; color: #735B50; }
   .chooser-card .find { height: 43px; margin-top: auto; border: 0; border-radius: 23px; background: #B62689; color: #fff;
-    font: 700 13px Inter, "DM Sans", sans-serif; cursor: pointer; }
+    font: 700 13px Inter, "DM Sans", sans-serif; cursor: pointer; transition: filter .2s ease; }
   @media (max-width: 720px) {
     .fold { display: block; }
     /* Phones: the card spans the top, so the ? sits inside it, left of the minimise button. */
@@ -257,7 +270,8 @@ window.track = (() => {
   }
   @media (prefers-reduced-motion: reduce) {
     .btn, .toast, .week summary::before, .fold svg, .card, h1, .btn.primary { transition: none; }
-    .live, .menu { animation: none; }
+    .live, .menu, .chooser-card, .chooser-panel { animation: none; }
+    .chooser-card, .chooser-card .shot img, .card, .team { transition: none; }
   }
 </style>
 </head>
@@ -703,6 +717,7 @@ function skin(p) {
 }
 
 function choose(next, from) {
+  const tuckAfter = from !== "chooser";
   if (next === product().slug) return closeMenu();
   slug = next;
   try { localStorage.setItem("product", slug); } catch {}
@@ -711,7 +726,7 @@ function choose(next, from) {
   popup?.remove();
   render();
   trend();
-  tuck();
+  if (tuckAfter) tuck();
   track("product_selected", { from });
 }
 
@@ -833,7 +848,8 @@ function showChooser() {
     li.className = "chooser-card";
     li.dataset.slug = p.slug;
     li.setAttribute("aria-selected", p.slug === current.slug);
-    li.innerHTML = `<img alt="" src="packs/${p.slug}.png" width="236" height="142"><p class="new">NEW IN</p>
+    li.style.animationDelay = `${60 * $("chooser-cards").children.length}ms`;
+    li.innerHTML = `<span class="shot"><img alt="" src="packs/${p.slug}.png" width="236" height="142"></span><p class="new">NEW IN</p>
       <p class="name"></p><p class="status"></p><button class="find" type="button">Find in store</button>`;
     li.querySelector(".name").textContent = p.name;
     li.querySelector(".status").textContent = chooserStatus(p);
@@ -846,19 +862,40 @@ function showChooser() {
   $("chooser-cards").querySelector('[aria-selected="true"]')?.scrollIntoView({ inline: "start", block: "nearest" });
   track("chooser_shown");
 }
+// Hand-off: the panel shrinks into the stock card's spot as the blur clears and the card settles in.
+// Then the map pushes in to London, and phones tuck the card away.
+let closing = false;
 function closeChooser() {
-  $("chooser").hidden = true;
+  if (closing || $("chooser").hidden) return;
+  closing = true;
+  const chooser = $("chooser"), panel = chooser.querySelector(".chooser-panel");
+  const done = () => {
+    chooser.hidden = true;
+    for (const a of [...panel.getAnimations(), ...chooser.getAnimations()]) a.cancel();
+    closing = false;
+    pushIn();
+    tuck();
+  };
   document.body.classList.remove("choosing");
+  if (reducedMotion) return done();
+  const from = panel.getBoundingClientRect(), to = card.getBoundingClientRect();
+  const dx = to.left + to.width / 2 - (from.left + from.width / 2), dy = to.top + to.height / 2 - (from.top + from.height / 2);
+  const ease = { duration: 520, easing: "cubic-bezier(.5, 0, .15, 1)", fill: "forwards" };
+  panel.animate([{ transform: "none", opacity: 1 },
+    { transform: `translate(${dx}px, ${dy}px) scale(${to.width / from.width}, ${to.height / from.height})`, opacity: 0 }], ease);
+  chooser.animate([{ backgroundColor: "rgba(30,15,8,.35)", backdropFilter: "blur(4px)" },
+    { backgroundColor: "rgba(30,15,8,0)", backdropFilter: "blur(0px)" }], ease).onfinish = done;
 }
-// A tap anywhere on a card picks it and opens its map.
+// A tap anywhere on a card picks it: a quick squeeze, then the hand-off to its map.
 $("chooser-cards").addEventListener("click", (e) => {
   const cardEl = e.target.closest(".chooser-card");
-  if (!cardEl) return;
+  if (!cardEl || closing) return;
   for (const c of $("chooser-cards").children) c.setAttribute("aria-selected", c === cardEl);
-  closeChooser();
   track("chooser_picked", { product: data.products.find((p) => p.slug === cardEl.dataset.slug).short });
-  if (cardEl.dataset.slug === product().slug) tuck();
-  else choose(cardEl.dataset.slug, "chooser");
+  if (cardEl.dataset.slug !== product().slug) choose(cardEl.dataset.slug, "chooser");
+  if (reducedMotion) return closeChooser();
+  cardEl.animate([{ transform: "scale(1)" }, { transform: "scale(.95)" }, { transform: "scale(1)" }],
+    { duration: 220, easing: "ease-out" }).onfinish = closeChooser;
 });
 // Esc or a click outside the panel keeps the current flavour and shows the map.
 $("chooser").addEventListener("click", (e) => { if (e.target === $("chooser")) closeChooser(); });
@@ -911,12 +948,19 @@ map.on("load", () => {
   mapReady = true;
   if (data) render();
   // Wide screens centre on the whole window with the card floating over the west; phones keep London below the card.
-  const target = map.cameraForBounds(CENTRAL, { padding: innerWidth > 720 ? 0 : padding() });
-  if (reducedMotion) return map.jumpTo(target);
-  // A gentle push-in: start slightly zoomed out, ease straight in without the fly-to arc.
-  map.jumpTo({ ...target, zoom: target.zoom - 0.8 });
-  map.easeTo({ ...target, duration: 1800, easing: (t) => 1 - Math.pow(1 - t, 3) });
+  pushTarget = map.cameraForBounds(CENTRAL, { padding: innerWidth > 720 ? 0 : padding() });
+  if (reducedMotion) return map.jumpTo(pushTarget);
+  // Start slightly zoomed out; the push-in waits while the chooser is up.
+  map.jumpTo({ ...pushTarget, zoom: pushTarget.zoom - 0.8 });
+  if (!document.body.classList.contains("choosing")) pushIn();
 });
+// A gentle push-in to London, once: straight in without the fly-to arc.
+let pushTarget;
+function pushIn() {
+  if (!pushTarget || reducedMotion) return;
+  map.easeTo({ ...pushTarget, duration: 1800, easing: (t) => 1 - Math.pow(1 - t, 3) });
+  pushTarget = null;
+}
 load();
 setInterval(load, 5 * 60 * 1000);
 setInterval(() => data && render(), 60 * 1000);
