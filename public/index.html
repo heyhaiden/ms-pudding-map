@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Is the Pudding In?</title>
-<meta name="description" content="Live map: which M&S stores in and around London have the Banana, Caramel & Pecan Pudding right now.">
+<meta name="description" content="Live map: which M&S stores in and around London have the new puddings and cookie doughs right now.">
 <meta property="og:title" content="Is the Pudding In?">
-<meta property="og:description" content="Live map of every M&S in and around London with the Banana, Caramel & Pecan Pudding. Updated every 30 min.">
+<meta property="og:description" content="Live map of every M&S in and around London with the new puddings and cookie doughs in stock. Updated every 30 min.">
 <meta property="og:type" content="website">
 <!-- Deploy rewrites og.png to the site's absolute URL; scrapers ignore relative image paths. -->
 <meta property="og:image" content="og.png">
@@ -35,7 +35,11 @@ window.track = (() => {
     };
     document.head.append(script);
   }
-  return (event, props) => (ready ? posthog.capture(event, props) : queue.push([event, props]));
+  // window.trackContext (the selected product) rides along with every event.
+  return (event, props) => {
+    props = { ...window.trackContext, ...props };
+    ready ? posthog.capture(event, props) : queue.push([event, props]);
+  };
 })();
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -71,6 +75,30 @@ window.track = (() => {
   @keyframes fade { from { opacity: 0; } }
   button, a { -webkit-tap-highlight-color: transparent; }
   :focus-visible { outline: 3px solid var(--magenta); outline-offset: 2px; }
+  /* Flavour skins: --card, --headline, --ink, --accent, --on-accent and --water are set from data/products.json. */
+  .card, .mode { transition: background-color .35s, color .35s; }
+  h1, .btn.primary { transition: color .35s, background-color .35s; }
+  .title { position: relative; }
+  .pick { padding: 0; border: 0; background: none; color: inherit; font: inherit; cursor: pointer; text-align: left;
+    text-decoration: underline; text-decoration-thickness: 3px; text-underline-offset: 4px; }
+  .pick .nowrap { white-space: nowrap; }
+  .pick > svg.chev { display: none; } /* template only; render() glues a copy to the last word */
+  .pick .chev { display: inline-block; width: .55em; height: .55em; margin-left: .08em; vertical-align: .05em; }
+  .menu { position: absolute; top: calc(100% + 8px); left: -8px; right: -8px; z-index: 5; margin: 0; padding: 6px;
+    list-style: none; background: #fff; border: 3px solid var(--chocolate); border-radius: 18px;
+    box-shadow: 0 4px 0 var(--chocolate), 0 16px 32px rgba(59,34,22,.3); animation: pop .18s ease-out; }
+  @keyframes pop { from { opacity: 0; transform: translateY(-6px) scale(.98); } }
+  .menu button { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 48px; padding: 6px 10px;
+    border: 0; border-radius: 12px; background: none; color: var(--chocolate); font: 600 15px "DM Sans", sans-serif;
+    text-align: left; cursor: pointer; }
+  .menu button:hover, .menu button:focus-visible { background: #F6EEE3; }
+  .menu button[aria-selected="true"] { background: #F3E6D3; }
+  .menu .name { flex: 1; }
+  .menu .have { font-size: 12px; font-weight: 600; opacity: .65; white-space: nowrap; }
+  /* A tiny tub: the pack's label colour with its lettering colour down both sides. */
+  .tub { width: 30px; height: 26px; flex: none; border-radius: 5px 5px 9px 9px; background: var(--c);
+    box-shadow: inset 5px 0 0 var(--l), inset -5px 0 0 var(--l), 0 0 0 2px var(--chocolate); }
+  .headline a { color: inherit; font-weight: 700; white-space: nowrap; }
 
   .card { position: absolute; top: max(16px, env(safe-area-inset-top)); left: 16px; width: min(380px, calc(100% - 32px));
     padding: 18px 20px 16px; background: var(--card); color: var(--ink); border: 3px solid var(--chocolate);
@@ -92,7 +120,7 @@ window.track = (() => {
     cursor: pointer; box-shadow: 0 3px 0 var(--chocolate); transition: transform .08s, box-shadow .08s; }
   .btn:active { transform: translateY(3px); box-shadow: 0 0 0 var(--chocolate); }
   .btn .icon { width: 18px; height: 18px; flex: none; }
-  .btn.primary { flex: 1.5; background: var(--magenta); color: #fff; }
+  .btn.primary { flex: 1.5; background: var(--accent, var(--magenta)); color: var(--on-accent, #fff); }
   .btn.secondary { background: #fff; color: var(--chocolate); }
 
   .legend { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
@@ -107,7 +135,7 @@ window.track = (() => {
   .meta { margin: 12px 0 0; font-size: 12px; opacity: .8; }
   .meta a { color: inherit; }
   .stale { color: var(--out); font-weight: 700; }
-  .dev { position: fixed; left: 50%; top: 8px; transform: translateX(-50%); z-index: 6; display: flex; gap: 6px;
+  .dev { position: fixed; left: 50%; bottom: 10px; transform: translateX(-50%); z-index: 6; display: flex; gap: 6px;
     align-items: center; padding: 4px 10px; border-radius: 999px; background: #111; color: #0f0;
     font: 600 11px ui-monospace, monospace; cursor: pointer; opacity: .85; }
   .toast { position: fixed; left: 50%; bottom: max(24px, env(safe-area-inset-bottom)); transform: translate(-50%, 20px);
@@ -159,6 +187,7 @@ window.track = (() => {
     /* Phones: the card spans the top, so the toggle sits inside it, left of the minimise button. */
     .mode { position: absolute; top: 6px; right: 50px; width: 44px; height: 44px; padding: 12px; border: 0;
       background: transparent; box-shadow: none; }
+    .title { padding-right: 84px; }
     .card.folded h1 { font-size: 22px; }
     .card.folded .answer { font-size: 30px; margin: 4px 0 0; }
   }
@@ -172,7 +201,10 @@ window.track = (() => {
     .legend button { min-height: 28px; padding: 0 9px; font-size: 12px; }
     .meta { margin-top: 8px; font-size: 11px; }
   }
-  @media (prefers-reduced-motion: reduce) { .btn, .toast, .week summary::before, .fold svg { transition: none; } .live { animation: none; } }
+  @media (prefers-reduced-motion: reduce) {
+    .btn, .toast, .week summary::before, .fold svg, .card, .mode, h1, .btn.primary { transition: none; }
+    .live, .menu { animation: none; }
+  }
 </style>
 </head>
 <body>
@@ -183,8 +215,11 @@ window.track = (() => {
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 15l6-6 6 6" fill="none" stroke="currentColor"
       stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
   <p class="eyebrow"><span class="live" aria-hidden="true"></span>Live</p>
-  <h1>Is <a id="product" href="https://www.marksandspencer.com/food/banana-caramel-and-pecan-pudding/p/fdp61273052"
-    target="_blank" rel="noopener">the Pudding</a> In?</h1>
+  <div class="title">
+    <h1>Is the <button class="pick" id="pick" type="button" aria-haspopup="listbox" aria-expanded="false"
+      aria-controls="menu"><span id="pick-name">Pudding</span><svg class="chev" hidden viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button> In?</h1>
+    <ul class="menu" id="menu" role="listbox" aria-label="Choose a flavour" hidden></ul>
+  </div>
   <p class="answer" id="answer">…</p>
   <div class="more" id="more">
   <p class="headline" id="headline">Checking every M&S…</p>
@@ -213,7 +248,8 @@ const QUIP = {
   unknown: "M&S isn't saying. Mystery pudding.",
 };
 const css = (name) => getComputedStyle(document.documentElement).getPropertyValue("--" + name).trim();
-const shown = new Set(STATUSES.map(([k]) => k));
+// "unknown" (M&S gave no reading) is never shown: not on the map, in the legend, or in the totals.
+const shown = new Set(STATUSES.map(([k]) => k).filter((k) => k !== "unknown"));
 const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
 let data, mapReady = false;
 
@@ -234,25 +270,38 @@ function verdict(have, pct) {
   return "YES!";
 }
 
+// ----- Products: data/products.json, one status letter per store in the same order as data.stores -----
+const STATUS_OF = { I: "in", L: "low", O: "out", N: "not_sold", U: "unknown" };
+let slug = new URLSearchParams(location.search).get("p");
+try { slug ||= localStorage.getItem("product"); } catch {}
+const product = () => data.products.find((p) => p.slug === slug) || data.products[0];
+const storesFor = (p) => data.stores.map((s, i) => ({ ...s, status: STATUS_OF[p.statuses[i]] || "unknown" }));
+
 function stats() {
-  const c = data.counts, sold = c.in + c.low + c.out + c.unknown, have = c.in + c.low;
+  const c = product().counts, sold = c.in + c.low + c.out, have = c.in + c.low;
   return { c, sold, have, pct: sold ? Math.round(100 * have / sold) : 0 };
 }
 
 function render() {
-  const { c, sold, have, pct } = stats();
-  $("product").href = data.product.url;
+  const { c, sold, have, pct } = stats(), p = product();
+  // The arrow stays glued to the last word, so long names never strand it on a line of its own.
+  const words = p.short.split(" "), last = words.pop();
+  $("pick-name").innerHTML = (words.length ? words.join(" ") + " " : "") +
+    `<span class="nowrap">${last}${document.querySelector(".pick .chev").outerHTML.replace(" hidden", "")}</span>`;
   $("answer").textContent = verdict(have, pct);
-  $("headline").innerHTML = `<b>${have}</b> of ${sold} M&S stores that sell it have it right now.`;
+  $("headline").innerHTML = `<b>${have}</b> of ${sold} M&S stores that sell it have it right now. ` +
+    `<a id="product" href="${p.url}" target="_blank" rel="noopener">See it on M&S ↗</a>`;
+  $("product").addEventListener("click", () => track("product_link_clicked"));
+  skin(p);
   const updated = $("updated");
   updated.textContent = "Updated " + ago(data.updated);
   updated.className = Date.now() - new Date(data.updated) > 2 * 3600e3 ? "stale" : "";
-  $("legend").innerHTML = STATUSES.filter(([k]) => k !== "unknown" || c.unknown).map(([key, label]) =>
+  $("legend").innerHTML = STATUSES.filter(([k]) => k !== "unknown").map(([key, label]) =>
     `<li><button type="button" data-status="${key}" aria-pressed="${shown.has(key)}">
        <span class="dot${key === "not_sold" ? " ring" : ""}" style="background:var(--${key})"></span>
        ${label} <span class="n">${c[key]}</span></button></li>`).join("");
   if (!mapReady) return;
-  const geojson = { type: "FeatureCollection", features: data.stores.map((s) => ({
+  const geojson = { type: "FeatureCollection", features: storesFor(p).map((s) => ({
     type: "Feature", geometry: { type: "Point", coordinates: [s.lng, s.lat] }, properties: s })) };
   const source = map.getSource("stores");
   if (source) source.setData(geojson); else addLayers(geojson);
@@ -359,7 +408,7 @@ $("nearest").addEventListener("click", () => {
   toast("Finding you…");
   navigator.geolocation.getCurrentPosition((pos) => {
     const here = [pos.coords.longitude, pos.coords.latitude];
-    const options = data.stores.filter((s) => s.status === "in" || s.status === "low")
+    const options = storesFor(product()).filter((s) => s.status === "in" || s.status === "low")
       .map((s) => ({ s, d: miles(here, [s.lng, s.lat]) })).sort((a, b) => a.d - b.d);
     you?.remove();
     you = new mapboxgl.Marker({ color: css("magenta") }).setLngLat(here).addTo(map);
@@ -381,9 +430,9 @@ $("nearest").addEventListener("click", () => {
 
 $("share").addEventListener("click", async () => {
   const text = data
-    ? `Only ${stats().have} of ${stats().sold} M&S stores around London have the banana, caramel & pecan pudding right now 🍮`
-    : "Is the M&S banana, caramel & pecan pudding in? 🍮";
-  const url = location.href.split("#")[0];
+    ? `Only ${stats().have} of ${stats().sold} M&S stores around London have the ${product().name} right now 🍮`
+    : "Is the M&S pudding in? 🍮";
+  const url = location.origin + location.pathname + "?p=" + product().slug;
   try {
     if (navigator.share) {
       track("share", { method: "native" });
@@ -414,7 +463,6 @@ function fold(folded, animate = true) {
       { duration: 300, easing: "cubic-bezier(.2,.8,.2,1)" });
   }
 }
-$("product").addEventListener("click", () => track("product_link_clicked"));
 $("fold").addEventListener("click", () => {
   const folded = !document.querySelector(".card").classList.contains("folded");
   track("card_folded", { folded });
@@ -468,7 +516,7 @@ function when(date) {
 
 // The last 7 days for one store: a 7x24 grid of the best reading each hour, plus a few facts.
 function week(s) {
-  const line = history?.stores?.[s.id];
+  const line = history?.products?.[product().id]?.[s.id];
   const box = document.createElement("div");
   box.className = "week";
   if (!line || s.status === "not_sold") return box;
@@ -522,7 +570,7 @@ function slide(details) {
 // Card: how many stores had it at each reading this week, and the best hour to look once there's enough data.
 function trend() {
   const el = $("trend");
-  const lines = Object.values(history?.stores || {});
+  const lines = Object.values(history?.products?.[product().id] || {});
   const length = lines[0]?.length || 0;
   const first = Math.max(0, length - WEEK);
   // Only once there's a full week: a few hours of readings is just a squiggle.
@@ -540,11 +588,85 @@ function trend() {
   const hour = byHour.map(([sum, k], h) => [k ? sum / k : -1, h]).sort((a, b) => b[0] - a[0])[0][1];
   const best = ` Best time to look: around ${hour % 12 || 12}${hour < 12 ? "am" : "pm"}.`;
   el.innerHTML = `<svg viewBox="0 0 100 34" preserveAspectRatio="none" aria-hidden="true">
-    <polyline points="${points.join(" ")}" fill="none" stroke="var(--magenta)" stroke-width="2.5"
+    <polyline points="${points.join(" ")}" fill="none" stroke="var(--headline)" stroke-width="2.5"
       vector-effect="non-scaling-stroke" stroke-linejoin="round" stroke-linecap="round"/></svg>
     <p>Stores with it, last 7 days.${best}</p>`;
   el.hidden = false;
 }
+
+// ----- Skins: recolour the card, title, main button and map water to the selected pack -----
+const hex = (c) => [1, 3, 5].map((i) => parseInt(c.slice(i, i + 2), 16));
+const luminance = (c) => { const [r, g, b] = hex(c).map((v) => v / 255); return 0.2126 * r + 0.7152 * g + 0.0722 * b; };
+const mix = (a, b, t) => "#" + hex(a).map((v, i) => Math.round(v + (hex(b)[i] - v) * t).toString(16).padStart(2, "0")).join("");
+function skin(p) {
+  const k = p.skin, dark = mode() === "dark", lightCard = luminance(k.card) > 0.45;
+  // Dark mode keeps a dark card; a light pack (mustard, orange) lends its label colour to the title instead.
+  const card = dark && lightCard ? "#2B1910" : k.card;
+  const vars = {
+    card,
+    headline: dark && lightCard ? k.card : k.lettering,
+    ink: dark && lightCard ? "#F3E6D3" : k.text,
+    chip: luminance(card) > 0.45 ? "rgba(255,255,255,.55)" : "rgba(255,255,255,.1)",
+    accent: k.lettering,
+    "on-accent": luminance(k.lettering) > 0.45 ? "#2A1A12" : "#FFFFFF",
+    water: dark ? mix("#241812", k.lettering, 0.3) : k.water,
+  };
+  const root = document.documentElement.style;
+  for (const [name, value] of Object.entries(vars)) root.setProperty("--" + name, value);
+  document.querySelector('meta[name="theme-color"]').content = card;
+  window.trackContext = { product: p.short };
+  if (mapReady && skin.water !== vars.water) theme();
+  skin.water = vars.water;
+}
+
+function choose(next, from) {
+  if (next === product().slug) return closeMenu();
+  slug = next;
+  try { localStorage.setItem("product", slug); } catch {}
+  const url = new URL(location.href);
+  url.searchParams.set("p", slug);
+  window.history.replaceState(null, "", url);
+  closeMenu();
+  popup?.remove();
+  render();
+  trend();
+  track("product_selected", { from });
+}
+
+function openMenu() {
+  const current = product();
+  $("menu").innerHTML = data.products.map((p) => `<li><button type="button" role="option" data-slug="${p.slug}"
+      aria-selected="${p.slug === current.slug}"><span class="tub" style="--c:${p.skin.card};--l:${p.skin.lettering}"></span>
+      <span class="name">${p.short}</span><span class="have">${p.counts.in + p.counts.low} have it</span></button></li>`)
+    .join("");
+  $("menu").hidden = false;
+  $("pick").setAttribute("aria-expanded", "true");
+  $("menu").querySelector('[aria-selected="true"]').focus();
+  track("product_menu_opened");
+}
+function closeMenu() {
+  if ($("menu").hidden) return;
+  $("menu").hidden = true;
+  $("pick").setAttribute("aria-expanded", "false");
+}
+$("pick").addEventListener("click", (e) => {
+  e.stopPropagation();
+  if (!data) return;
+  $("menu").hidden ? openMenu() : closeMenu();
+});
+$("menu").addEventListener("click", (e) => {
+  const option = e.target.closest("button[data-slug]");
+  if (option) choose(option.dataset.slug, "menu");
+});
+$("menu").addEventListener("keydown", (e) => {
+  const options = [...$("menu").querySelectorAll("button")], i = options.indexOf(document.activeElement);
+  if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+    e.preventDefault();
+    options[(i + (e.key === "ArrowDown" ? 1 : -1) + options.length) % options.length].focus();
+  }
+});
+document.addEventListener("click", (e) => { if (!e.target.closest(".title")) closeMenu(); });
+document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("menu").hidden) { closeMenu(); $("pick").focus(); } });
 
 async function load() {
   try {
@@ -592,6 +714,7 @@ $("mode").addEventListener("click", () => {
   map.setStyle(STYLE[next]);
   // Base styles drop our layers; recolour and re-add them once the new style is in.
   map.once("style.load", () => { theme(); if (data) render(); });
+  if (data) skin(product());
 });
 // Where the push-in lands: Hounslow to Welling, East Finchley to Streatham, Westminster in the middle.
 const CENTRAL = [[-0.4, 51.425], [0.12, 51.595]];
