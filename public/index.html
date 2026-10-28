@@ -261,14 +261,21 @@ window.track = (() => {
   .chooser-card .new { font-size: 10px; font-weight: 700; color: #B62689; }
   .chooser-card .name { font-size: 15px; font-weight: 700; }
   .chooser-card .status { font-size: 12px; color: #735B50; }
+  /* Phones: one grey dot per card, the one in view darker; tap a dot to jump to its card. */
+  .chooser-dots { display: none; justify-content: center; gap: 8px; margin: -12px 0 6px; }
+  .chooser-dots button { width: 8px; height: 8px; padding: 0; border: 0; border-radius: 50%; background: #D9CBBB;
+    cursor: pointer; transition: background-color .2s, transform .2s; }
+  .chooser-dots button[aria-current="true"] { background: #735B50; transform: scale(1.25); }
   .chooser-card .find { height: 43px; margin-top: auto; border: 0; border-radius: 23px; background: #B62689; color: #fff;
     font: 700 13px Inter, "DM Sans", sans-serif; cursor: pointer; transition: filter .2s ease; }
   @media (max-width: 720px) {
+    .chooser-dots { display: flex; }
     .fold { display: block; }
     /* Phones: the card spans the top, so the ? sits inside it, left of the minimise button. */
-    .team { position: absolute; top: 6px; right: 50px; width: 44px; height: 44px; padding: 9px; border: 0;
-      background: transparent; box-shadow: none; }
-    .title { padding-right: 84px; }
+    /* Phones: the ? sits bottom-left, just above the Mapbox logo (which must stay visible). */
+    .team { position: fixed; top: auto; right: auto; left: 12px; bottom: calc(40px + env(safe-area-inset-bottom));
+      width: 44px; height: 44px; padding: 6px; }
+    .title { padding-right: 40px; }
     .card.folded h1 { font-size: 22px; }
     .card.folded .answer { font-size: 30px; margin: 4px 0 0; }
   }
@@ -338,6 +345,7 @@ window.track = (() => {
       <p class="chooser-sub">Pick a flavour and see which stores near you have it.</p>
     </div>
     <ul class="chooser-cards" id="chooser-cards"></ul>
+    <div class="chooser-dots" id="chooser-dots"></div>
   </div>
 </section>
 <div class="toast" id="toast" role="status"></div>
@@ -451,6 +459,8 @@ function addLayers(geojson) {
   // One tap opens one store. Where dots overlap, the most useful wins: in stock, going fast, sold out, not sold.
   const rank = { in: 4, low: 3, out: 2, unknown: 1, not_sold: 0 };
   map.on("click", (e) => {
+    // Phones: a tap anywhere on the map tucks the card away, so the map has room.
+    tuck();
     const hits = map.queryRenderedFeatures(e.point, { layers: ["stores", "not_sold"] });
     if (!hits.length) return;
     const f = hits.sort((a, b) => rank[b.properties.status] - rank[a.properties.status])[0];
@@ -939,12 +949,34 @@ function showChooser() {
     $("chooser-cards").append(li);
   }
   $("chooser").hidden = false;
+  dots();
   // Start the row on the remembered flavour.
   $("chooser-cards").querySelector('[aria-selected="true"]')?.scrollIntoView({ inline: "start", block: "nearest" });
   track("chooser_shown");
 }
 // Hand-off: the panel morphs into the stock card, ending on its exact position, size, corners, border, shadow and
-// colour, as its contents fade and the blur clears. Then the real card swaps in and phones tuck it away.
+// colour, as its contents fade and the blur clears. Then the real card swaps in (full size; phones tuck it on the
+// first tap on the map).
+// Dots under the cards (phones): built once per opening, kept in step with the scroll.
+function dots() {
+  const row = $("chooser-cards"), box = $("chooser-dots"), cards = [...row.children];
+  box.innerHTML = "";
+  cards.forEach((c, i) => {
+    const dot = document.createElement("button");
+    dot.type = "button";
+    dot.setAttribute("aria-label", `Show card ${i + 1} of ${cards.length}`);
+    dot.addEventListener("click", () => c.scrollIntoView({ behavior: reducedMotion ? "auto" : "smooth", inline: "start", block: "nearest" }));
+    box.append(dot);
+  });
+  const mark = () => {
+    const step = cards[1] ? cards[1].offsetLeft - cards[0].offsetLeft : 1;
+    const i = Math.min(cards.length - 1, Math.round(row.scrollLeft / step));
+    box.querySelectorAll("button").forEach((d, j) => d.setAttribute("aria-current", j === i));
+  };
+  row.onscroll = mark;
+  mark();
+}
+
 let closing = false;
 function closeChooser() {
   if (closing || $("chooser").hidden) return;
@@ -955,8 +987,6 @@ function closeChooser() {
     for (const a of [...panel.getAnimations({ subtree: true }), ...chooser.getAnimations()]) a.cancel();
     panel.removeAttribute("style");
     closing = false;
-    if (settled) settled.then(tuck);
-    else tuck();
   };
   if (reducedMotion) {
     document.body.classList.remove("choosing");
