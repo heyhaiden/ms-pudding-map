@@ -298,6 +298,7 @@ window.track = (() => {
       -webkit-overflow-scrolling: touch; }
     .legend::-webkit-scrollbar { display: none; }
     .legend li { flex: none; }
+    .mapboxgl-popup { z-index: 3; }
     /* compact is set at the start of the fold so the type eases down with the card, not after it. */
     .card.folded h1, .card.compact h1 { font-size: 22px; }
     .card.folded .answer, .card.compact .answer { font-size: 30px; margin: 4px 0 0; }
@@ -485,9 +486,14 @@ function addLayers(geojson) {
   map.on("click", (e) => {
     // Phones: a tap anywhere on the map tucks the card away, so the map has room.
     tuck();
-    const hits = map.queryRenderedFeatures(e.point, { layers: ["stores", "not_sold"] });
+    // Fat finger target on phones: a miss of ~22px still hits the nearest dot.
+    const slop = innerWidth <= 720 ? 22 : 0;
+    const hits = map.queryRenderedFeatures(slop
+      ? [[e.point.x - slop, e.point.y - slop], [e.point.x + slop, e.point.y + slop]] : e.point,
+      { layers: ["stores", "not_sold"] });
     if (!hits.length) return;
-    const f = hits.sort((a, b) => rank[b.properties.status] - rank[a.properties.status])[0];
+    const dist = (f) => { const p = map.project(f.geometry.coordinates); return (p.x - e.point.x) ** 2 + (p.y - e.point.y) ** 2; };
+    const f = hits.sort((a, b) => dist(a) - dist(b) || rank[b.properties.status] - rank[a.properties.status])[0];
     track("store_opened", { store: f.properties.name, status: f.properties.status });
     openStore(f.properties, f.geometry.coordinates);
   });
@@ -539,7 +545,16 @@ const randomGif = (status) => {
 const storeName = (name) => name.replace(/\s+Simply Foo(d)?\b/i, "").replace(/\bNhs\b/g, "NHS").trim();
 
 let popup;
-function openStore(s, coordinates, extra = "") {
+// Phones: slide the point into the map left under the card, clear of the ? button, with room for its popup.
+function snapView(points) {
+  const moreH = card.classList.contains("folded") ? 0 : $("more").offsetHeight;
+  const top = Math.min(innerHeight * 0.46, card.getBoundingClientRect().bottom - moreH + 12);
+  const bottom = points.length > 1 ? 120 : Math.min(220, Math.round(innerHeight * 0.32));
+  const camera = { padding: { top, bottom, left: 36, right: 24 }, duration: reducedMotion ? 0 : 450 };
+  if (points.length > 1) map.fitBounds(points, { ...camera, maxZoom: 15 });
+  else map.easeTo({ ...camera, center: points[0] });
+}
+function openStore(s, coordinates, extra = "", frame) {
   const box = document.createElement("div");
   box.className = "pop";
   const gifUrl = randomGif(s.status);
@@ -570,11 +585,7 @@ function openStore(s, coordinates, extra = "") {
   popup?.remove();
   // Phones: the card covers the top, so slide the store just below it and open the popup underneath the dot.
   const phone = innerWidth <= 720;
-  if (phone) {
-    const top = card.getBoundingClientRect().bottom;
-    map.easeTo({ center: coordinates, padding: { top, bottom: Math.max(0, innerHeight - top - 80), left: 0, right: 0 },
-      duration: reducedMotion ? 0 : 400 });
-  }
+  if (phone) snapView(frame || [coordinates]);
   select(s.id);
   // focusAfterOpen off: otherwise the first link gets a focus ring every time a card opens.
   popup = new mapboxgl.Popup({ offset: 24, maxWidth: "none", anchor: phone ? "top" : undefined, focusAfterOpen: false })
@@ -630,14 +641,19 @@ $("nearest").addEventListener("click", () => {
     you = new mapboxgl.Marker({ color: css("magenta") }).setLngLat(here).addTo(map);
     if (!options.length) {
       track("nearest_result", { found: false });
+      if (innerWidth <= 720) snapView([here]);
       return toast("No pudding anywhere nearby right now. 😭");
     }
     const { s, d } = options[0];
     track("nearest_result", { found: true, store: s.name, status: s.status, miles: +d.toFixed(1) });
     const coords = [s.lng, s.lat];
-    map.fitBounds([here, coords], { padding: { top: 260, bottom: 80, left: 60, right: 60 }, maxZoom: 15,
-      duration: reducedMotion ? 0 : 1200 });
-    openStore(s, coords, `${d < 0.1 ? "Right here" : d.toFixed(1) + " mi away"}.`);
+    const away = `${d < 0.1 ? "Right here" : d.toFixed(1) + " mi away"}.`;
+    if (innerWidth <= 720) openStore(s, coords, away, [here, coords]);
+    else {
+      map.fitBounds([here, coords], { padding: { top: 260, bottom: 80, left: 60, right: 60 }, maxZoom: 15,
+        duration: reducedMotion ? 0 : 1200 });
+      openStore(s, coords, away);
+    }
   }, (error) => {
     track("nearest_result", { found: false, location_error: error.code });
     toast("Couldn't get your location.");
