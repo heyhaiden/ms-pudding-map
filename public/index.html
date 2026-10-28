@@ -204,6 +204,12 @@ window.track = (() => {
     background: var(--accent); color: var(--on-accent); }
   .makers .links svg { width: 16px; height: 16px; }
   .crew .small { margin: 12px 0 0; font-size: 11px; opacity: .7; }
+  .story p { margin: 0 0 8px; font-size: 15px; line-height: 1.45; }
+  .story b { color: var(--headline); }
+  .story .nowrap { white-space: nowrap; }
+  #baked { margin-top: 16px; }
+  #baked .eyebrow { margin-bottom: 8px; }
+  #baked[hidden] { display: none; }
   .fold { display: none; position: absolute; top: 6px; right: 6px; width: 44px; height: 44px; padding: 10px;
     border: 0; border-radius: 50%; background: transparent; color: var(--ink); cursor: pointer; z-index: 1; }
   .fold svg { width: 24px; height: 24px; display: block; transition: transform .25s; }
@@ -240,7 +246,7 @@ window.track = (() => {
 <body>
 <div id="map" role="region" aria-label="Map of M&S stores around London and pudding stock"></div>
 <main class="card" aria-live="polite">
-  <button class="team" id="team" type="button" aria-label="Meet the team" aria-haspopup="dialog"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8.5" cy="8" r="3.3" fill="currentColor"/><circle cx="16.5" cy="9" r="2.6" fill="currentColor"/><path d="M2.5 20c0-3.6 2.7-6 6-6s6 2.4 6 6Z" fill="currentColor"/><path d="M14.3 14.6c.7-.4 1.4-.6 2.2-.6 2.8 0 5 2 5 5v1h-6" fill="currentColor"/></svg></button>
+  <button class="team" id="team" type="button" aria-label="What is this?" aria-haspopup="dialog"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.6 8.8a3.5 3.5 0 0 1 6.8 1.1c0 2.4-3.4 2.9-3.4 5" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="19.6" r="1.8" fill="currentColor"/></svg></button>
   <button class="mode" id="mode" type="button"></button>
   <button class="fold" id="fold" type="button" aria-expanded="true" aria-controls="more" aria-label="Minimise">
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 15l6-6 6 6" fill="none" stroke="currentColor"
@@ -260,14 +266,23 @@ window.track = (() => {
   </div>
   <ul class="legend" id="legend" aria-label="Show or hide stores by stock"></ul>
   <div class="trend" id="trend" hidden></div>
-  <p class="meta"><span id="updated"></span> · Unofficial fan map, not affiliated with M&S</p>
+  <p class="meta"><span id="updated"></span></p>
   </div>
 </main>
 <dialog class="crew" id="crew" aria-labelledby="crew-title">
   <button class="close" id="crew-close" type="button" aria-label="Close">×</button>
-  <p class="eyebrow">Baked by</p>
-  <h2 id="crew-title">Meet the team</h2>
-  <ul class="makers" id="makers"></ul>
+  <p class="eyebrow">The story</p>
+  <h2 id="crew-title">Why does this exist?</h2>
+  <div class="story">
+    <p>We wanted the banana pudding. Every M&S we tried had sold out. 😩</p>
+    <p>So we built a map that checks every store near London every 30 minutes, and we finally found one.</p>
+    <p>Then it clicked: why stop at pudding? Every viral M&S treat sells out the same way.</p>
+    <p>Now we track them all, so you can find yours too. <b>For the people, by the <span class="nowrap">people.</span></b><span class="nowrap"> 🍮</span></p>
+  </div>
+  <div id="baked" hidden>
+    <p class="eyebrow">Baked by</p>
+    <ul class="makers" id="makers"></ul>
+  </div>
   <p class="small">An unofficial fan project. Not affiliated with M&S.</p>
 </dialog>
 <div class="toast" id="toast" role="status"></div>
@@ -761,12 +776,12 @@ function showTeam() {
     $("makers").append(li);
   }
   $("crew").showModal();
-  track("team_opened");
+  track("about_opened");
 }
 $("team").addEventListener("click", showTeam);
-// Hidden on the live site until the bios and links are filled in; dev always shows it.
+// "Baked by" stays hidden on the live site until the bios and links are filled in; dev always shows it.
 const TEAM_READY = false;
-$("team").hidden = !(TEAM_READY || DEV);
+$("baked").hidden = !(TEAM_READY || DEV);
 $("crew-close").addEventListener("click", () => $("crew").close());
 // A click on the dimmed backdrop lands on the dialog element itself.
 $("crew").addEventListener("click", (e) => { if (e.target === $("crew")) $("crew").close(); });
