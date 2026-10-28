@@ -167,7 +167,8 @@ window.track = (() => {
   .pop .gif { display: block; width: 100%; height: 140px; object-fit: cover; border-radius: 10px;
     background: var(--cream); }
   .pop .quip { line-height: 1.4; }
-  .pop > .directions { margin-top: 36px !important; } /* 12px gap + 36px: Directions sits 48px under the quip */
+  /* 12px flex gap + 12px: Directions sits one step below the quip, on desktop and phones. */
+  .pop > .directions { margin-top: 12px !important; }
   .pill { display: inline-block; padding: 2px 10px; border-radius: 999px; color: #fff; font-weight: 700; font-size: 12px; }
   .pill.not_sold, .pill.unknown { background: var(--cream) !important; color: var(--chocolate); }
   .pop p { margin: 6px 0 0; font-size: 13px; }
