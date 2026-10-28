@@ -145,8 +145,10 @@ window.track = (() => {
   /* A white disc keeps the close button readable over a GIF. */
   .mapboxgl-popup-close-button { top: 8px; right: 8px; width: 28px; height: 28px; padding: 0; border-radius: 50%;
     background: rgba(255, 255, 255, .92); color: var(--chocolate); font-size: 18px; line-height: 28px; z-index: 1; }
-  .pop h2 { margin: 0 22px 6px 0; font: 400 19px/1.25 "Bagel Fat One", sans-serif; white-space: nowrap; overflow: hidden;
-    text-overflow: ellipsis; }
+  /* Names get two lines (room is always kept for both, so every card is the same size). */
+  .pop h2 { margin: 0 30px 6px 0; min-height: calc(2 * 1.15em); font: 400 19px/1.15 "Bagel Fat One", sans-serif;
+    display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+  .pop h2.long { font-size: 16px; min-height: calc(2 * 1.15 * 19px); }
   .pop .gif { display: block; width: 100%; height: 140px; margin: 0 0 10px; object-fit: cover; border-radius: 10px;
     background: var(--cream); }
   .pop .quip { min-height: calc(2 * 1.4em); line-height: 1.4; }
@@ -464,6 +466,10 @@ const randomGif = (status) => {
   return list.length ? list[Math.floor(Math.random() * list.length)] : null;
 };
 
+// "Camden Town Simply Food" -> "Camden Town": every store here is M&S food, so the format adds nothing. M&S also
+// cuts names at 35 characters ("…Simply Foo"), and title case turns NHS into "Nhs".
+const storeName = (name) => name.replace(/\s+Simply Foo(d)?\b/i, "").replace(/\bNhs\b/g, "NHS").trim();
+
 let popup;
 function openStore(s, coordinates, extra = "") {
   const box = document.createElement("div");
@@ -471,7 +477,9 @@ function openStore(s, coordinates, extra = "") {
   const gifUrl = randomGif(s.status);
   const gif = gifUrl ? Object.assign(new Image(260, 140), { className: "gif", src: gifUrl, alt: "" }) : null;
   const name = document.createElement("h2");
-  name.textContent = s.name;
+  name.textContent = storeName(s.name);
+  // The longest few names step down a size so they still fit two lines.
+  name.classList.toggle("long", name.textContent.length > 28);
   name.title = s.name;
   const pill = document.createElement("span");
   pill.className = "pill " + s.status;
