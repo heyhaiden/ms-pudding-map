@@ -199,9 +199,8 @@ window.track = (() => {
   .makers .face { position: relative; width: 104px; height: 104px; display: grid; place-items: center; overflow: hidden;
     border-radius: 50%; background: var(--accent); color: var(--on-accent); border: 3px solid var(--chocolate);
     box-shadow: 0 3px 0 var(--chocolate); font: 400 44px/1 "Bagel Fat One", "DM Sans", sans-serif; }
-  /* A touch larger than the circle, so the border clips the illustration's curved bottom with no gap. */
-  .makers .face img { position: absolute; inset: -4px; width: calc(100% + 8px); height: calc(100% + 8px);
-    object-fit: cover; }
+  /* 90% size and sat low for headroom; it runs past the bottom so the border clips the curve with no gap. */
+  .makers .face img { position: absolute; left: 5%; bottom: -5px; width: 90%; height: 90%; object-fit: cover; }
   .makers .who { font: 400 20px/1.1 "Bagel Fat One", "DM Sans", sans-serif; }
   .makers .links { display: flex; gap: 8px; }
   .makers .links a { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%;
