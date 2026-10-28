@@ -176,7 +176,30 @@ window.track = (() => {
   .mode { position: fixed; top: max(16px, env(safe-area-inset-top)); right: 16px; z-index: 2; width: 48px; height: 48px;
     padding: 11px; border: 3px solid var(--chocolate); border-radius: 50%; background: var(--card); color: var(--ink);
     box-shadow: 0 3px 0 var(--chocolate); cursor: pointer; }
-  .mode svg { width: 20px; height: 20px; display: block; }
+  .mode svg, .team svg { width: 20px; height: 20px; display: block; }
+  .team { position: fixed; top: max(16px, env(safe-area-inset-top)); right: 72px; z-index: 2; width: 48px; height: 48px;
+    padding: 11px; border: 3px solid var(--chocolate); border-radius: 50%; background: var(--card); color: var(--ink);
+    box-shadow: 0 3px 0 var(--chocolate); cursor: pointer; transition: background-color .35s, color .35s; }
+  /* Meet the team: a small dialog in the current flavour's colours. */
+  .crew { width: min(400px, calc(100% - 32px)); padding: 24px 22px 18px; border: 3px solid var(--chocolate);
+    border-radius: 24px; background: var(--card); color: var(--ink); box-shadow: 0 5px 0 var(--chocolate); }
+  .crew[open] { animation: pop .22s ease-out; }
+  .crew::backdrop { background: rgba(30, 15, 8, .45); backdrop-filter: blur(3px); }
+  .crew h2 { margin: 2px 0 14px; font: 400 32px/1 "Bagel Fat One", "DM Sans", sans-serif; color: var(--headline); }
+  .crew .close { position: absolute; top: 8px; right: 10px; width: 40px; height: 40px; border: 0; background: none;
+    color: var(--ink); font-size: 26px; line-height: 1; cursor: pointer; }
+  .makers { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+  .makers li { display: grid; grid-template-columns: 56px 1fr; gap: 4px 12px; align-items: center; padding: 12px;
+    border-radius: 16px; background: var(--chip); }
+  .makers .face { grid-row: span 3; width: 56px; height: 56px; display: grid; place-items: center; border-radius: 50%;
+    background: var(--accent); color: var(--on-accent); border: 3px solid var(--chocolate); font-size: 26px; }
+  .makers .who { font: 400 20px/1.1 "Bagel Fat One", "DM Sans", sans-serif; }
+  .makers .bio { margin: 0; font-size: 13px; opacity: .85; }
+  .makers .links { display: flex; gap: 6px; }
+  .makers .links a { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%;
+    background: var(--accent); color: var(--on-accent); }
+  .makers .links svg { width: 16px; height: 16px; }
+  .crew .small { margin: 12px 0 0; font-size: 11px; opacity: .7; }
   .fold { display: none; position: absolute; top: 6px; right: 6px; width: 44px; height: 44px; padding: 10px;
     border: 0; border-radius: 50%; background: transparent; color: var(--ink); cursor: pointer; z-index: 1; }
   .fold svg { width: 24px; height: 24px; display: block; transition: transform .25s; }
@@ -187,7 +210,9 @@ window.track = (() => {
     /* Phones: the card spans the top, so the toggle sits inside it, left of the minimise button. */
     .mode { position: absolute; top: 6px; right: 50px; width: 44px; height: 44px; padding: 12px; border: 0;
       background: transparent; box-shadow: none; }
-    .title { padding-right: 84px; }
+    .team { position: absolute; top: 6px; right: 94px; width: 44px; height: 44px; padding: 12px; border: 0;
+      background: transparent; box-shadow: none; }
+    .title { padding-right: 128px; }
     .card.folded h1 { font-size: 22px; }
     .card.folded .answer { font-size: 30px; margin: 4px 0 0; }
   }
@@ -210,6 +235,7 @@ window.track = (() => {
 <body>
 <div id="map" role="region" aria-label="Map of M&S stores around London and pudding stock"></div>
 <main class="card" aria-live="polite">
+  <button class="team" id="team" type="button" aria-label="Meet the team" aria-haspopup="dialog"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8.5" cy="8" r="3.3" fill="currentColor"/><circle cx="16.5" cy="9" r="2.6" fill="currentColor"/><path d="M2.5 20c0-3.6 2.7-6 6-6s6 2.4 6 6Z" fill="currentColor"/><path d="M14.3 14.6c.7-.4 1.4-.6 2.2-.6 2.8 0 5 2 5 5v1h-6" fill="currentColor"/></svg></button>
   <button class="mode" id="mode" type="button"></button>
   <button class="fold" id="fold" type="button" aria-expanded="true" aria-controls="more" aria-label="Minimise">
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 15l6-6 6 6" fill="none" stroke="currentColor"
@@ -217,7 +243,7 @@ window.track = (() => {
   <p class="eyebrow"><span class="live" aria-hidden="true"></span>Live</p>
   <div class="title">
     <h1>Is the <button class="pick" id="pick" type="button" aria-haspopup="listbox" aria-expanded="false"
-      aria-controls="menu"><span id="pick-name">Pudding</span><svg class="chev" hidden viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button> In?</h1>
+      aria-controls="menu"><span id="pick-name">Banana</span><svg class="chev" hidden viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button><br><span id="kind">Pudding</span> In?</h1>
     <ul class="menu" id="menu" role="listbox" aria-label="Choose a flavour" hidden></ul>
   </div>
   <p class="answer" id="answer">…</p>
@@ -232,6 +258,13 @@ window.track = (() => {
   <p class="meta"><span id="updated"></span> · Unofficial fan map, not affiliated with M&S</p>
   </div>
 </main>
+<dialog class="crew" id="crew" aria-labelledby="crew-title">
+  <button class="close" id="crew-close" type="button" aria-label="Close">×</button>
+  <p class="eyebrow">Baked by</p>
+  <h2 id="crew-title">Meet the team</h2>
+  <ul class="makers" id="makers"></ul>
+  <p class="small">An unofficial fan project. Not affiliated with M&S.</p>
+</dialog>
 <div class="toast" id="toast" role="status"></div>
 <script src="config.js"></script>
 <script>
@@ -284,8 +317,10 @@ function stats() {
 
 function render() {
   const { c, sold, have, pct } = stats(), p = product();
-  // The arrow stays glued to the last word, so long names never strand it on a line of its own.
-  const words = p.short.split(" "), last = words.pop();
+  // Only the flavour is the picker; the kind (Pudding, Crumble…) sits on the next line with "In?".
+  // The arrow stays glued to the flavour's last word, so it never strands on a line of its own.
+  const words = p.flavour.split(" "), last = words.pop();
+  $("kind").textContent = p.kind;
   $("pick-name").innerHTML = (words.length ? words.join(" ") + " " : "") +
     `<span class="nowrap">${last}${document.querySelector(".pick .chev").outerHTML.replace(" hidden", "")}</span>`;
   $("answer").textContent = verdict(have, pct);
@@ -667,6 +702,48 @@ $("menu").addEventListener("keydown", (e) => {
 });
 document.addEventListener("click", (e) => { if (!e.target.closest(".title")) closeMenu(); });
 document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("menu").hidden) { closeMenu(); $("pick").focus(); } });
+
+// ----- Meet the team -----
+// Edit names, bios and links here. Networks with icons: x, instagram, tiktok, linkedin, github, web.
+const TEAM = [
+  { name: "Haiden", face: "🍮", bio: "One-line bio goes here.", links: { github: "https://github.com/heyhaiden" } },
+  { name: "Co-maker", face: "🥄", bio: "One-line bio goes here.", links: {} },
+];
+const SOCIAL = {
+  x: '<path d="M18.9 2H22l-7.6 8.7L23 22h-7l-5.5-7.2L4.2 22H1l8.1-9.3L1 2h7.2l5 6.6zM17.7 20h1.7L7.4 3.9H5.5z" fill="currentColor"/>',
+  instagram: '<rect x="3" y="3" width="18" height="18" rx="5" fill="none" stroke="currentColor" stroke-width="2.4"/><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="2.4"/><circle cx="17.3" cy="6.7" r="1.4" fill="currentColor"/>',
+  tiktok: '<path d="M16 3c.4 2.4 2 4 4.5 4.2v3.2c-1.6 0-3.1-.5-4.5-1.4v6.6A6.2 6.2 0 1 1 9.8 9.4v3.3a3 3 0 1 0 2.9 3V3z" fill="currentColor"/>',
+  linkedin: '<path d="M4 3a2 2 0 1 1 0 4 2 2 0 0 1 0-4zM2.5 9h3v12h-3zM9 9h2.9v1.7c.4-.8 1.5-1.9 3.4-1.9 3.6 0 4.2 2.4 4.2 5.4V21h-3v-6c0-1.5 0-3.3-2-3.3s-2.4 1.6-2.4 3.2V21H9z" fill="currentColor"/>',
+  github: '<path d="M12 2a10 10 0 0 0-3.2 19.5c.5.1.7-.2.7-.5v-1.7c-2.8.6-3.4-1.3-3.4-1.3-.5-1.2-1.1-1.5-1.1-1.5-.9-.6.1-.6.1-.6 1 .1 1.5 1 1.5 1 .9 1.5 2.3 1.1 2.9.8.1-.6.3-1.1.6-1.3-2.2-.3-4.6-1.1-4.6-5a3.9 3.9 0 0 1 1-2.7c-.1-.3-.4-1.3.1-2.7 0 0 .8-.3 2.7 1a9.4 9.4 0 0 1 5 0c1.9-1.3 2.7-1 2.7-1 .5 1.4.2 2.4.1 2.7a3.9 3.9 0 0 1 1 2.7c0 3.9-2.4 4.7-4.6 5 .4.3.7.9.7 1.8V21c0 .3.2.6.7.5A10 10 0 0 0 12 2z" fill="currentColor"/>',
+  web: '<circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M3 12h18M12 3c2.5 2.5 3.8 5.5 3.8 9s-1.3 6.5-3.8 9c-2.5-2.5-3.8-5.5-3.8-9S9.5 5.5 12 3z" fill="none" stroke="currentColor" stroke-width="2.2"/>',
+};
+function showTeam() {
+  $("makers").innerHTML = "";
+  for (const m of TEAM) {
+    const li = document.createElement("li");
+    li.innerHTML = `<span class="face" aria-hidden="true"></span><span class="who"></span><p class="bio"></p><span class="links"></span>`;
+    li.querySelector(".face").textContent = m.face;
+    li.querySelector(".who").textContent = m.name;
+    li.querySelector(".bio").textContent = m.bio;
+    for (const [network, url] of Object.entries(m.links)) {
+      const a = document.createElement("a");
+      a.href = url;
+      a.target = "_blank";
+      a.rel = "noopener";
+      a.setAttribute("aria-label", `${m.name} on ${network}`);
+      a.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true">${SOCIAL[network] || SOCIAL.web}</svg>`;
+      a.addEventListener("click", () => track("team_link_clicked", { maker: m.name, network }));
+      li.querySelector(".links").append(a);
+    }
+    $("makers").append(li);
+  }
+  $("crew").showModal();
+  track("team_opened");
+}
+$("team").addEventListener("click", showTeam);
+$("crew-close").addEventListener("click", () => $("crew").close());
+// A click on the dimmed backdrop lands on the dialog element itself.
+$("crew").addEventListener("click", (e) => { if (e.target === $("crew")) $("crew").close(); });
 
 async function load() {
   try {
