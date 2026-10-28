@@ -45,7 +45,7 @@ window.track = (() => {
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=DM+Sans:opsz,wght@9..40,400;9..40,600;9..40,700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=DM+Sans:opsz,wght@9..40,400;9..40,600;9..40,700&family=Inter:wght@400;700&display=swap" rel="stylesheet">
 <link href="https://api.mapbox.com/mapbox-gl-js/v3.7.0/mapbox-gl.css" rel="stylesheet">
 <script src="https://api.mapbox.com/mapbox-gl-js/v3.7.0/mapbox-gl.js"></script>
 <style>
@@ -216,6 +216,33 @@ window.track = (() => {
   .fold svg { width: 24px; height: 24px; display: block; transition: transform .25s; }
   .card.folded .fold svg { transform: rotate(180deg); }
   .card.folded .more { display: none; }
+  /* First screen: choose a flavour before the map. */
+  .chooser { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; padding: 16px;
+    background: rgba(30, 15, 8, .35); backdrop-filter: blur(4px); }
+  .chooser[hidden] { display: none; }
+  .chooser-panel { width: min(936px, 100%); max-height: calc(100dvh - 32px); overflow: hidden auto; padding: 50px 0 41px;
+    background: #FFF8EA; border: 1px solid #E5D8C7; border-radius: 30px; color: #3B2016;
+    font-family: Inter, "DM Sans", system-ui, sans-serif; animation: pop .25s ease-out; }
+  .chooser-head { display: grid; gap: 10px; max-width: 594px; margin: 0 auto; padding: 0 21px; text-align: center; }
+  .chooser-head p, .chooser-head h2 { margin: 0; }
+  .chooser-eyebrow { font-size: 11px; font-weight: 700; color: #B62689; }
+  .chooser-head h2 { font-size: 35px; font-weight: 700; line-height: 1.2; }
+  .chooser-sub { font-size: 16px; }
+  .chooser-head h2, .chooser-sub { text-wrap: balance; }
+  .chooser-cards { display: flex; gap: 15px; margin: 34px 0 0; padding: 0 50px 8px; list-style: none; overflow-x: auto;
+    scroll-snap-type: x mandatory; scroll-padding: 0 50px; scrollbar-width: none; }
+  .chooser-cards::-webkit-scrollbar { display: none; }
+  .chooser-card { flex: none; width: 264px; display: flex; flex-direction: column; gap: 10px; padding: 14px;
+    background: #fff; border: 1px solid #E5D8C7; border-radius: 18px; scroll-snap-align: start; cursor: pointer;
+    text-align: left; }
+  .chooser-card[aria-selected="true"] { padding: 13px; border: 2px solid #B62689; }
+  .chooser-card img { width: 100%; height: 142px; object-fit: cover; border-radius: 12px; }
+  .chooser-card p { margin: 0; }
+  .chooser-card .new { font-size: 10px; font-weight: 700; color: #B62689; }
+  .chooser-card .name { font-size: 15px; font-weight: 700; }
+  .chooser-card .status { font-size: 12px; color: #735B50; }
+  .chooser-card .find { height: 43px; margin-top: auto; border: 0; border-radius: 23px; background: #B62689; color: #fff;
+    font: 700 13px Inter, "DM Sans", sans-serif; cursor: pointer; }
   @media (max-width: 720px) {
     .fold { display: block; }
     /* Phones: the card spans the top, so the toggle sits inside it, left of the minimise button. */
@@ -229,6 +256,9 @@ window.track = (() => {
     .card.folded .answer { font-size: 30px; margin: 4px 0 0; }
   }
   @media (max-width: 520px) {
+    .chooser-head h2 { font-size: 28px; }
+    .chooser-sub { font-size: 13px; }
+    .chooser-cards { padding: 0 38px 8px; scroll-padding: 0 38px; }
     .crew h2 { font-size: 24px; margin-left: 30px; margin-right: 30px; }
     .card { padding: 14px 16px 12px; border-radius: 18px; }
     h1 { font-size: 26px; }
@@ -283,6 +313,16 @@ window.track = (() => {
   </div>
   <p class="small">An unofficial fan project. Not affiliated with M&S.</p>
 </dialog>
+<section class="chooser" id="chooser" role="dialog" aria-modal="true" aria-labelledby="chooser-title" hidden>
+  <div class="chooser-panel">
+    <div class="chooser-head">
+      <p class="chooser-eyebrow"><span aria-hidden="true">●</span> LIVE PUDDING TRACKER</p>
+      <h2 id="chooser-title">Choose your pudding 🍮</h2>
+      <p class="chooser-sub">Pick a flavour and see which stores near you have it.</p>
+    </div>
+    <ul class="chooser-cards" id="chooser-cards"></ul>
+  </div>
+</section>
 <div class="toast" id="toast" role="status"></div>
 <script src="config.js"></script>
 <script>
@@ -794,16 +834,66 @@ $("crew-close").addEventListener("click", () => $("crew").close());
 // A click on the dimmed backdrop lands on the dialog element itself.
 $("crew").addEventListener("click", (e) => { if (e.target === $("crew")) $("crew").close(); });
 
+// ----- First screen: choose a flavour, then the map -----
+// Shown on every visit except shared links (?p=…), which go straight to that flavour's map.
+const startOnChooser = !new URLSearchParams(location.search).has("p");
+function chooserStatus(p) {
+  const c = p.counts, sold = c.in + c.low + c.out, pct = sold ? (c.in + c.low) / sold : 0;
+  if (!c.in && !c.low) return "Sold out everywhere";
+  if (pct >= 0.5) return "Available nearby";
+  if (pct >= 0.15) return "Going fast";
+  return "Limited stock";
+}
+function showChooser() {
+  const current = product();
+  $("chooser-cards").innerHTML = "";
+  for (const p of data.products) {
+    const li = document.createElement("li");
+    li.className = "chooser-card";
+    li.dataset.slug = p.slug;
+    li.setAttribute("aria-selected", p.slug === current.slug);
+    li.innerHTML = `<img alt="" src="packs/${p.slug}.png" width="236" height="142"><p class="new">NEW IN</p>
+      <p class="name"></p><p class="status"></p><button class="find" type="button">Find in store</button>`;
+    li.querySelector(".name").textContent = p.name;
+    li.querySelector(".status").textContent = chooserStatus(p);
+    li.querySelector("img").alt = p.name;
+    li.querySelector(".find").setAttribute("aria-label", `Find ${p.name} in store`);
+    $("chooser-cards").append(li);
+  }
+  $("chooser").hidden = false;
+  // Start the row on the remembered flavour.
+  $("chooser-cards").querySelector('[aria-selected="true"]')?.scrollIntoView({ inline: "start", block: "nearest" });
+  track("chooser_shown");
+}
+function closeChooser() {
+  $("chooser").hidden = true;
+}
+$("chooser-cards").addEventListener("click", (e) => {
+  const cardEl = e.target.closest(".chooser-card");
+  if (!cardEl) return;
+  for (const c of $("chooser-cards").children) c.setAttribute("aria-selected", c === cardEl);
+  if (!e.target.closest(".find")) return;
+  closeChooser();
+  track("chooser_picked", { product: data.products.find((p) => p.slug === cardEl.dataset.slug).short });
+  if (cardEl.dataset.slug === product().slug) tuck();
+  else choose(cardEl.dataset.slug, "chooser");
+});
+// Esc or a click outside the panel keeps the current flavour and shows the map.
+$("chooser").addEventListener("click", (e) => { if (e.target === $("chooser")) closeChooser(); });
+document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("chooser").hidden) closeChooser(); });
+
 async function load() {
   try {
     const [stock, past] = await Promise.all([
       fetch("stock.json?t=" + Date.now()).then((r) => r.json()),
       fetch("history.json?t=" + Date.now()).then((r) => (r.ok ? r.json() : null)).catch(() => null),
     ]);
+    const first = !data;
     data = stock;
     history = past;
     render();
     trend();
+    if (first && startOnChooser) showChooser();
   } catch (error) {
     $("headline").textContent = "Couldn't load stock. Trying again shortly.";
   }
