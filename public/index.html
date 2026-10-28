@@ -587,8 +587,12 @@ function openStore(s, coordinates, extra = "", frame) {
   const phone = innerWidth <= 720;
   if (phone) snapView(frame || [coordinates]);
   select(s.id);
+  // Anchor stays put for the life of the card. Leaving it unset makes Mapbox swap the
+  // card above and below the dot whenever a zoom changes which side has room.
+  const y = map.project(coordinates).y;
+  const anchor = phone || y < innerHeight / 2 ? "top" : "bottom";
   // focusAfterOpen off: otherwise the first link gets a focus ring every time a card opens.
-  popup = new mapboxgl.Popup({ offset: 24, maxWidth: "none", anchor: phone ? "top" : undefined, focusAfterOpen: false })
+  popup = new mapboxgl.Popup({ offset: 24, maxWidth: "none", anchor, focusAfterOpen: false })
     .setLngLat(coordinates).setDOMContent(box).addTo(map);
   const opened = popup;
   opened.on("close", () => { if (popup === opened) select(null); });
