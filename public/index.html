@@ -67,7 +67,7 @@ window.track = (() => {
   /* Flavour skins: --card, --headline, --ink, --accent, --on-accent and --water are set from data/products.json. */
   /* The chooser morphs into the card's exact spot; the card then swaps in at once and only its text fades in. */
   .card { transition: background-color .35s, color .35s; }
-  h1, .btn.primary { transition: color .35s, background-color .35s; }
+  h1, .btn.primary { transition: color .35s, background-color .35s, font-size .28s cubic-bezier(.2,.8,.2,1); }
   .title { position: relative; }
   .pick { padding: 0; border: 0; background: none; color: inherit; font: inherit; cursor: pointer; text-align: left;
     text-decoration: underline; text-decoration-thickness: 3px; text-underline-offset: 4px; }
@@ -111,7 +111,7 @@ window.track = (() => {
   h1 a { color: inherit; text-decoration: underline; text-decoration-thickness: 3px; text-underline-offset: 4px; }
   /* The chunky verdict sits a hair left of plain text, so it's nudged in to share the stock line's edge. */
   .answer { margin: 10px 0 8px; padding-left: 1px; font: 400 52px/1 "Bagel Fat One", "DM Sans", sans-serif;
-    color: var(--ink); }
+    color: var(--ink); transition: font-size .28s cubic-bezier(.2,.8,.2,1), margin .28s cubic-bezier(.2,.8,.2,1); }
   .headline { margin: 0 0 14px; font-size: 15px; line-height: 1.45; }
   .headline b { font-weight: 700; font-variant-numeric: lining-nums tabular-nums; }
 
@@ -297,8 +297,9 @@ window.track = (() => {
       -webkit-overflow-scrolling: touch; }
     .legend::-webkit-scrollbar { display: none; }
     .legend li { flex: none; }
-    .card.folded h1 { font-size: 22px; }
-    .card.folded .answer { font-size: 30px; margin: 4px 0 0; }
+    /* compact is set at the start of the fold so the type eases down with the card, not after it. */
+    .card.folded h1, .card.compact h1 { font-size: 22px; }
+    .card.folded .answer, .card.compact .answer { font-size: 30px; margin: 4px 0 0; }
   }
   @media (max-width: 520px) {
     .chooser-head h2 { font-size: 28px; }
@@ -316,7 +317,7 @@ window.track = (() => {
     .meta { margin-top: 8px; font-size: 11px; }
   }
   @media (prefers-reduced-motion: reduce) {
-    .btn, .toast, .week summary::before, .fold svg, .card, h1, .btn.primary { transition: none; }
+    .btn, .toast, .week summary::before, .fold svg, .card, h1, .answer, .btn.primary { transition: none; }
     .live, .menu, .chooser-card, .chooser-panel, .tracker { animation: none; }
     .chooser-card, .card, .team { transition: none; }
   }
@@ -665,11 +666,14 @@ function fold(folded, animate = true) {
   const cardEl = document.querySelector(".card"), more = $("more"), button = $("fold");
   button.setAttribute("aria-expanded", String(!folded));
   button.setAttribute("aria-label", folded ? "Expand" : "Minimise");
+  // Shrinking the type starts with the fold. Changing flavour tucks through here too.
+  const run = fold.n = (fold.n || 0) + 1;
+  cardEl.classList.toggle("compact", folded);
   if (!animate || reducedMotion) return cardEl.classList.toggle("folded", folded);
-  const full = more.scrollHeight + "px";
   if (folded) {
-    more.animate({ height: [full, "0px"], opacity: [1, 0] }, { duration: 260, easing: "cubic-bezier(.2,.8,.2,1)" })
-      .onfinish = () => cardEl.classList.add("folded");
+    const full = more.scrollHeight + "px";
+    more.animate({ height: [full, "0px"], opacity: [1, 0] }, { duration: 280, easing: "cubic-bezier(.2,.8,.2,1)" })
+      .onfinish = () => { if (run === fold.n) cardEl.classList.add("folded"); };
   } else {
     cardEl.classList.remove("folded");
     more.animate({ height: ["0px", more.scrollHeight + "px"], opacity: [0, 1] },
@@ -677,13 +681,13 @@ function fold(folded, animate = true) {
   }
 }
 $("fold").addEventListener("click", () => {
-  const folded = !document.querySelector(".card").classList.contains("folded");
+  const folded = !document.querySelector(".card").classList.contains("compact");
   track("card_folded", { folded });
   fold(folded);
 });
 // Phones open with the full card every time, then tuck it away once someone picks a flavour or asks for the
 // nearest pudding, so the map has room.
-const tuck = () => { if (innerWidth <= 720 && !document.querySelector(".card").classList.contains("folded")) fold(true); };
+const tuck = () => { if (innerWidth <= 720 && !document.querySelector(".card").classList.contains("compact")) fold(true); };
 
 $("legend").addEventListener("click", (e) => {
   const button = e.target.closest("button");
