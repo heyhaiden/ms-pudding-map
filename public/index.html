@@ -3,9 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Is the Pudding In?</title>
-<meta name="description" content="Live map: which M&S stores in and around London have the new puddings and cookie doughs right now.">
-<meta property="og:title" content="Is the Pudding In?">
+<title>Out of Pud · M&S puddings in stock near London</title>
+<meta name="description" content="Out of Pud: a live map of which M&S stores in and around London have the viral banana pudding, crumbles and cookie doughs in stock. Checked every 30 minutes. Unofficial fan project.">
+<link rel="canonical" href="https://outofpud.com/">
+<meta property="og:title" content="Out of Pud">
+<meta property="og:site_name" content="Out of Pud">
+<meta property="og:url" content="https://outofpud.com/">
 <meta property="og:description" content="Live map of every M&S in and around London with the new puddings and cookie doughs in stock. Updated every 30 min.">
 <meta property="og:type" content="website">
 <!-- Deploy rewrites og.png to the site's absolute URL; scrapers ignore relative image paths. -->
@@ -15,7 +18,9 @@
 <meta property="og:image:alt" content="Map of M&S stores around London coloured by pudding stock">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#F6C344">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍮</text></svg>">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Out of Pud","url":"https://outofpud.com/"}</script>
+<link rel="icon" id="favicon" type="image/svg+xml" href="favicon.svg">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <script>
 // Analytics: PostHog (US). Only on the live site, or locally with ?analytics. Cookieless mode: nothing is stored on the
 // device, so no consent banner; PostHog counts unique visitors with a daily server-side hash instead (it must also be
@@ -240,7 +245,7 @@ window.track = (() => {
   .crew .mail svg { width: 20px; height: 20px; flex: none; }
   .crew .mail:hover { background: rgba(255,255,255,.85); }
   .crew .mail:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--chocolate); }
-  .crew .small { margin: 12px 0 0; font-size: 11px; opacity: .7; }
+  .crew .small { margin: 12px 0 0; font-size: 11px; opacity: .7; text-align: center; }
   .crew .eyebrow + .story { margin-top: 6px; }
   .story p { margin: 0 0 8px; font-size: 15px; line-height: 1.45; }
   .story b { color: var(--headline); }
@@ -881,6 +886,15 @@ function trend() {
 // ----- Skins: recolour the card, title, main button and map water to the selected pack -----
 const hex = (c) => [1, 3, 5].map((i) => parseInt(c.slice(i, i + 2), 16));
 const luminance = (c) => { const [r, g, b] = hex(c).map((v) => v / 255); return 0.2126 * r + 0.7152 * g + 0.0722 * b; };
+// The tab icon: public/favicon.svg (the "?" button, shadow and all) recoloured to the current pack.
+// Its shadow and strokes are a touch heavier than the button's so they survive at 16px.
+let faviconSvg = "";
+fetch("favicon.svg").then((r) => r.text()).then((svg) => {
+  faviconSvg = svg;
+  if (skin.colours) $("favicon").href = favicon(...skin.colours);
+}).catch(() => {});
+const favicon = (fill, ink) => faviconSvg && "data:image/svg+xml," + encodeURIComponent(
+  faviconSvg.replace("#F6C344", fill).replace('color="#3B2216"', `color="${ink}"`));
 function skin(p) {
   const k = p.skin, card = k.card;
   const vars = {
@@ -895,6 +909,9 @@ function skin(p) {
   const root = document.documentElement.style;
   for (const [name, value] of Object.entries(vars)) root.setProperty("--" + name, value);
   document.querySelector('meta[name="theme-color"]').content = card;
+  skin.colours = [card, k.text];
+  if (faviconSvg) $("favicon").href = favicon(card, k.text);
+  document.title = `${p.short} in stock? · Out of Pud`;
   window.trackContext = { product: p.short };
   if (mapReady && skin.water !== vars.water) theme();
   skin.water = vars.water;
