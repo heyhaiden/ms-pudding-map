@@ -899,12 +899,11 @@ function closeChooser() {
       backgroundColor: look.backgroundColor, boxShadow: look.boxShadow },
   ], timing).onfinish = () => {
     // Lined up: the real card takes over in the same frame (same shape and colour, so no flash), and only its
-    // text fades in, line by line.
+    // text fades in, line by line (a pure fade, no movement).
     document.body.classList.remove("choosing");
     const lines = [...card.children].filter((el) => getComputedStyle(el).display !== "none" && !el.matches(".team"));
-    const fades = lines.map((el, i) => el.animate(
-      [{ opacity: 0, transform: "translateY(6px)" }, { opacity: 1, transform: "none" }],
-      { duration: 320, delay: 40 * i, easing: "cubic-bezier(.2, .8, .2, 1)", fill: "backwards" }).finished);
+    const fades = lines.map((el, i) => el.animate([{ opacity: 0 }, { opacity: 1 }],
+      { duration: 520, delay: 40 * i, easing: "ease-in-out", fill: "backwards" }).finished);
     done(Promise.all(fades));
   };
 }
