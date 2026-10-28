@@ -1,4 +1,4 @@
-"""Read M&S stock for one product across every UK store and write public/stock.json.
+"""Read M&S stock for each product in data/products.json across stores around London; write public/stock.json.
 
 A real browser opens the product page, which gives it an M&S guest session. Every M&S call then runs as a fetch
 inside that page, the same calls the "Select your store" modal makes: range (which stores sell it) and one stock
@@ -23,10 +23,12 @@ from scripts.posthog_client import get_posthog_client
 from scripts.posthog_logs import get_posthog_logger
 from scripts.stock import join, stores_from
 
+# Any product page gives the browser a guest session; this one also owned the single-product history.
 PRODUCT = "61273052"
 PAGE = "https://www.marksandspencer.com/food/banana-caramel-and-pecan-pudding/p/fdp" + PRODUCT
 ROOT = Path(__file__).resolve().parent.parent
 STORES = ROOT / "data" / "stores.json"
+PRODUCTS = ROOT / "data" / "products.json"
 OUT = ROOT / "public" / "stock.json"
 OG = ROOT / "public" / "og.png"
 HISTORY = ROOT / "public" / "history.json"
@@ -248,41 +250,31 @@ def poll(driver, posthog_client, posthog_logger):
             )
         print(f"store list: {len(stores)} food stores from {len(SEEDS)} towns")
     stores = json.loads(STORES.read_text())["stores"]
-    found = checked(driver.run(STOCK_JS, [PRODUCT, [s["id"] for s in stores]]), "stock")
-    out, counts, missing = join(stores, found["ranged"], found["indicators"])
-    if missing:
-        print(f"warning: {len(missing)} stores sell it but aren't in the store list: {', '.join(missing[:20])}")
-    name = found["title"].split("|")[0].strip() or "M&S product"
-    OUT.write_text(json.dumps({"updated": now, "product": {"id": PRODUCT, "name": name, "url": PAGE},
-                               "counts": counts, "stores": out}, separators=(",", ":")) + "\n")
-    print(f"{name}: " + ", ".join(f"{n} {k}" for k, n in counts.items()))
-    stock = json.loads(OUT.read_text())
-    past = previous_history()
-    HISTORY.write_text(json.dumps(history.record(past, stock, datetime.now(timezone.utc)),
+    ids = [s["id"] for s in stores]
+    products, readings = [], {}
+    # One guest session covers every product: two M&S calls each (range + stock).
+    for product in json.loads(PRODUCTS.read_text()):
+        found = checked(driver.run(STOCK_JS, [product["id"], ids]), "stock for " + product["short"])
+        out, counts, missing = join(stores, found["ranged"], found["indicators"])
+        if missing:
+            print(f"warning: {product['short']}: {len(missing)} ranged stores aren't in the store list")
+        readings[product["id"]] = {s["id"]: s["status"] for s in out}
+        # One letter per store, in the same order as "stores", keeps the file small.
+        products.append({**product, "counts": counts, "statuses": "".join(history.CODE[s["status"]] for s in out)})
+        print(f"{product['short']}: " + ", ".join(f"{n} {k}" for k, n in counts.items()))
+        if posthog_client:
+            posthog_client.capture("stock_snapshot_published", properties={
+                "product": product["short"], "store_count": len(out), "in_stock_count": counts.get("in", 0),
+                "low_stock_count": counts.get("low", 0), "out_of_stock_count": counts.get("out", 0)})
+    stock = {"updated": now, "stores": stores, "products": products}
+    OUT.write_text(json.dumps(stock, separators=(",", ":")) + "\n")
+    past = history.upgrade(previous_history(), PRODUCT)
+    HISTORY.write_text(json.dumps(history.record(past, readings, datetime.now(timezone.utc)),
                                   separators=(",", ":")) + "\n")
     if posthog_logger:
-        posthog_logger.info(
-            "stock snapshot published",
-            extra={
-                "event": "stock_snapshot_published",
-                "store_count": len(out),
-                "in_stock_count": counts.get("in", 0),
-                "low_stock_count": counts.get("low", 0),
-                "out_of_stock_count": counts.get("out", 0),
-                "history_started": past is None,
-            },
-        )
-    if posthog_client:
-        posthog_client.capture(
-            "stock_snapshot_published",
-            properties={
-                "store_count": len(out),
-                "in_stock_count": counts.get("in", 0),
-                "low_stock_count": counts.get("low", 0),
-                "out_of_stock_count": counts.get("out", 0),
-                "history_started": past is None,
-            },
-        )
+        posthog_logger.info("stock snapshot published", extra={
+            "event": "stock_snapshot_published", "product_count": len(products), "store_count": len(stores),
+            "history_started": past is None})
     print(f"history: {'started' if past is None else 'added a reading'}")
     return stock
 
@@ -308,7 +300,7 @@ def main():
         sys.exit("Stock not updated; public/stock.json keeps the last good reading.")
     # After the driver closes: Playwright allows one sync session per thread. A failed preview keeps the old one.
     try:
-        og.render(stock, OG)
+        og.render(og.first_product(stock), OG)
     except Exception as error:
         print(f"warning: link preview not updated: {type(error).__name__}: {error}", file=sys.stderr)
 

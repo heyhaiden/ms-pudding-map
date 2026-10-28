@@ -1,0 +1,38 @@
+[
+  {
+    "id": "61273052", "slug": "banana-pudding", "short": "Banana Pudding",
+    "name": "Banana, Caramel & Pecan Pudding",
+    "url": "https://www.marksandspencer.com/food/banana-caramel-and-pecan-pudding/p/fdp61273052",
+    "skin": {"card": "#F6C344", "lettering": "#B5328C", "text": "#3B2216", "water": "#EBC6DD"}
+  },
+  {
+    "id": "61270768", "slug": "apple-crumble", "short": "Apple Crumble",
+    "name": "Apple & Custard Crumble",
+    "url": "https://www.marksandspencer.com/food/apple-and-custard-crumble/p/fdp61270768",
+    "skin": {"card": "#1F4D2B", "lettering": "#D4E65A", "text": "#F3EED8", "water": "#DCE7B4"}
+  },
+  {
+    "id": "61270769", "slug": "berry-crumble", "short": "Berry Crumble",
+    "name": "Berry, Apple & Custard Crumble",
+    "url": "https://www.marksandspencer.com/food/berry-apple-and-custard-crumble/p/fdp61270769",
+    "skin": {"card": "#3E2160", "lettering": "#F2A6D8", "text": "#F7E9F2", "water": "#F0CFE6"}
+  },
+  {
+    "id": "61273053", "slug": "choc-orange-pudding", "short": "Choc Orange Pudding",
+    "name": "Chocolate, Orange & Hazelnut Pudding",
+    "url": "https://www.marksandspencer.com/food/chocolate-orange-and-hazelnut-pudding/p/fdp61273053",
+    "skin": {"card": "#F28A1E", "lettering": "#4E2F96", "text": "#2A1A3D", "water": "#D9CFF2"}
+  },
+  {
+    "id": "61270725", "slug": "choc-cookie-dough", "short": "Choc Cookie Dough",
+    "name": "Double Chocolate Cookie Dough",
+    "url": "https://www.marksandspencer.com/food/double-chocolate-cookie-dough/p/fdp61270725",
+    "skin": {"card": "#3E2318", "lettering": "#BCA6EA", "text": "#F3E6D3", "water": "#DCD2F2"}
+  },
+  {
+    "id": "61270770", "slug": "raspberry-cookie-dough", "short": "Raspberry Cookie Dough",
+    "name": "Raspberry & White Chocolate Cookie Dough",
+    "url": "https://www.marksandspencer.com/food/raspberry-and-white-chocolate-cookie-dough/p/fdp61270770",
+    "skin": {"card": "#3E2318", "lettering": "#EC3A8E", "text": "#F3E6D3", "water": "#F6C6DC"}
+  }
+]

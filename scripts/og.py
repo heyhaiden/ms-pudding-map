@@ -7,6 +7,8 @@ import math
 import os
 from html import escape
 
+from scripts.history import CODE
+
 WIDTH, HEIGHT = 1200, 630
 COLOURS = {"in": "#1F9D5A", "low": "#E8891C", "out": "#D23A4E", "unknown": "#8C7B70"}
 COMPASS = ('<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="none" '
@@ -14,6 +16,14 @@ COMPASS = ('<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx=
            'fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>')
 # Draw the good news last so it sits on top.
 DRAW_ORDER = ("not_sold", "unknown", "out", "low", "in")
+
+
+def first_product(stock):
+    """The preview shows the first product in data/products.json, as the old single-product shape."""
+    product = stock["products"][0]
+    status = {code: name for name, code in CODE.items()}
+    stores = [{**s, "status": status[c]} for s, c in zip(stock["stores"], product["statuses"])]
+    return {"counts": product["counts"], "stores": stores}
 
 
 def verdict(have, pct):
