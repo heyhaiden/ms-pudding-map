@@ -22,13 +22,13 @@
 <link rel="icon" id="favicon" type="image/svg+xml" href="favicon.svg">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <script>
-// Analytics: PostHog (US). Only on the live site, or locally with ?analytics. Cookieless mode: nothing is stored on the
+// Analytics: PostHog (US). Only on the live site (outofpud.com, or the old github.io address), or locally with ?analytics. Cookieless mode: nothing is stored on the
 // device, so no consent banner; PostHog counts unique visitors with a daily server-side hash instead (it must also be
 // switched on in the PostHog project). Events before load are queued.
 window.track = (() => {
   const queue = [];
   let ready = false;
-  if (location.hostname.endsWith("github.io") || new URLSearchParams(location.search).has("analytics")) {
+  if (/(^|\.)outofpud\.com$|\.github\.io$/.test(location.hostname) || new URLSearchParams(location.search).has("analytics")) {
     const script = document.createElement("script");
     script.async = true;
     script.src = "https://us-assets.i.posthog.com/static/array.js";
