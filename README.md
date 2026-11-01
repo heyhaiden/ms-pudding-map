@@ -1,27 +1,58 @@
-# M&S Pudding Map
+# Out of Pud 🍮
 
-mcbroken-style map: are the new M&S puddings and cookie doughs in stock at each store around London?
+**Is the M&S pudding in? A live map that tells you which London stores still have it.**
 
-- `scripts/poll.py` opens the product page in a browser and runs M&S's own store-modal calls as in-page fetches:
-  range (stores that sell it) + one GraphQL `GetStockLevel` for all of them. No clicks, no model calls.
-- Products: `data/products.json` (id, slug, names, pack colours for the skin). Add one there and it's polled and
-  appears in the title's flavour menu. Any store with a stock reading counts as selling it.
-- Codes (from M&S `_app.js`): H/M = in stock, L = low, O = out. Not in range = not sold. No reading ('unknown') is
-  kept in the data but never shown to visitors.
-- Dev: localhost (or ?dev) shows a DEV pill that toggles the hidden 7-day grid in store popups.
-- Scope: London + ~50 miles (`BOX` in `poll.py`); the page opens on central London. Store list from 24 seed towns,
-  no ownedBys filter (station franchises sell M&S food), cached in `data/stores.json`, refreshed weekly.
-  Northern Ireland stores only have the `FOODSCATALOGUE` capability, not `FOOD`.
-- Keep load low: one poll per 30 min. Never present the site as M&S.
-- GitHub Actions (`.github/workflows/poll.yml`) polls and deploys `public/` to Pages. A failed poll doesn't deploy.
-- What starts it: cron-job.org POSTs `workflow_dispatch` every 30 min (fine-grained token, Actions read/write,
-  this repo only; it lives in cron-job.org, renew yearly). GitHub's own `schedule` is only a backup: it never fired
-  on this repo. Stale map? Check cron-job.org's history first, then `gh run list`.
-- Mapbox tokens: DEV in `.env` (local, allows 127.0.0.1:8731); PROD only in the GitHub secret `MAPBOX_TOKEN`
-  (URL-restricted to heyhaiden.github.io). Update prod with `gh secret set MAPBOX_TOKEN`, never `-f .env`.
-- If Actions gets blocked: `uv run --with-editable ../jev-ultrafast python -m scripts.poll --local` uses your Chrome.
-- `scripts/history.py` keeps 30 days of readings, one letter per store per 30-min slot, in `public/history.json`.
-  On Actions the run fetches the deployed copy (SITE_URL) and adds to it; only a 404 starts afresh.
-- `scripts/og.py` renders `public/og.png` (link preview) after each poll; deploy rewrites its URL to absolute.
+👉 **[outofpud.com](https://outofpud.com)**
 
-Checks: `uv run ruff check . && uv run pytest`. Live run: `uv run python -m scripts.poll` (~35s).
+![The map for Banana, Caramel & Pecan Pudding: a big "YES!", 109 of 174 stores in stock](docs/map-banana.jpg)
+
+## The story
+
+M&S launched a range of pudding pots and they went viral. We wanted the banana one. Every store we tried was sold out.
+
+So we built a map that checks every M&S near London every 30 minutes. We found one. Now anyone can.
+
+## What it does
+
+- **One question, one answer.** Pick a flavour and the headline says *YES!*, *SORT OF.* or *RARELY.*
+- **Every store, colour-coded.** Green is in stock, orange is going fast, red is sold out.
+- **Nearest pudding.** One tap finds the closest store that has it, with directions.
+- **Each flavour has its own look.** The whole site recolours to match the pack.
+- **Shareable.** The link preview image redraws itself with the latest numbers after every check.
+
+| Choose your pudding | Tap a store |
+|---|---|
+| ![Flavour picker with the pudding pots](docs/choose.jpg) | ![Store popup at St Pancras: In stock, "Pudding confirmed. Go go go."](docs/store-popup.jpg) |
+
+| Switch flavour, switch skin | About the project |
+|---|---|
+| ![The map for Apple & Custard Crumble in its green pack colours](docs/map-apple.jpg) | ![About dialog with the two makers](docs/about.jpg) |
+
+## How it works
+
+- **Live stock, ~270 stores, every 30 minutes.** A headless browser opens the product page and asks M&S's own "check stock in store" feature about every store at once, just as a shopper would. One check takes about 35 seconds.
+- **No servers, no running costs.** GitHub Actions does the checking and GitHub Pages hosts the site. A free scheduler starts each run.
+- **It remembers.** 30 days of readings are kept, one letter per store per half hour, small enough to ship with the page.
+- **Gentle by design.** One request batch per flavour per half hour, no clicking around, no scraping loops.
+- **Add a flavour in one line.** A new product in `data/products.json` gets polled, mapped and skinned automatically.
+
+Built in 24 hours with Python, Playwright and Mapbox.
+
+## Made by
+
+Haiden and Khumbira. Questions or puddings: furious@outofpud.com
+
+*An unofficial fan project. Not affiliated with M&S.*
+
+---
+
+<details>
+<summary>Running it locally</summary>
+
+```sh
+uv run python -m scripts.poll          # live poll (~35s)
+uv run ruff check . && uv run pytest   # checks
+```
+
+Developer notes (tokens, scheduler, history, troubleshooting) live in [CLAUDE.md](CLAUDE.md).
+</details>
