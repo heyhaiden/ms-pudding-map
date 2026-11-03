@@ -1145,7 +1145,7 @@ function lockHeight() {
 addEventListener("resize", () => { if (!$("chooser").hidden) lockHeight(); });
 // The chooser's filters: All plus at most three shelves, however many kinds of product there are.
 const SHELVES = ["Puddings", "Cookies", "Treats"];
-const shelf = (p) => /pudding|crumble/i.test(p.kind) ? "Puddings" : /cookie/i.test(p.kind) ? "Cookies" : "Treats";
+const shelf = (p) => /pudding|crumble|dough/i.test(p.kind) ? "Puddings" : /cookie/i.test(p.kind) ? "Cookies" : "Treats";
 const shownCards = () => [...$("chooser-cards").children].filter((c) => !c.hidden);
 // Search (name, flavour or type; every word must match) and the shelf pill together decide which cards show.
 function narrow() {
