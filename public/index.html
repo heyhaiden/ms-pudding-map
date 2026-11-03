@@ -1119,9 +1119,9 @@ function showChooser() {
     $("chooser-cards").append(li);
   }
   // One pill per kind, in products.json order, after "All". Each opening starts unfiltered.
-  const kinds = [...new Set(data.products.map((p) => p.kind))];
-  $("chooser-pills").innerHTML = ["", ...kinds].map((k) => `<button type="button" data-kind="${k}"
-    aria-pressed="${!k}">${k ? plural(k) : "All"}</button>`).join("");
+  const shelves = SHELVES.filter((name) => data.products.some((p) => shelf(p) === name));
+  $("chooser-pills").innerHTML = ["", ...shelves].map((k) => `<button type="button" data-kind="${k}"
+    aria-pressed="${!k}">${k || "All"}</button>`).join("");
   $("chooser-search").value = "";
   $("chooser").hidden = false;
   lockHeight();
@@ -1143,16 +1143,18 @@ function lockHeight() {
   for (const c of $("chooser-cards").children) cardSizes.observe(c);
 }
 addEventListener("resize", () => { if (!$("chooser").hidden) lockHeight(); });
-const plural = (kind) => /s$|dough$/i.test(kind) ? kind : kind + "s";
+// The chooser's filters: All plus at most three shelves, however many kinds of product there are.
+const SHELVES = ["Puddings", "Cookies", "Treats"];
+const shelf = (p) => /pudding|crumble/i.test(p.kind) ? "Puddings" : /cookie/i.test(p.kind) ? "Cookies" : "Treats";
 const shownCards = () => [...$("chooser-cards").children].filter((c) => !c.hidden);
-// Search (name, flavour or type; every word must match) and the type pill together decide which cards show.
+// Search (name, flavour or type; every word must match) and the shelf pill together decide which cards show.
 function narrow() {
   const words = $("chooser-search").value.toLowerCase().split(/\s+/).filter(Boolean);
   const kind = $("chooser-pills").querySelector('[aria-pressed="true"]')?.dataset.kind || "";
   for (const c of $("chooser-cards").children) {
     const p = data.products.find((x) => x.slug === c.dataset.slug);
-    const text = `${p.name} ${p.short} ${p.flavour} ${p.kind}`.toLowerCase();
-    c.hidden = (kind && p.kind !== kind) || !words.every((w) => text.includes(w));
+    const text = `${p.name} ${p.short} ${p.flavour} ${p.kind} ${shelf(p)}`.toLowerCase();
+    c.hidden = (kind && shelf(p) !== kind) || !words.every((w) => text.includes(w));
   }
   $("chooser-empty").hidden = shownCards().length > 0;
   // Always start on the first card shown. The remembered flavour is not a scroll position.
