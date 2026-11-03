@@ -1,5 +1,5 @@
 {
- "updated": "2026-10-27T14:59:22+00:00",
+ "updated": "2026-11-03T15:01:29+00:00",
  "stores": [
   {
    "id": "10",
@@ -1505,6 +1505,13 @@
    "type": "Simply Food",
    "lat": 51.52032,
    "lng": -0.63767
+  },
+  {
+   "id": "5419",
+   "name": "Elephant And Castle",
+   "type": "Simply Food",
+   "lat": 51.4939,
+   "lng": -0.0997
   },
   {
    "id": "5617",
