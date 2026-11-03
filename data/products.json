@@ -58,5 +58,23 @@
     "name": "Raspberry & White Chocolate Cookie Dough",
     "url": "https://www.marksandspencer.com/food/raspberry-and-white-chocolate-cookie-dough/p/fdp61270770",
     "skin": {"card": "#3E2318", "lettering": "#EC3A8E", "text": "#F3E6D3", "water": "#F6C6DC"}
+  },
+  {
+    "slug": "choc-cornflake-cookies",
+    "soon": "2026-11-04",
+    "short": "Choc Cornflake Cookies",
+    "flavour": "Choc Cornflake",
+    "kind": "Cookies",
+    "name": "Chocolate & Cornflake Cookies",
+    "skin": {"card": "#F1D25D", "lettering": "#8A4E16", "text": "#2E2418", "water": "#E9C485"}
+  },
+  {
+    "slug": "malt-caramel-cookies",
+    "soon": "2026-11-04",
+    "short": "Malt Caramel Cookies",
+    "flavour": "Malt Caramel",
+    "kind": "Cookies",
+    "name": "Malt Caramel Chocolate Cookies",
+    "skin": {"card": "#C98A44", "lettering": "#3B2216", "text": "#2A1A10", "water": "#DDAE6A"}
   }
 ]
