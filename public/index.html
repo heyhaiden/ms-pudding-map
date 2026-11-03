@@ -285,6 +285,11 @@ window.track = (() => {
     .chooser-card:hover .find { filter: brightness(1.1); }
   }
   .chooser-card:active { transform: scale(.98); }
+  /* Desktop: grab the row with the mouse and drag it sideways (snap is off while the hand holds it). */
+  @media (hover: hover) and (pointer: fine) { .chooser-cards { cursor: grab; } }
+  .chooser-cards.dragging { scroll-snap-type: none; cursor: grabbing; user-select: none; }
+  .chooser-cards.dragging .chooser-card { cursor: grabbing; transform: none; }
+  .chooser-cards img { -webkit-user-drag: none; }
   .chooser-card .shot { display: block; overflow: hidden; border-radius: 12px; }
   .chooser-card .shot img { display: block; }
   /* Outlined on hover only; the remembered pick isn't marked. */
@@ -1142,6 +1147,57 @@ $("chooser-cards").addEventListener("click", (e) => {
   cardEl.animate([{ transform: "scale(1)" }, { transform: "scale(.95)" }, { transform: "scale(1)" }],
     { duration: 220, easing: "ease-out" }).onfinish = closeChooser;
 });
+// Mouse drag scrolls the row. Past a few pixels it's a drag, not a pick: the click that follows is swallowed.
+// On release it glides to the nearest card, nudged one card further by a quick flick, then snap comes back on.
+{
+  const row = $("chooser-cards");
+  let drag = null, swallow = false;
+  row.addEventListener("pointerdown", (e) => {
+    if (e.pointerType !== "mouse" || e.button !== 0) return;
+    drag = { id: e.pointerId, x: e.clientX, left: row.scrollLeft, moved: false, lastX: e.clientX, lastT: e.timeStamp, v: 0 };
+  });
+  row.addEventListener("pointermove", (e) => {
+    if (!drag || e.pointerId !== drag.id) return;
+    const dx = e.clientX - drag.x;
+    if (!drag.moved) {
+      if (Math.abs(dx) < 5) return;
+      drag.moved = true;
+      row.classList.add("dragging");
+      row.setPointerCapture(e.pointerId);
+    }
+    const dt = e.timeStamp - drag.lastT;
+    if (dt > 0) drag.v = (e.clientX - drag.lastX) / dt;
+    drag.lastX = e.clientX;
+    drag.lastT = e.timeStamp;
+    row.scrollLeft = drag.left - dx;
+  });
+  const release = (e) => {
+    if (!drag || e.pointerId !== drag.id) return;
+    const { moved, v } = drag;
+    drag = null;
+    if (!moved) return;
+    // The click (if any) follows straight after this pointerup, before any timer runs.
+    swallow = true;
+    setTimeout(() => { swallow = false; });
+    const cards = [...row.children];
+    const step = cards[1] ? cards[1].offsetLeft - cards[0].offsetLeft : 1;
+    const flick = Math.abs(v) > 0.5 ? -Math.sign(v) * 0.5 : 0;
+    const i = Math.max(0, Math.min(cards.length - 1, Math.round(row.scrollLeft / step + flick)));
+    const target = Math.min(i * step, row.scrollWidth - row.clientWidth);
+    row.scrollTo({ left: target, behavior: reducedMotion ? "auto" : "smooth" });
+    const settle = () => row.classList.remove("dragging");
+    if (reducedMotion || Math.abs(row.scrollLeft - target) < 1) settle();
+    else if ("onscrollend" in row) row.addEventListener("scrollend", settle, { once: true });
+    else setTimeout(settle, 400);
+  };
+  row.addEventListener("pointerup", release);
+  row.addEventListener("pointercancel", release);
+  row.addEventListener("click", (e) => {
+    if (!swallow) return;
+    swallow = false;
+    e.stopImmediatePropagation();
+  }, true);
+}
 // Esc or a click outside the panel keeps the current flavour and shows the map.
 $("chooser").addEventListener("click", (e) => { if (e.target === $("chooser")) closeChooser(); });
 document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("chooser").hidden) closeChooser(); });
