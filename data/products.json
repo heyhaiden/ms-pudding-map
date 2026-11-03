@@ -121,10 +121,10 @@
   {
     "slug": "malt-caramel-cookies",
     "soon": "2026-11-04",
-    "short": "Malt Caramel Cookies",
+    "short": "Malt Caramel Cookie",
     "flavour": "Malt Caramel",
-    "kind": "Cookies",
-    "name": "Malt Caramel Chocolate Cookies",
+    "kind": "Cookie",
+    "name": "Chunked N' Loaded Milk Chocolate, Malt & Caramel Cookie",
     "skin": {"card": "#C98A44", "lettering": "#3B2216", "text": "#2A1A10", "water": "#DDAE6A"}
   }
 ]
