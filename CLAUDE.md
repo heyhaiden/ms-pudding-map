@@ -9,7 +9,7 @@ mcbroken-style map: are the new M&S puddings and cookie doughs in stock at each 
   Announced but not on M&S yet: leave out `id`/`url` and add `"soon": "YYYY-MM-DD"`; it shows as coming soon, unpolled.
 - Codes (from M&S `_app.js`): H/M = in stock, L = low, O = out. Not in range = not sold. No reading ('unknown') is
   kept in the data but never shown to visitors.
-- Dev: localhost (or ?dev) shows a DEV pill that toggles the hidden 7-day grid in store popups.
+- Store popups show "Best time to look" (that store's best two shop hours this week). The 7-day grid is dev only (localhost or `?dev`).
 - Scope: London + ~50 miles (`BOX` in `poll.py`); the page opens on central London. Store list from 24 seed towns,
   no ownedBys filter (station franchises sell M&S food), cached in `data/stores.json`, refreshed weekly.
   Northern Ireland stores only have the `FOODSCATALOGUE` capability, not `FOOD`.

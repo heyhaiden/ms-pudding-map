@@ -142,9 +142,6 @@ window.track = (() => {
   .meta { margin: 12px 0 0; font-size: 12px; opacity: .8; }
   .meta a { color: inherit; }
   .stale { color: var(--out); font-weight: 700; }
-  .dev { position: fixed; left: 50%; bottom: 10px; transform: translateX(-50%); z-index: 6; display: flex; gap: 6px;
-    align-items: center; padding: 4px 10px; border-radius: 999px; background: #111; color: #0f0;
-    font: 600 11px ui-monospace, monospace; cursor: pointer; opacity: .85; }
   .toast { position: fixed; left: 50%; bottom: max(24px, env(safe-area-inset-bottom)); transform: translate(-50%, 20px);
     padding: 10px 16px; background: var(--chocolate); color: var(--cream); border-radius: 999px; font-weight: 600;
     opacity: 0; transition: opacity .2s, transform .2s; pointer-events: none; z-index: 5; }
@@ -184,7 +181,7 @@ window.track = (() => {
   .pop p { margin: 6px 0 0; font-size: 13px; }
   .pop a { color: var(--magenta); font-weight: 700; }
   /* History: 7 days (rows) by 24 hours (columns), like a status page. */
-  .week { margin: 10px 0 0; }
+  .week { align-self: stretch; margin: 10px 0 0; }
   .week summary { display: inline-flex; align-items: center; gap: 5px; min-height: 28px; font-size: 11px;
     font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--magenta); cursor: pointer;
     list-style: none; }
@@ -192,16 +189,14 @@ window.track = (() => {
   .week summary::before { content: "▸"; font-size: 12px; transition: transform .15s; }
   .week details[open] summary::before { transform: rotate(90deg); }
   .week details[open] .grid { margin: 4px 0 6px; }
-  .grid { display: grid; grid-template-columns: 28px repeat(24, 7px); gap: 3px 2px; align-items: center; }
+  /* The 24 hour columns share whatever width the popup leaves, so the grid never runs past its edge. */
+  .grid { display: grid; grid-template-columns: 28px repeat(24, minmax(0, 1fr)); gap: 3px 2px; align-items: center; }
   .grid .day { font-size: 11px; font-weight: 600; opacity: .7; }
   .grid .c { height: 16px; border-radius: 3px; background: #EDE3D6; }
   .week .slide { overflow: hidden; }
   .grid .c.I { background: var(--in); } .grid .c.L { background: var(--low); } .grid .c.O { background: var(--out); }
   .grid .hours { grid-column: 2 / -1; display: flex; justify-content: space-between; font-size: 9px; opacity: .6; }
-  .week .facts { margin: 0 0 2px; font-size: 12px; }
-  .trend { margin: 12px 0 0; }
-  .trend svg { display: block; width: 100%; height: 34px; overflow: visible; }
-  .trend p { margin: 4px 0 0; font-size: 12px; opacity: .85; }
+  .pop .best { font-size: 13px; }
 
   .more { overflow: hidden; }
   .team svg { width: 26px; height: 26px; display: block; transition: transform .25s cubic-bezier(.34, 1.56, .64, 1); }
@@ -271,7 +266,35 @@ window.track = (() => {
   .chooser-head h2 { font-size: 35px; font-weight: 700; line-height: 1.2; }
   .chooser-sub { font-size: 16px; }
   .chooser-head h2, .chooser-sub { text-wrap: balance; }
-  .chooser-cards { display: flex; gap: 15px; margin: 24px 0 0; padding: 10px 50px 28px; list-style: none; overflow-x: auto;
+  /* Search and type pills: narrow the row of cards. */
+  /* Desktop: search on the left, pills on the right, lined up with the card row's edges. */
+  .chooser-tools { display: flex; align-items: center; gap: 8px; margin: 26px 0 0; padding: 0 50px; }
+  .chooser-tools .chooser-search { flex: 1; min-width: 180px; }
+  .chooser-search { display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 16px; background: #fff;
+    border: 1px solid #E5D8C7; border-radius: 23px; color: #735B50; cursor: text; transition: border-color .2s; }
+  .chooser-search:focus-within { border-color: #B62689; }
+  .chooser-search svg { flex: none; width: 18px; height: 18px; }
+  .chooser-search input { flex: 1; min-width: 0; height: 100%; border: 0; outline: 0; background: none; color: #3B2016;
+    font: 500 15px Inter, "DM Sans", sans-serif; }
+  .chooser-search input::placeholder { color: #9A8473; }
+  .chooser-pills { display: flex; justify-content: flex-end; gap: 6px; margin-left: auto; }
+  .chooser-pills button { flex: none; height: 34px; padding: 0 11px; border: 1px solid #E5D8C7; border-radius: 999px;
+    background: #fff; color: #3B2016; font: 600 13px Inter, "DM Sans", sans-serif; cursor: pointer;
+    transition: background-color .2s, color .2s, border-color .2s; }
+  .chooser-pills button[aria-pressed="true"] { background: #3B2016; border-color: #3B2016; color: #fff; }
+  @media (hover: hover) { .chooser-pills button:not([aria-pressed="true"]):hover { border-color: #B62689; } }
+  /* The row keeps the height it has with every card showing, so filtering never resizes the panel. */
+  .chooser-stage { position: relative; }
+  .chooser-empty { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; gap: 4px;
+    margin: 0; font-size: 14px; color: #735B50; }
+  .chooser-empty[hidden] { display: none; }
+  .chooser-dots { min-height: 8px; }
+  .chooser-empty button { border: 0; background: none; padding: 0; color: #B62689; font: inherit; font-weight: 700;
+    text-decoration: underline; cursor: pointer; }
+  .chooser-card[hidden] { display: none; }
+  /* Fewer cards than fit: centred. More: the side margins collapse and the row scrolls. */
+  .chooser-cards::before, .chooser-cards::after { content: ""; margin: auto; }
+  .chooser-cards { box-sizing: border-box; display: flex; gap: 15px; margin: 14px 0 0; padding: 10px 50px 28px; list-style: none; overflow-x: auto;
     scroll-snap-type: x mandatory; scroll-padding: 0 50px; scrollbar-width: none; }
   .chooser-cards::-webkit-scrollbar { display: none; }
   .chooser-card { flex: none; width: 264px; display: flex; flex-direction: column; gap: 10px; padding: 14px;
@@ -328,10 +351,19 @@ window.track = (() => {
     .card.folded .pick, .card.compact .pick { text-decoration-thickness: 2.5px; text-underline-offset: 3px; }
     .card.folded .answer, .card.compact .answer { font-size: 30px; margin: 4px 0 0; }
   }
+  /* Too narrow for one line: search on top, pills below it, scrolling sideways rather than wrapping. */
+  @media (max-width: 860px) {
+    .chooser-tools { flex-direction: column; align-items: stretch; gap: 12px; }
+    .chooser-tools .chooser-search { flex: none; }
+    .chooser-pills { justify-content: flex-start; margin: 0 -50px; padding: 0 50px; overflow-x: auto; scrollbar-width: none; }
+    .chooser-pills::-webkit-scrollbar { display: none; }
+  }
   @media (max-width: 520px) {
     .chooser-head h2 { font-size: 28px; }
     .chooser-sub { font-size: 13px; }
     .chooser-cards { padding: 10px 38px 28px; scroll-padding: 0 38px; }
+    .chooser-tools { margin-top: 16px; padding: 0 38px; }
+    .chooser-pills { margin: 0 -38px; padding: 0 38px; }
     .crew h2 { font-size: 24px; margin-left: 30px; margin-right: 30px; }
     .card { padding: 14px 16px 12px; border-radius: 18px; }
     h1 { font-size: 26px; }
@@ -359,7 +391,7 @@ window.track = (() => {
       stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
   <p class="eyebrow"><span class="live" aria-hidden="true"></span>Live</p>
   <div class="title">
-    <h1>Is the <button class="pick" id="pick" type="button" aria-haspopup="listbox" aria-expanded="false"
+    <h1><span id="verb">Is</span> the <button class="pick" id="pick" type="button" aria-haspopup="listbox" aria-expanded="false"
       aria-controls="menu"><span id="pick-name">Banana</span><svg class="chev" hidden viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button><br><span id="kind">Pudding</span> In?</h1>
     <ul class="menu" id="menu" role="listbox" aria-label="Choose a flavour" hidden></ul>
   </div>
@@ -367,11 +399,10 @@ window.track = (() => {
   <div class="more" id="more">
   <p class="headline" id="headline">Checking every M&S…</p>
   <div class="actions">
-    <button class="btn primary" id="nearest" type="button"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M15.8 8.2 13.6 13.6 8.2 15.8 10.4 10.4Z" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg> Nearest pudding</button>
+    <button class="btn primary" id="nearest" type="button"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M15.8 8.2 13.6 13.6 8.2 15.8 10.4 10.4Z" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg> <span id="nearest-label">Nearest pudding</span></button>
     <button class="btn secondary" id="share" type="button">Share</button>
   </div>
   <ul class="legend" id="legend" aria-label="Show or hide stores by stock"></ul>
-  <div class="trend" id="trend" hidden></div>
   <p class="meta"><span id="updated"></span></p>
   </div>
 </main>
@@ -392,10 +423,21 @@ window.track = (() => {
   <div class="chooser-panel">
     <div class="chooser-head">
       <p class="chooser-eyebrow"><span class="tracker" aria-hidden="true"></span>LIVE PUDDING TRACKER</p>
-      <h2 id="chooser-title">Choose your pudding 🍮</h2>
-      <p class="chooser-sub">Pick a flavour and see which stores near you have it.</p>
+      <h2 id="chooser-title">Pick your pud 🍮</h2>
+      <p class="chooser-sub">Puddings, crumbles, cookies and more. See which stores near you have them.</p>
     </div>
-    <ul class="chooser-cards" id="chooser-cards"></ul>
+    <div class="chooser-tools">
+      <label class="chooser-search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" fill="none"
+        stroke="currentColor" stroke-width="2.5"/><path d="m16.5 16.5 4 4" stroke="currentColor" stroke-width="2.5"
+        stroke-linecap="round"/></svg><input type="search" id="chooser-search" placeholder="Search flavours"
+        aria-label="Search flavours" autocomplete="off" enterkeyhint="go"></label>
+      <div class="chooser-pills" id="chooser-pills" role="group" aria-label="Filter by type"></div>
+    </div>
+    <div class="chooser-stage">
+      <ul class="chooser-cards" id="chooser-cards"></ul>
+      <p class="chooser-empty" id="chooser-empty" hidden>No flavours match that.
+        <button type="button" id="chooser-reset">Show all</button></p>
+    </div>
     <div class="chooser-dots" id="chooser-dots"></div>
   </div>
 </section>
@@ -447,6 +489,21 @@ try { slug ||= localStorage.getItem("product"); } catch {}
 const product = () => data.products.find((p) => p.slug === slug) || data.products[0];
 const storesFor = (p) => data.stores.map((s, i) => ({ ...s, status: STATUS_OF[p.statuses[i]] || "unknown" }));
 
+// Announced products ("soon": launch date, no M&S id yet) are listed with no readings until they land.
+function landing(p) {
+  const days = Math.round((new Date(p.soon + "T00:00") - new Date(new Date().toDateString())) / 864e5);
+  if (days <= 0) return "today";
+  if (days === 1) return "tomorrow";
+  return new Date(p.soon + "T00:00").toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" });
+}
+
+// Grammar per product: "Cookies" is plural ("Are the … In?", "sell them"); the rest are singular.
+function says(p) {
+  const many = /s$/i.test(p.kind);
+  return { is: many ? "Are" : "Is", it: many ? "them" : "it", lands: many ? "land" : "lands",
+    they: many ? "They" : "It", noun: p.kind.toLowerCase() };
+}
+
 function stats() {
   const c = product().counts, sold = c.in + c.low + c.out, have = c.in + c.low;
   return { c, sold, have, pct: sold ? Math.round(100 * have / sold) : 0 };
@@ -457,11 +514,16 @@ function render() {
   // Only the flavour is the picker; the kind (Pudding, Crumble…) sits on the next line with "In?".
   // The arrow stays glued to the flavour's last word, so it never strands on a line of its own.
   const words = p.flavour.split(" "), last = words.pop();
+  const say = says(p);
   $("kind").textContent = p.kind;
+  $("verb").textContent = say.is;
+  $("nearest-label").textContent = "Nearest " + say.noun;
   $("pick-name").innerHTML = (words.length ? words.join(" ") + " " : "") +
     `<span class="nowrap">${last}${document.querySelector(".pick .chev").outerHTML.replace(" hidden", "")}</span>`;
-  $("answer").textContent = verdict(have, pct);
-  $("headline").innerHTML = `<b>${have}</b> of ${sold} M&S stores that sell it have it right now.`;
+  $("answer").textContent = p.soon ? "SOON." : verdict(have, pct);
+  $("headline").innerHTML = p.soon
+    ? `${say.they} ${say.lands} in M&S stores <b>${landing(p)}</b>. Stock shows here from the first reading.`
+    : `<b>${have}</b> of ${sold} M&S stores that sell ${say.it} have ${say.it} right now.`;
   skin(p);
   const updated = $("updated");
   updated.textContent = "Updated " + ago(data.updated);
@@ -606,8 +668,12 @@ function openStore(s, coordinates, extra = "", frame) {
   link.textContent = "Directions →";
   directions.append(link);
   if (gif) box.append(gif);
+  const best = document.createElement("p");
+  best.className = "best";
+  best.textContent = bestTime(s);
   const history = week(s);
-  box.append(name, pill, quip, ...(history.childElementCount ? [history] : []), directions);
+  box.append(name, pill, quip, ...(best.textContent ? [best] : []),
+    ...(history.childElementCount ? [history] : []), directions);
   popup?.remove();
   // Phones: the card covers the top, so slide the store just below it and open the popup underneath the dot.
   // frame === false: the caller already aimed the camera (nearest pudding frames two dots).
@@ -658,7 +724,13 @@ function keepPopupInView() {
   const rect = popup?.getElement()?.getBoundingClientRect();
   if (!rect) return;
   const nudge = rect.top < 8 ? rect.top - 8 : rect.bottom > innerHeight - 8 ? rect.bottom - innerHeight + 8 : 0;
-  if (nudge) map.panBy([0, nudge], { duration: reducedMotion ? 0 : 300 });
+  // Desktop: the stock card sits in the top left, so slide a store card that runs under it out to its right.
+  let side = 0;
+  const card = document.querySelector("main.card").getBoundingClientRect();
+  if (innerWidth > 720 && card.width && rect.left < card.right + 12 && rect.top - nudge < card.bottom) {
+    side = rect.left - card.right - 12;
+  }
+  if (nudge || side) map.panBy([side, nudge], { duration: reducedMotion ? 0 : 300 });
 }
 
 function filter() {
@@ -688,6 +760,10 @@ $("nearest").addEventListener("click", () => {
   if (!data) return;
   track("nearest_clicked");
   tuck();
+  if (product().soon) {
+    const say = says(product());
+    return toast(`${say.they} ${say.lands} in stores ${landing(product())}. Check back then!`);
+  }
   if (!navigator.geolocation) return toast("Your browser can't share your location.");
   toast("Finding you…");
   navigator.geolocation.getCurrentPosition((pos) => {
@@ -706,7 +782,7 @@ $("nearest").addEventListener("click", () => {
     if (!options.length) {
       track("nearest_result", { found: false });
       showYou(null);
-      return toast("No pudding anywhere nearby right now. 😭");
+      return toast(`No ${says(product()).noun} anywhere nearby right now. 😭`);
     }
     const { s, d } = options[0];
     track("nearest_result", { found: true, store: s.name, status: s.status, miles: +d.toFixed(1) });
@@ -720,14 +796,16 @@ $("nearest").addEventListener("click", () => {
 });
 
 $("share").addEventListener("click", async () => {
-  const text = data
+  const text = data && product().soon
+    ? `The ${product().name} ${says(product()).lands} in M&S ${landing(product())}. Track the stock here 🍪`
+    : data
     ? `Only ${stats().have} of ${stats().sold} M&S stores around London have the ${product().name} right now 🍮`
     : "Is the M&S pudding in? 🍮";
   const url = location.origin + location.pathname + "?p=" + product().slug;
   try {
     if (navigator.share) {
       track("share", { method: "native" });
-      return await navigator.share({ title: "Is the Pudding In?", text, url });
+      return await navigator.share({ title: `${says(product()).is} the ${product().short} In?`, text, url });
     }
     await navigator.clipboard.writeText(`${text} ${url}`);
     track("share", { method: "copy" });
@@ -781,21 +859,8 @@ $("legend").addEventListener("click", (e) => {
 
 // ----- History: one letter per store per 30-minute slot (scripts/history.py) -----
 let history;
-// The 7-day grid in store popups: hidden on the live site. Dev (localhost, or any URL with ?dev) gets a switch for it.
+// The 7-day grid in store popups is for dev only: localhost, or any URL with ?dev.
 const DEV = ["127.0.0.1", "localhost"].includes(location.hostname) || new URLSearchParams(location.search).has("dev");
-let SHOW_WEEK_GRID = false;
-try { SHOW_WEEK_GRID = DEV && localStorage.getItem("dev-week-grid") === "1"; } catch {}
-if (DEV) {
-  const panel = document.createElement("label");
-  panel.className = "dev";
-  panel.innerHTML = `<input type="checkbox" ${SHOW_WEEK_GRID ? "checked" : ""}> DEV · 7-day grid`;
-  panel.querySelector("input").addEventListener("change", (e) => {
-    SHOW_WEEK_GRID = e.target.checked;
-    try { localStorage.setItem("dev-week-grid", SHOW_WEEK_GRID ? "1" : ""); } catch {}
-    popup?.remove();
-  });
-  document.body.append(panel);
-}
 const SLOT_MS = 30 * 60 * 1000, WEEK = 7 * 48;
 const RANK = { I: 4, L: 3, O: 2, U: 1, N: 1, "-": 0 };
 const londonParts = new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/London", weekday: "short", year: "numeric",
@@ -807,44 +872,55 @@ function london(date) {
 const slotDate = (i) => new Date(+new Date(history.start) + i * SLOT_MS);
 const has = (code) => code === "I" || code === "L";
 
-function when(date) {
-  const t = london(date), today = london(new Date()).key;
-  const h = t.hour % 12 || 12, ampm = t.hour < 12 ? "am" : "pm";
-  return (t.key === today ? "today" : t.day) + " " + h + ampm;
+const clock = (h) => `${h % 12 || 12}${h < 12 ? "am" : "pm"}`;
+
+// One store, this product: the two shop hours (7am to 10pm) it most often had it this week.
+// Nothing until there's a day of readings and it's had it at least once.
+function bestTime(s) {
+  const line = history?.products?.[product().id]?.[s.id];
+  if (!line || s.status === "not_sold") return "";
+  const byHour = Array.from({ length: 24 }, () => [0, 0]);
+  let known = 0;
+  for (let i = Math.max(0, line.length - WEEK); i < line.length; i++) {
+    if (line[i] === "-" || line[i] === "N" || line[i] === "U") continue;
+    const h = london(slotDate(i)).hour;
+    byHour[h][0] += has(line[i]);
+    byHour[h][1]++;
+    known++;
+  }
+  const rate = byHour.map(([yes, k]) => k ? yes / k : 0);
+  const shop = rate.slice(7, 22);
+  if (known < 48 || !Math.max(...shop)) return "";
+  if (Math.min(...shop) === 1) return "Best time to look: any time";
+  let start = 7;
+  for (let h = 7; h <= 20; h++) if (rate[h] + rate[h + 1] > rate[start] + rate[start + 1]) start = h;
+  return `Best time to look: ${clock(start)}–${clock(start + 2)}`;
 }
 
-// The last 7 days for one store: a 7x24 grid of the best reading each hour, plus a few facts.
+// The last 7 days for one store: a 7x24 grid of the best reading each hour. Dev only.
 function week(s) {
   const line = history?.products?.[product().id]?.[s.id];
   const box = document.createElement("div");
   box.className = "week";
-  if (!line || s.status === "not_sold") return box;
+  if (!DEV || !line || s.status === "not_sold") return box;
   const first = Math.max(0, line.length - WEEK);
   const cells = new Map();
-  let known = 0, yes = 0, last = -1;
   for (let i = first; i < line.length; i++) {
     const code = line[i], t = london(slotDate(i)), key = t.key + "|" + t.hour;
     if (RANK[code] > (RANK[cells.get(key)] ?? -1)) cells.set(key, code);
-    if (code !== "-" && code !== "N") known++;
-    if (has(code)) { yes++; last = i; }
   }
-  for (let i = first - 1; i >= 0 && last < 0; i--) if (has(line[i])) last = i;
+  // Newest day first, then back through the week.
   const days = [];
-  for (let d = 6; d >= 0; d--) days.push(london(new Date(Date.now() - d * 864e5)));
-  const grid = days.map((d) => `<span class="day">${d.day}</span>` + Array.from({ length: 24 }, (_, h) => {
-    const code = cells.get(d.key + "|" + h) || "";
-    return `<span class="c ${code}"></span>`;
-  }).join("")).join("") + `<span class="hours"><span>0</span><span>6</span><span>12</span><span>18</span><span>24</span></span>`;
-  // A percentage needs a day of readings; until then the grid speaks for itself.
-  const facts = known < 48 ? "" : `Had it ${Math.round(100 * yes / known)}% of the time this week.` +
-    (last >= 0 ? ` Last seen ${when(slotDate(last))}.` : " Not seen this week.");
-  // The grid is tucked away until asked for.
-  box.innerHTML = (facts ? '<p class="facts"></p>' : "") + (SHOW_WEEK_GRID ? `<details><summary>Last 7 days</summary>
-    <div class="slide"><div class="grid" role="img" aria-label="Stock by hour for the last 7 days">${grid}</div></div>
-    </details>` : "");
-  if (facts) box.querySelector(".facts").textContent = facts;
+  for (let d = 0; d <= 6; d++) days.push(london(new Date(Date.now() - d * 864e5)));
+  const row = (d, label) => `<span class="day">${label}</span>` + Array.from({ length: 24 }, (_, h) =>
+    `<span class="c ${cells.get(d.key + "|" + h) || ""}"></span>`).join("");
+  const hours = `<span class="hours"><span>0</span><span>6</span><span>12</span><span>18</span><span>24</span></span>`;
+  // The week is tucked away until asked for.
+  box.innerHTML = `<details><summary>See the week</summary><div class="slide"><div class="grid" role="img"
+    aria-label="Stock by hour for the last 7 days">${days.map((d) => row(d, d.day)).join("")}${hours}</div>
+    </div></details>`;
   const details = box.querySelector("details");
-  details?.querySelector("summary").addEventListener("click", (e) => { e.preventDefault(); slide(details); });
+  details.querySelector("summary").addEventListener("click", (e) => { e.preventDefault(); slide(details); });
   return box;
 }
 
@@ -853,6 +929,7 @@ function slide(details) {
   const panel = details.querySelector(".slide");
   const opening = !details.open;
   if (opening) details.open = true;
+  details.querySelector("summary").textContent = opening ? "Hide the week" : "See the week";
   const full = panel.scrollHeight + "px";
   const animation = panel.animate(
     { height: opening ? ["0px", full] : [full, "0px"], opacity: opening ? [0, 1] : [1, 0] },
@@ -861,33 +938,6 @@ function slide(details) {
     if (!opening) details.open = false;
     keepPopupInView();
   };
-}
-
-// Card: how many stores had it at each reading this week, and the best hour to look once there's enough data.
-function trend() {
-  const el = $("trend");
-  const lines = Object.values(history?.products?.[product().id] || {});
-  const length = lines[0]?.length || 0;
-  const first = Math.max(0, length - WEEK);
-  // Only once there's a full week: a few hours of readings is just a squiggle.
-  if (length < WEEK) return (el.hidden = true);
-  const counts = [];
-  for (let i = first; i < length; i++) {
-    const n = lines.reduce((sum, line) => sum + has(line[i]), 0);
-    counts.push(lines.some((line) => line[i] !== "-") ? n : null);
-  }
-  const max = Math.max(1, ...counts.filter((n) => n !== null));
-  const points = counts.map((n, i) => n === null ? null :
-    `${(100 * i / Math.max(1, counts.length - 1)).toFixed(2)},${(34 - 30 * n / max).toFixed(1)}`).filter(Boolean);
-  const byHour = Array.from({ length: 24 }, () => [0, 0]);
-  counts.forEach((n, i) => { if (n !== null) { const h = london(slotDate(first + i)).hour; byHour[h][0] += n; byHour[h][1]++; } });
-  const hour = byHour.map(([sum, k], h) => [k ? sum / k : -1, h]).sort((a, b) => b[0] - a[0])[0][1];
-  const best = ` Best time to look: around ${hour % 12 || 12}${hour < 12 ? "am" : "pm"}.`;
-  el.innerHTML = `<svg viewBox="0 0 100 34" preserveAspectRatio="none" aria-hidden="true">
-    <polyline points="${points.join(" ")}" fill="none" stroke="var(--headline)" stroke-width="2.5"
-      vector-effect="non-scaling-stroke" stroke-linejoin="round" stroke-linecap="round"/></svg>
-    <p>Stores with it, last 7 days.${best}</p>`;
-  el.hidden = false;
 }
 
 // ----- Skins: recolour the card, title, main button and map water to the selected pack -----
@@ -933,7 +983,6 @@ function choose(next, from) {
   closeMenu();
   popup?.remove();
   render();
-  trend();
   if (tuckAfter) tuck();
   track("product_selected", { from });
 }
@@ -942,7 +991,7 @@ function openMenu(fromKeyboard) {
   const current = product();
   $("menu").innerHTML = data.products.map((p) => `<li><button type="button" role="option" data-slug="${p.slug}"
       aria-selected="${p.slug === current.slug}"><img class="thumb" src="packs/${p.slug}.png" alt="" width="52" height="40">
-      <span class="name">${p.short}</span><span class="have">${p.counts.in + p.counts.low} stores</span></button></li>`)
+      <span class="name">${p.short}</span><span class="have">${p.soon ? "In " + landing(p) : p.counts.in + p.counts.low + " stores"}</span></button></li>`)
     .join("");
   $("menu").hidden = false;
   $("pick").setAttribute("aria-expanded", "true");
@@ -1044,6 +1093,7 @@ $("crew").addEventListener("click", (e) => { if (e.target === $("crew")) $("crew
 const startOnChooser = !new URLSearchParams(location.search).has("p");
 if (startOnChooser) document.body.classList.add("choosing");
 function chooserStatus(p) {
+  if (p.soon) return "In stores " + landing(p);
   const c = p.counts, sold = c.in + c.low + c.out, pct = sold ? (c.in + c.low) / sold : 0;
   if (!c.in && !c.low) return "Sold out everywhere";
   if (pct >= 0.5) return "Available nearby";
@@ -1062,23 +1112,76 @@ function showChooser() {
     li.innerHTML = `<span class="shot"><img alt="" src="packs/${p.slug}.png" width="236" height="142"></span><p class="new">NEW IN</p>
       <p class="name"></p><p class="status"></p><button class="find" type="button">Find in store</button>`;
     li.querySelector(".name").textContent = p.name;
+    if (p.soon) li.querySelector(".new").textContent = "COMING SOON";
     li.querySelector(".status").textContent = chooserStatus(p);
     li.querySelector("img").alt = p.name;
     li.querySelector(".find").setAttribute("aria-label", `Find ${p.name} in store`);
     $("chooser-cards").append(li);
   }
+  // One pill per kind, in products.json order, after "All". Each opening starts unfiltered.
+  const kinds = [...new Set(data.products.map((p) => p.kind))];
+  $("chooser-pills").innerHTML = ["", ...kinds].map((k) => `<button type="button" data-kind="${k}"
+    aria-pressed="${!k}">${k ? plural(k) : "All"}</button>`).join("");
+  $("chooser-search").value = "";
   $("chooser").hidden = false;
-  // Always open on the first card. The remembered flavour is not a scroll position.
-  $("chooser-cards").scrollLeft = 0;
-  dots();
+  lockHeight();
+  narrow();
   track("chooser_shown");
 }
+// The row keeps the height of the tallest card it has shown, whatever the filter leaves. Cards are watched, so
+// late changes (web fonts, images) are caught; a new opening or a resize starts the measuring again.
+let tallest = 0;
+const cardSizes = new ResizeObserver((entries) => {
+  for (const e of entries) tallest = Math.max(tallest, e.borderBoxSize?.[0]?.blockSize ?? e.target.offsetHeight);
+  const row = $("chooser-cards"), cs = getComputedStyle(row);
+  row.style.minHeight = tallest + parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom) + "px";
+});
+function lockHeight() {
+  tallest = 0;
+  $("chooser-cards").style.minHeight = "";
+  cardSizes.disconnect();
+  for (const c of $("chooser-cards").children) cardSizes.observe(c);
+}
+addEventListener("resize", () => { if (!$("chooser").hidden) lockHeight(); });
+const plural = (kind) => /s$|dough$/i.test(kind) ? kind : kind + "s";
+const shownCards = () => [...$("chooser-cards").children].filter((c) => !c.hidden);
+// Search (name, flavour or type; every word must match) and the type pill together decide which cards show.
+function narrow() {
+  const words = $("chooser-search").value.toLowerCase().split(/\s+/).filter(Boolean);
+  const kind = $("chooser-pills").querySelector('[aria-pressed="true"]')?.dataset.kind || "";
+  for (const c of $("chooser-cards").children) {
+    const p = data.products.find((x) => x.slug === c.dataset.slug);
+    const text = `${p.name} ${p.short} ${p.flavour} ${p.kind}`.toLowerCase();
+    c.hidden = (kind && p.kind !== kind) || !words.every((w) => text.includes(w));
+  }
+  $("chooser-empty").hidden = shownCards().length > 0;
+  // Always start on the first card shown. The remembered flavour is not a scroll position.
+  $("chooser-cards").scrollLeft = 0;
+  dots();
+}
+$("chooser-search").addEventListener("input", narrow);
+$("chooser-search").addEventListener("keydown", (e) => {
+  // Esc clears the search first; a second Esc closes the chooser. Enter picks the first match.
+  if (e.key === "Escape" && e.target.value) { e.stopPropagation(); e.target.value = ""; narrow(); }
+  if (e.key === "Enter") shownCards()[0]?.click();
+});
+$("chooser-pills").addEventListener("click", (e) => {
+  const pill = e.target.closest("button");
+  if (!pill) return;
+  for (const b of $("chooser-pills").children) b.setAttribute("aria-pressed", b === pill);
+  narrow();
+  track("chooser_filtered", { kind: pill.dataset.kind || "all" });
+});
+$("chooser-reset").addEventListener("click", () => {
+  $("chooser-search").value = "";
+  $("chooser-pills").firstElementChild.click();
+});
 // Hand-off: the panel morphs into the stock card, ending on its exact position, size, corners, border, shadow and
 // colour, as its contents fade and the blur clears. Then the real card swaps in (full size; phones tuck it on the
 // first tap on the map).
 // Dots under the cards (phones): built once per opening, kept in step with the scroll.
 function dots() {
-  const row = $("chooser-cards"), box = $("chooser-dots"), cards = [...row.children];
+  const row = $("chooser-cards"), box = $("chooser-dots"), cards = shownCards();
   box.innerHTML = "";
   cards.forEach((c, i) => {
     const dot = document.createElement("button");
@@ -1179,7 +1282,7 @@ $("chooser-cards").addEventListener("click", (e) => {
     // The click (if any) follows straight after this pointerup, before any timer runs.
     swallow = true;
     setTimeout(() => { swallow = false; });
-    const cards = [...row.children];
+    const cards = shownCards();
     const step = cards[1] ? cards[1].offsetLeft - cards[0].offsetLeft : 1;
     const flick = Math.abs(v) > 0.5 ? -Math.sign(v) * 0.5 : 0;
     const i = Math.max(0, Math.min(cards.length - 1, Math.round(row.scrollLeft / step + flick)));
@@ -1212,7 +1315,6 @@ async function load() {
     data = stock;
     history = past;
     render();
-    trend();
     if (first && startOnChooser) showChooser();
   } catch (error) {
     $("headline").textContent = "Couldn't load stock. Trying again shortly.";
