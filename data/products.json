@@ -60,6 +60,16 @@
     "skin": {"card": "#3E2318", "lettering": "#EC3A8E", "text": "#F3E6D3", "water": "#F6C6DC"}
   },
   {
+    "id": "61230662",
+    "slug": "churro-twists",
+    "short": "Churro Twists",
+    "flavour": "Cinnamon Churro",
+    "kind": "Twists",
+    "name": "Cinnamon Churros Twists",
+    "url": "https://www.marksandspencer.com/food/cinnamon-churros-twists/p/fdp61230662",
+    "skin": {"card": "#E30B2E", "lettering": "#FFD1E6", "text": "#FFF6EE", "water": "#F6C6DC"}
+  },
+  {
     "slug": "choc-cornflake-cookies",
     "soon": "2026-11-04",
     "short": "Choc Cornflake Cookies",
