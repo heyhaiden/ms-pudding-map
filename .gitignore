@@ -8,3 +8,4 @@ public/stock.json
 public/config.js
 public/og.png
 public/history.json
+.playwright-mcp/
