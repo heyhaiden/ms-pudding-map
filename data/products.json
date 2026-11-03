@@ -70,6 +70,46 @@
     "skin": {"card": "#E30B2E", "lettering": "#FFD1E6", "text": "#FFF6EE", "water": "#F6C6DC"}
   },
   {
+    "id": "61276501",
+    "slug": "sticky-apple-cookie",
+    "short": "Sticky Apple Cookie",
+    "flavour": "Sticky Apple",
+    "kind": "Cookie",
+    "name": "Chunked N' Loaded Sticky Apple Cookie",
+    "url": "https://www.marksandspencer.com/food/chunked-n-loaded-sticky-apple-cookie/p/fdp61276501",
+    "skin": {"card": "#D5C228", "lettering": "#054900", "text": "#1E2A0A", "water": "#EDE79A"}
+  },
+  {
+    "id": "60733081",
+    "slug": "gingerbread-cookies",
+    "short": "Gingerbread Cookies",
+    "flavour": "Gingerbread",
+    "kind": "Cookies",
+    "name": "Gingerbread & White Chocolate Cookies",
+    "url": "https://www.marksandspencer.com/food/gingerbread-and-white-chocolate-cookies/p/fdp60733081",
+    "skin": {"card": "#D89A2B", "lettering": "#8E0E1E", "text": "#2A1608", "water": "#F2D29A"}
+  },
+  {
+    "id": "60677342",
+    "slug": "white-choc-cookies",
+    "short": "White Choc Cookies",
+    "flavour": "White Choc",
+    "kind": "Cookies",
+    "name": "White Chocolate Cookies",
+    "url": "https://www.marksandspencer.com/food/white-chocolate-cookies/p/fdp60677342",
+    "skin": {"card": "#EFE6D0", "lettering": "#7A5530", "text": "#2A1E14", "water": "#E3D3B0"}
+  },
+  {
+    "id": "60677499",
+    "slug": "milk-choc-cookies",
+    "short": "Milk Choc Cookies",
+    "flavour": "Milk Choc",
+    "kind": "Cookies",
+    "name": "Milk Chocolate Cookies",
+    "url": "https://www.marksandspencer.com/food/milk-chocolate-cookies/p/fdp60677499",
+    "skin": {"card": "#96623A", "lettering": "#F7E7CF", "text": "#FFF6EA", "water": "#D9BB98"}
+  },
+  {
     "slug": "choc-cornflake-cookies",
     "soon": "2026-11-04",
     "short": "Choc Cornflake Cookies",
