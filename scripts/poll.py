@@ -21,7 +21,7 @@ from pathlib import Path
 from scripts import history, og
 from scripts.posthog_client import get_posthog_client
 from scripts.posthog_logs import get_posthog_logger
-from scripts.stock import join, stores_from
+from scripts.stock import ORDER, join, stores_from
 
 # Any product page gives the browser a guest session; this one also owned the single-product history.
 PRODUCT = "61273052"
@@ -256,6 +256,11 @@ def poll(driver, posthog_client, posthog_logger):
     products, readings = [], {}
     # One guest session covers every product: two M&S calls each (range + stock).
     for product in json.loads(PRODUCTS.read_text()):
+        # Announced but not on sale yet (no M&S id): listed with no readings, so the page can say when it lands.
+        if "id" not in product:
+            counts = dict.fromkeys(ORDER, 0)
+            products.append({**product, "counts": counts, "statuses": ""})
+            continue
         found = checked(driver.run(STOCK_JS, [product["id"], ids]), "stock for " + product["short"])
         out, counts, missing = join(stores, found["ranged"], found["indicators"])
         if missing:

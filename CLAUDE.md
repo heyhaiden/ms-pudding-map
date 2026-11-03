@@ -6,6 +6,7 @@ mcbroken-style map: are the new M&S puddings and cookie doughs in stock at each 
   range (stores that sell it) + one GraphQL `GetStockLevel` for all of them. No clicks, no model calls.
 - Products: `data/products.json` (id, slug, names, pack colours for the skin). Add one there and it's polled and
   appears in the title's flavour menu. Any store with a stock reading counts as selling it.
+  Announced but not on M&S yet: leave out `id`/`url` and add `"soon": "YYYY-MM-DD"`; it shows as coming soon, unpolled.
 - Codes (from M&S `_app.js`): H/M = in stock, L = low, O = out. Not in range = not sold. No reading ('unknown') is
   kept in the data but never shown to visitors.
 - Dev: localhost (or ?dev) shows a DEV pill that toggles the hidden 7-day grid in store popups.
