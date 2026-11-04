@@ -20,8 +20,10 @@ mcbroken-style map: are the new M&S puddings and cookie doughs in stock at each 
 - Keep load low: one poll per 30 min. Never present the site as M&S.
 - GitHub Actions (`.github/workflows/poll.yml`) polls and deploys `public/` to Pages. A failed poll doesn't deploy.
 - What starts it: cron-job.org POSTs `workflow_dispatch` every 30 min (fine-grained token, Actions read/write,
-  this repo only; it lives in cron-job.org, renew yearly). GitHub's own `schedule` is only a backup: it never fired
-  on this repo. Stale map? Check cron-job.org's history first, then `gh run list`.
+  this repo only; it lives in cron-job.org, renew yearly). GitHub's own `schedule` (:13/:43, fires irregularly) is
+  only a backup: its `guard` job skips the poll unless no dispatch/push run started in the last 25 min.
+  Pages deploy retries once; a failed store-list push never blocks the deploy.
+  Stale map? Check cron-job.org's history first, then `gh run list`.
 - Mapbox tokens: DEV in `.env` (local, allows 127.0.0.1:8731); PROD only in the GitHub secret `MAPBOX_TOKEN`
   (URL-restricted to heyhaiden.github.io). Update prod with `gh secret set MAPBOX_TOKEN`, never `-f .env`.
 - If Actions gets blocked: `uv run --with-editable ../jev-ultrafast python -m scripts.poll --local` uses your Chrome.
