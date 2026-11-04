@@ -57,12 +57,14 @@ PRELUDE = """
     return r.json();
   };
 """
-STOCK_JS = """async ([product, ids]) => {""" + PRELUDE + """
+STOCK_JS = """async ([product, ids, bakery]) => {""" + PRELUDE + """
   const range = await fetch('https://api.range.marksandspencer.app/v1/range/product/' + product, {headers: auth});
   if (!range.ok) return {error: 'range ' + range.status};
   // Ask about all our stores, not the whole country. The range list misses the odd store that has stock.
   const ours = new Set(ids);
   const ranged = (await range.json()).stores.map(s => s.storeId).filter(id => ours.has(id));
+  // In-store bakery: M&S's own site skips the stock check and says "Ask in store", so we do too.
+  if (bakery) return {ranged, indicators: [], title: document.title};
   const d = await graphql(`query GetStockLevel($input: Stock_GetFoodStockLevelIndicatorInput!) { stock {
     getFoodStockLevelIndicator(input: $input) { __typename
       ... on Stock_GetFoodStockLevelIndicatorSuccess { indicator { stockLevelIndicator locationId } }
@@ -165,6 +167,11 @@ def open_page(driver, timeout=30):
     raise Blocked("No M&S guest session after %ss. Page said: %s" % (timeout, state.get("text", "")[:200]))
 
 
+def coming(product):
+    """A product with no readings yet: zero counts, so the page says when it lands."""
+    return {**product, "counts": dict.fromkeys(ORDER, 0), "statuses": ""}
+
+
 def checked(result, what):
     if not result or result.get("error"):
         raise RuntimeError(f"{what} failed: {(result or {}).get('error', 'no result')}")
@@ -258,11 +265,16 @@ def poll(driver, posthog_client, posthog_logger):
     for product in json.loads(PRODUCTS.read_text()):
         # Announced but not on sale yet (no M&S id): listed with no readings, so the page can say when it lands.
         if "id" not in product:
-            counts = dict.fromkeys(ORDER, 0)
-            products.append({**product, "counts": counts, "statuses": ""})
+            products.append(coming(product))
             continue
-        found = checked(driver.run(STOCK_JS, [product["id"], ids]), "stock for " + product["short"])
-        out, counts, missing = join(stores, found["ranged"], found["indicators"])
+        result = driver.run(STOCK_JS, [product["id"], ids, bool(product.get("bakery"))])
+        # A "soon" product can be on the M&S site before its stock is: stay coming soon until it is.
+        if product.get("soon") and "NotFoundError" in str((result or {}).get("error", "")):
+            print(f"{product['short']}: no stock on M&S yet, still coming soon")
+            products.append(coming(product))
+            continue
+        found = checked(result, "stock for " + product["short"])
+        out, counts, missing = join(stores, found["ranged"], found["indicators"], product.get("bakery", False))
         if missing:
             print(f"warning: {product['short']}: {len(missing)} ranged stores aren't in the store list")
         readings[product["id"]] = {s["id"]: s["status"] for s in out}

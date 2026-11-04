@@ -27,7 +27,7 @@ def test_join_gives_every_store_a_status():
     out, counts, missing = join(stores, ranged, indicators)
     assert {s["id"]: s["status"] for s in out} == {"291": "out", "1025": "in", "1633": "low", "1666": "in",
                                                    "2972": "not_sold", "4420": "not_sold"}
-    assert counts == {"in": 2, "low": 1, "out": 1, "unknown": 0, "not_sold": 2}
+    assert counts == {"in": 2, "low": 1, "out": 1, "unknown": 0, "not_sold": 2, "bakery": 0}
     assert missing == ["9999"]
 
 
@@ -39,3 +39,10 @@ def test_ranged_store_without_a_reading_is_unknown():
 def test_store_list_keeps_only_stores_inside_the_box():
     london = {"south": 51.22, "west": -0.62, "north": 51.76, "east": 0.36}
     assert [s["id"] for s in stores_from(load("locations.json"), london)] == ["291", "1025", "1633"]
+
+
+def test_bakery_products_say_ask_in_store_wherever_they_are_sold():
+    stores = [{"id": i, "name": i, "type": None, "lat": 0, "lng": 0} for i in ("1", "2")]
+    out, counts, _ = join(stores, ["1"], [{"locationId": "1", "stockLevelIndicator": "O"}], bakery=True)
+    assert [s["status"] for s in out] == ["bakery", "not_sold"]
+    assert counts["bakery"] == 1 and counts["out"] == 0

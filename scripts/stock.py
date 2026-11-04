@@ -4,7 +4,8 @@
 STATUS = {"H": "in", "M": "in", "L": "low", "O": "out"}
 # Northern Ireland stores sell food but only carry FOODSCATALOGUE.
 FOOD = {"FOOD", "FOODSCATALOGUE"}
-ORDER = ("in", "low", "out", "unknown", "not_sold")
+# "bakery": freshly baked in store. M&S skips the stock check for these and says "Ask in store".
+ORDER = ("in", "low", "out", "unknown", "not_sold", "bakery")
 
 
 def status(code):
@@ -28,11 +29,16 @@ def stores_from(locations, box=None):
     return sorted(stores.values(), key=lambda s: int(s["id"]) if s["id"].isdigit() else s["id"])
 
 
-def join(stores, ranged, indicators):
-    """Every store with its status, the count per status, and ranged ids missing from the store list."""
+def join(stores, ranged, indicators, bakery=False):
+    """Every store with its status, the count per status, and ranged ids missing from the store list.
+
+    bakery: an in-store bakery product, where every store that sells it is "bakery" (ask in store).
+    """
     levels = {i["locationId"]: i["stockLevelIndicator"] for i in indicators}
     ranged = set(ranged)
-    out = [{**s, "status": status(levels.get(s["id"])) if s["id"] in ranged else "not_sold"} for s in stores]
+    sells = "bakery" if bakery else None
+    out = [{**s, "status": (sells or status(levels.get(s["id"]))) if s["id"] in ranged else "not_sold"}
+           for s in stores]
     counts = {name: 0 for name in ORDER}
     for s in out:
         counts[s["status"]] += 1

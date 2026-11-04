@@ -7,6 +7,10 @@ mcbroken-style map: are the new M&S puddings and cookie doughs in stock at each 
 - Products: `data/products.json` (id, slug, names, pack colours for the skin). Add one there and it's polled and
   appears in the title's flavour menu. Any store with a stock reading counts as selling it.
   Announced but not on M&S yet: leave out `id`/`url` and add `"soon": "YYYY-MM-DD"`; it shows as coming soon, unpolled.
+  With an `id` and `"soon"`, it stays coming soon while M&S stock says not found; drop `"soon"` once it reads.
+- In-store bakery products (`"bakery": true`; M&S page JSON has `"isISBProduct":true`): M&S's own site skips the stock
+  check and says "Freshly baked – Ask in store", so the poll only reads the range and stores show "Ask in store".
+  `"new": false` drops the NEW IN tag on the chooser card.
 - Codes (from M&S `_app.js`): H/M = in stock, L = low, O = out. Not in range = not sold. No reading ('unknown') is
   kept in the data but never shown to visitors.
 - Store popups show "Best time to look" (that store's best two shop hours this week). The 7-day grid is dev only (localhost or `?dev`).

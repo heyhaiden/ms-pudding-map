@@ -9,7 +9,7 @@ from datetime import datetime, timedelta, timezone
 
 SLOT = timedelta(minutes=30)
 KEEP_DAYS = 30
-CODE = {"in": "I", "low": "L", "out": "O", "not_sold": "N", "unknown": "U"}
+CODE = {"in": "I", "low": "L", "out": "O", "not_sold": "N", "unknown": "U", "bakery": "B"}
 GAP = "-"
 
 
