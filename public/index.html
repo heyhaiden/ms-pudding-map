@@ -56,7 +56,7 @@ window.track = (() => {
   /* Colours from the tub: mustard label, magenta lettering, chocolate pudding, cream pot, caramel drizzle. */
   :root {
     --mustard: #F6C344; --magenta: #B5328C; --chocolate: #3B2216; --cream: #F3E6D3; --caramel: #C9802F;
-    --in: #1F9D5A; --low: #E8891C; --out: #D23A4E; --unknown: #8C7B70; --not_sold: #9A8473;
+    --in: #1F9D5A; --low: #E8891C; --out: #D23A4E; --unknown: #8C7B70; --not_sold: #9A8473; --bakery: #7A4B2A;
     --card: var(--mustard); --ink: var(--chocolate); --headline: var(--magenta); --chip: rgba(255,255,255,.55);
     --land: #F3E6D3; --water: #EBC6DD; --page: #F3E6D3; --shadow: 0 4px 0 var(--chocolate); --stroke: #3B2216;
   }
@@ -89,7 +89,8 @@ window.track = (() => {
   @media (hover: hover) { .pick:hover .chev { transform: scale(1.1); } }
   .menu { position: absolute; top: calc(100% + 8px); left: -8px; right: -8px; z-index: 5; margin: 0; padding: 6px;
     list-style: none; background: #fff; border: 3px solid var(--chocolate); border-radius: 18px;
-    box-shadow: 0 4px 0 var(--chocolate), 0 16px 32px rgba(59,34,22,.3); animation: pop .18s ease-out; }
+    box-shadow: 0 4px 0 var(--chocolate), 0 16px 32px rgba(59,34,22,.3); animation: pop .18s ease-out;
+    overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
   @keyframes pop { from { opacity: 0; transform: translateY(-6px) scale(.98); } }
   .menu button { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 48px; padding: 6px 10px;
     border: 0; border-radius: 12px; background: none; color: var(--chocolate); font: 600 15px "DM Sans", sans-serif;
@@ -446,7 +447,7 @@ window.track = (() => {
 <script>
 const STATUSES = [
   ["in", "In stock"], ["low", "Going fast"], ["out", "Sold out"], ["not_sold", "Not sold here"],
-  ["unknown", "No reading"],
+  ["bakery", "Ask in store"], ["unknown", "No reading"],
 ];
 const LABEL = Object.fromEntries(STATUSES);
 const QUIP = {
@@ -455,6 +456,7 @@ const QUIP = {
   out: "Pudding-less. Thoughts and prayers.",
   not_sold: "This M&S doesn't stock it.",
   unknown: "M&S isn't saying. Mystery pudding.",
+  bakery: "Freshly baked here. M&S doesn't share bakery stock, so ask in store.",
 };
 const css = (name) => getComputedStyle(document.documentElement).getPropertyValue("--" + name).trim();
 // "unknown" (M&S gave no reading) is never shown: not on the map, in the legend, or in the totals.
@@ -483,7 +485,7 @@ function verdict(have, pct) {
 }
 
 // ----- Products: data/products.json, one status letter per store in the same order as data.stores -----
-const STATUS_OF = { I: "in", L: "low", O: "out", N: "not_sold", U: "unknown" };
+const STATUS_OF = { I: "in", L: "low", O: "out", N: "not_sold", U: "unknown", B: "bakery" };
 let slug = new URLSearchParams(location.search).get("p");
 try { slug ||= localStorage.getItem("product"); } catch {}
 const product = () => data.products.find((p) => p.slug === slug) || data.products[0];
@@ -520,15 +522,18 @@ function render() {
   $("nearest-label").textContent = "Nearest " + say.noun;
   $("pick-name").innerHTML = (words.length ? words.join(" ") + " " : "") +
     `<span class="nowrap">${last}${document.querySelector(".pick .chev").outerHTML.replace(" hidden", "")}</span>`;
-  $("answer").textContent = p.soon ? "SOON." : verdict(have, pct);
+  $("answer").textContent = p.soon ? "SOON." : p.bakery ? "BAKED FRESH." : verdict(have, pct);
+  // In-store bakery: M&S doesn't publish stock for these (its own site says "Ask in store"), so neither do we.
   $("headline").innerHTML = p.soon
     ? `${say.they} ${say.lands} in M&S stores <b>${landing(p)}</b>. Stock shows here from the first reading.`
+    : p.bakery ? `Baked in <b>${c.bakery}</b> M&S stores. M&S doesn't share bakery stock, so ask in store.`
     : `<b>${have}</b> of ${sold} M&S stores that sell ${say.it} have ${say.it} right now.`;
   skin(p);
   const updated = $("updated");
   updated.textContent = "Updated " + ago(data.updated);
   updated.className = Date.now() - new Date(data.updated) > 2 * 3600e3 ? "stale" : "";
-  $("legend").innerHTML = STATUSES.filter(([k]) => k !== "unknown").map(([key, label]) =>
+  const keys = p.bakery ? ["bakery", "not_sold"] : VISIBLE.filter((k) => k !== "bakery");
+  $("legend").innerHTML = keys.map((k) => [k, LABEL[k]]).map(([key, label]) =>
     `<li><button type="button" data-status="${key}" aria-pressed="${!picked.size || picked.has(key)}"
        class="${picked.size && !picked.has(key) ? "off" : ""}">
        <span class="dot${key === "not_sold" ? " ring" : ""}" style="background:var(--${key})"></span>
@@ -768,7 +773,7 @@ $("nearest").addEventListener("click", () => {
   toast("Finding you…");
   navigator.geolocation.getCurrentPosition((pos) => {
     const here = [pos.coords.longitude, pos.coords.latitude];
-    const options = storesFor(product()).filter((s) => s.status === "in" || s.status === "low")
+    const options = storesFor(product()).filter((s) => ["in", "low", "bakery"].includes(s.status))
       .map((s) => ({ s, d: miles(here, [s.lng, s.lat]) })).sort((a, b) => a.d - b.d);
     you?.remove();
     you = new mapboxgl.Marker({ color: css("magenta") }).setLngLat(here).addTo(map);
@@ -982,6 +987,8 @@ function choose(next, from) {
   // The address bar is left alone: ?p= marks a shared link, which skips the chooser. Share builds its own link.
   closeMenu();
   popup?.remove();
+  // Legend picks belong to one product: a bakery item has different chips.
+  picked.clear();
   render();
   if (tuckAfter) tuck();
   track("product_selected", { from });
@@ -991,9 +998,16 @@ function openMenu(fromKeyboard) {
   const current = product();
   $("menu").innerHTML = data.products.map((p) => `<li><button type="button" role="option" data-slug="${p.slug}"
       aria-selected="${p.slug === current.slug}"><img class="thumb" src="packs/${p.slug}.png" alt="" width="52" height="40">
-      <span class="name">${p.short}</span><span class="have">${p.soon ? "In " + landing(p) : p.counts.in + p.counts.low + " stores"}</span></button></li>`)
+      <span class="name">${p.short}</span><span class="have">${p.soon ? "In " + landing(p) : (p.bakery ? p.counts.bakery : p.counts.in + p.counts.low) + " stores"}</span></button></li>`)
     .join("");
-  $("menu").hidden = false;
+  const menu = $("menu");
+  menu.hidden = false;
+  // Five flavours show at once; the rest scroll, with the chosen one in view.
+  const items = [...menu.children], cs = getComputedStyle(menu);
+  menu.style.maxHeight = items.length > 5 ? items.slice(0, 5).reduce((h, li) => h + li.offsetHeight, 0) +
+    parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom) + parseFloat(cs.borderTopWidth) * 2 + "px" : "";
+  const chosen = menu.querySelector('[aria-selected="true"]').parentElement;
+  menu.scrollTop = chosen.offsetTop - menu.clientHeight / 2 + chosen.offsetHeight / 2;
   $("pick").setAttribute("aria-expanded", "true");
   // Only move focus for keyboard users; on phones a programmatic focus can cost the next tap.
   if (fromKeyboard) $("menu").querySelector('[aria-selected="true"]').focus();
@@ -1094,6 +1108,7 @@ const startOnChooser = !new URLSearchParams(location.search).has("p");
 if (startOnChooser) document.body.classList.add("choosing");
 function chooserStatus(p) {
   if (p.soon) return "In stores " + landing(p);
+  if (p.bakery) return "Freshly baked · ask in store";
   const c = p.counts, sold = c.in + c.low + c.out, pct = sold ? (c.in + c.low) / sold : 0;
   if (!c.in && !c.low) return "Sold out everywhere";
   if (pct >= 0.5) return "Available nearby";
@@ -1113,6 +1128,7 @@ function showChooser() {
       <p class="name"></p><p class="status"></p><button class="find" type="button">Find in store</button>`;
     li.querySelector(".name").textContent = p.name;
     if (p.soon) li.querySelector(".new").textContent = "COMING SOON";
+    else if (p.new === false) li.querySelector(".new").textContent = p.bakery ? "IN-STORE BAKERY" : "M&S FOOD";
     li.querySelector(".status").textContent = chooserStatus(p);
     li.querySelector("img").alt = p.name;
     li.querySelector(".find").setAttribute("aria-label", `Find ${p.name} in store`);
