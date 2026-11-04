@@ -10,6 +10,16 @@
     "skin": {"card": "#F6C344", "lettering": "#B5328C", "text": "#3B2216", "water": "#EBC6DD"}
   },
   {
+    "id": "61273053",
+    "slug": "choc-orange-pudding",
+    "short": "Choc Orange Pudding",
+    "flavour": "Choc Orange",
+    "kind": "Pudding",
+    "name": "Chocolate, Orange & Hazelnut Pudding",
+    "url": "https://www.marksandspencer.com/food/chocolate-orange-and-hazelnut-pudding/p/fdp61273053",
+    "skin": {"card": "#F28A1E", "lettering": "#4E2F96", "text": "#2A1A3D", "water": "#D9CFF2"}
+  },
+  {
     "id": "61270768",
     "slug": "apple-crumble",
     "short": "Apple Crumble",
@@ -28,16 +38,6 @@
     "name": "Berry, Apple & Custard Crumble",
     "url": "https://www.marksandspencer.com/food/berry-apple-and-custard-crumble/p/fdp61270769",
     "skin": {"card": "#3E2160", "lettering": "#F2A6D8", "text": "#F7E9F2", "water": "#F0CFE6"}
-  },
-  {
-    "id": "61273053",
-    "slug": "choc-orange-pudding",
-    "short": "Choc Orange Pudding",
-    "flavour": "Choc Orange",
-    "kind": "Pudding",
-    "name": "Chocolate, Orange & Hazelnut Pudding",
-    "url": "https://www.marksandspencer.com/food/chocolate-orange-and-hazelnut-pudding/p/fdp61273053",
-    "skin": {"card": "#F28A1E", "lettering": "#4E2F96", "text": "#2A1A3D", "water": "#D9CFF2"}
   },
   {
     "id": "61270725",
@@ -60,14 +60,26 @@
     "skin": {"card": "#3E2318", "lettering": "#EC3A8E", "text": "#F3E6D3", "water": "#F6C6DC"}
   },
   {
-    "id": "61230662",
-    "slug": "churro-twists",
-    "short": "Churro Twists",
-    "flavour": "Cinnamon Churro",
-    "kind": "Twists",
-    "name": "Cinnamon Churros Twists",
-    "url": "https://www.marksandspencer.com/food/cinnamon-churros-twists/p/fdp61230662",
-    "skin": {"card": "#E30B2E", "lettering": "#FFD1E6", "text": "#FFF6EE", "water": "#F6C6DC"}
+    "id": "61272780",
+    "slug": "choc-cornflake-cookies",
+    "short": "Choc Cornflake Cookies",
+    "flavour": "Choc Cornflake",
+    "kind": "Cookies",
+    "bakery": true,
+    "name": "Chocolate & Cornflake Cookies",
+    "url": "https://www.marksandspencer.com/food/chocolate-and-cornflake-cookies/p/fdp61272780",
+    "skin": {"card": "#F3C12B", "lettering": "#6B3A12", "text": "#2E2418", "water": "#F2D98A"}
+  },
+  {
+    "id": "61272730",
+    "slug": "malt-caramel-cookies",
+    "short": "Malt Caramel Cookie",
+    "flavour": "Malt Caramel",
+    "kind": "Cookie",
+    "bakery": true,
+    "name": "Milk Chocolate, Malt & Caramel Cookie",
+    "url": "https://www.marksandspencer.com/food/chunked-n-loaded-milk-chocolate-malt-and-caramel-cookie/p/fdp61272730",
+    "skin": {"card": "#E69E6E", "lettering": "#5D1D13", "text": "#2E120B", "water": "#F3C9A8"}
   },
   {
     "id": "61276501",
@@ -75,6 +87,7 @@
     "short": "Sticky Apple Cookie",
     "flavour": "Sticky Apple",
     "kind": "Cookie",
+    "bakery": true,
     "name": "Chunked N' Loaded Sticky Apple Cookie",
     "url": "https://www.marksandspencer.com/food/chunked-n-loaded-sticky-apple-cookie/p/fdp61276501",
     "skin": {"card": "#D5C228", "lettering": "#054900", "text": "#1E2A0A", "water": "#EDE79A"}
@@ -85,6 +98,7 @@
     "short": "Gingerbread Cookies",
     "flavour": "Gingerbread",
     "kind": "Cookies",
+    "bakery": true,
     "name": "Gingerbread & White Chocolate Cookies",
     "url": "https://www.marksandspencer.com/food/gingerbread-and-white-chocolate-cookies/p/fdp60733081",
     "skin": {"card": "#D89A2B", "lettering": "#8E0E1E", "text": "#2A1608", "water": "#F2D29A"}
@@ -95,6 +109,8 @@
     "short": "White Choc Cookies",
     "flavour": "White Choc",
     "kind": "Cookies",
+    "bakery": true,
+    "new": false,
     "name": "White Chocolate Cookies",
     "url": "https://www.marksandspencer.com/food/white-chocolate-cookies/p/fdp60677342",
     "skin": {"card": "#EFE6D0", "lettering": "#7A5530", "text": "#2A1E14", "water": "#E3D3B0"}
@@ -105,26 +121,20 @@
     "short": "Milk Choc Cookies",
     "flavour": "Milk Choc",
     "kind": "Cookies",
+    "bakery": true,
+    "new": false,
     "name": "Milk Chocolate Cookies",
     "url": "https://www.marksandspencer.com/food/milk-chocolate-cookies/p/fdp60677499",
     "skin": {"card": "#96623A", "lettering": "#F7E7CF", "text": "#FFF6EA", "water": "#D9BB98"}
   },
   {
-    "slug": "choc-cornflake-cookies",
-    "soon": "2026-11-04",
-    "short": "Choc Cornflake Cookies",
-    "flavour": "Choc Cornflake",
-    "kind": "Cookies",
-    "name": "Chocolate & Cornflake Cookies",
-    "skin": {"card": "#F1D25D", "lettering": "#8A4E16", "text": "#2E2418", "water": "#E9C485"}
-  },
-  {
-    "slug": "malt-caramel-cookies",
-    "soon": "2026-11-04",
-    "short": "Malt Caramel Cookie",
-    "flavour": "Malt Caramel",
-    "kind": "Cookie",
-    "name": "Chunked N' Loaded Milk Chocolate, Malt & Caramel Cookie",
-    "skin": {"card": "#C98A44", "lettering": "#3B2216", "text": "#2A1A10", "water": "#DDAE6A"}
+    "id": "61230662",
+    "slug": "churro-twists",
+    "short": "Churro Twists",
+    "flavour": "Cinnamon Churro",
+    "kind": "Twists",
+    "name": "Cinnamon Churros Twists",
+    "url": "https://www.marksandspencer.com/food/cinnamon-churros-twists/p/fdp61230662",
+    "skin": {"card": "#E30B2E", "lettering": "#FFD1E6", "text": "#FFF6EE", "water": "#F6C6DC"}
   }
 ]
