@@ -11,6 +11,12 @@ mcbroken-style map: are the new M&S puddings and cookie doughs in stock at each 
 - In-store bakery products (`"bakery": true`; M&S page JSON has `"isISBProduct":true`): M&S's own site skips the stock
   check and says "Freshly baked – Ask in store", so the poll only reads the range and stores show "Ask in store".
   `"new": false` drops the NEW IN tag on the chooser card.
+- `"hidden": true` switches a product off: kept in `products.json` but not polled or shown. All bakery items
+  (cookies, dot cakes) are hidden for now since they have no live stock; delete the flag to turn one back on.
+- New items: `scripts/watch.py` (`.github/workflows/watch.yml`, daily ~07:17 UTC) reads M&S's New In and As Seen
+  On Social lists and opens a `new-items` issue listing new desserts that aren't bakery. Dessert = title keywords
+  (`SWEET`/`SAVOURY`). Nothing goes live from it: ticked items are added to `products.json` by hand. Every item
+  seen, sweet or not, is kept in `data/watch.json` so each is raised once.
 - Codes (from M&S `_app.js`): H/M = in stock, L = low, O = out. Not in range = not sold. No reading ('unknown') is
   kept in the data but never shown to visitors.
 - Store popups show "Best time to look" (that store's best two shop hours this week). The 7-day grid is dev only (localhost or `?dev`).

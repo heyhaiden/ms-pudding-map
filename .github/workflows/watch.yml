@@ -1,0 +1,45 @@
+# Daily: look for new items on M&S's New In and As Seen On Social lists and open an issue to approve them.
+# Nothing is added to the map from here; approved items go into data/products.json by hand.
+name: Watch new items
+
+on:
+  schedule:
+    - cron: "17 7 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: watch
+  cancel-in-progress: false
+
+jobs:
+  watch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - run: uv sync --frozen
+      - run: uv run python -m scripts.watch --owner "${{ github.repository_owner }}"
+        env:
+          BROWSER_CHANNEL: chrome
+      - name: Open review issue
+        if: hashFiles('watch-issue.md') != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh label create new-items --color F6C344 --description "New M&S items to approve" 2>/dev/null || true
+          gh issue create --title "New at M&S: $(date -u +%Y-%m-%d)" --label new-items --body-file watch-issue.md
+      # Remember what's been raised so it's only raised once. Pushes made with the Actions token don't start the poll.
+      - name: Save seen items
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/watch.json
+          git diff --cached --quiet && exit 0
+          git commit -m "Watch: remember new M&S items"
+          for i in 1 2 3; do git pull --rebase -q && git push -q && exit 0; sleep $((i * 5)); done
+          exit 1
